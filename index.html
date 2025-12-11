@@ -16,141 +16,174 @@
             box-sizing: border-box;
             font-family: Arial, sans-serif;
         }
-        /* 浅色基础+高对比文字 */
         body {
-            background-color: #f5f5f5; /* 页面浅灰背景 */
+            background-color: #f9fafb;
             width: 100vw;
             overflow-x: hidden;
             overflow-y: auto;
-            -webkit-overflow-scrolling: touch; /* iOS弹性滚动 */
-            padding: 10px 0;
+            -webkit-overflow-scrolling: touch;
+            padding: 15px 0;
         }
+        /* 容器优化：顶部更整洁，边框更柔和 */
         .container {
-            width: 100%;
-            background: #ffffff; /* 容器纯白背景 */
-            padding: 20px 15px;
+            width: 95%;
+            max-width: 1200px;
+            background: #ffffff;
+            padding: 25px 20px;
             margin: 0 auto;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.06);
         }
-        /* 标题：深黑高对比 */
+        /* 标题优化：居中更紧凑，字体更协调 */
         .title {
             text-align: center;
-            color: #212121; /* 标题深黑 */
-            font-size: 24px;
-            margin: 0 0 30px 0; /* 增大底部间距，避免和卡片重叠 */
-            padding-top: 10px;
-            font-weight: 600;
+            color: #1f2937;
+            font-size: 26px;
+            margin: 0 0 35px 0;
+            padding-bottom: 10px;
+            font-weight: 700;
+            border-bottom: 1px solid #f0f2f5; /* 顶部加浅分隔线，替代突兀横条 */
         }
-        /* 连接状态：浅背景+深文字 */
+        /* 右上角连接状态：背景优化，更协调 */
         .status {
             position: fixed;
-            top: 15px;
-            right: 15px;
+            top: 20px;
+            right: 20px;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px; /* 缩小间距 */
             cursor: pointer;
             z-index: 999;
-            background: rgba(255, 255, 255, 0.9); /* 白色半透明 */
-            padding: 4px 10px;
-            border-radius: 15px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            /* 去掉胶囊背景/阴影/内边距 */
+            background: transparent;
+            padding: 0;
+            box-shadow: none;
         }
         .status-text {
             font-size: 14px;
-            color: #212121; /* 深黑文字 */
+            color: #1f2937;
             white-space: nowrap;
             visibility: hidden;
             opacity: 0;
             transition: all 0.3s ease;
             font-weight: 500;
+            /* 文字hover时才显示，无背景 */
         }
         .status:hover .status-text {
             visibility: visible;
             opacity: 1;
         }
+        
+        /* 绿点背景优化：增大尺寸+边框，更醒目 */
         .status-dot {
             width: 12px;
             height: 12px;
             border-radius: 50%;
-            background-color: #999;
-            transition: background-color 0.3s ease;
+            background-color: #27ae60;
+            border: 1px solid #f0f9f4;
+            transition: all 0.3s ease;
         }
-        .status.connected .status-dot { background-color: #27ae60; }
-        .status.failed .status-dot { background-color: #e74c3c; }
+        .status.disconnected .status-dot {
+            background-color: #e74c3c;
+            border-color: #ffebee;
+        }
 
-        /* 数据卡片：浅灰背景+深黑文字（高对比） */
+        /* 数据卡片：增强交互+美观性 */
         .data-grid {
             display: grid;
-            grid-template-columns: 1fr; /* 移动端单列 */
-            gap: 18px;
-            margin: 0 0 35px 0; /* 增大底部间距，分隔卡片和图表 */
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 20px;
+            margin: 0 0 40px 0;
         }
         .data-card {
-            padding: 22px 18px;
-            background: #f8f9fa; /* 卡片浅灰 */
-            border-radius: 10px;
+            padding: 25px 20px;
+            background: #f8fafc;
+            border-radius: 12px;
             text-align: center;
-            box-shadow: 0 3px 6px rgba(0,0,0,0.08);
-            border: 1px solid #e9ecef; /* 边框强化区分 */
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            border: 1px solid #f0f2f5;
+            /* 鼠标交互反馈 */
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        /* 鼠标移上效果：加深阴影+轻微上移 */
+        .data-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+            background: #ffffff;
+        }
+        /* 点击效果：轻微缩放+深色边框 */
+        .data-card:active {
+            transform: translateY(-2px);
+            border-color: #e2e8f0;
         }
         .data-card h3 {
-            color: #495057; /* 副标题中灰 */
-            margin-bottom: 15px;
+            color: #64748b;
+            margin-bottom: 18px;
             font-size: 16px;
             font-weight: 500;
         }
         .data-value {
-            font-size: 32px; /* 增大数值，提升对比 */
+            font-size: 34px;
             font-weight: bold;
-            color: #212121; /* 数值深黑 */
+            color: #1f2937;
+            transition: all 0.8s ease-in-out;
+            display: inline-block;
+        }
+        .data-value.changed {
+            animation: pulse 0.8s ease-in-out;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.08); }
+            100% { transform: scale(1); }
         }
         .unit {
             font-size: 16px;
-            color: #6c757d; /* 单位中灰 */
+            color: #64748b;
             margin-left: 8px;
         }
 
-        /* 图表区域：浅灰背景+足够高度+大间距 */
+        /* 图表区域：优化内边距+阴影 */
         .charts-container {
-            display: block;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
             margin: 0 0 30px 0;
         }
         .chart-container {
             width: 100%;
-            height: 330px; /* 增大图表高度，避免内容挤压 */
-            padding: 20px 15px;
-            background: #f8f9fa;
-            border-radius: 10px;
-            box-shadow: 0 3px 6px rgba(0,0,0,0.08);
-            border: 1px solid #e9ecef;
-            margin-bottom: 30px; /* 增大图表间距，避免重叠 */
+            height: 350px;
+            padding: 20px;
+            background: #f8fafc;
+            border-radius: 12px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            border: 1px solid #f0f2f5;
         }
 
-        /* 大屏适配 */
-        @media (min-width: 768px) {
-            .data-grid {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 20px;
-            }
+        /* 响应式适配 */
+        @media (max-width: 768px) {
             .charts-container {
-                display: grid;
-                grid-template-columns: 1fr 1fr;
-                gap: 25px;
+                grid-template-columns: 1fr;
             }
             .chart-container {
-                height: 360px;
-                margin-bottom: 0; /* 大屏取消图表底部间距 */
+                height: 320px;
+            }
+            .data-value {
+                font-size: 30px;
             }
         }
-        @media (min-width: 1024px) {
+        @media (max-width: 500px) {
             .data-grid {
-                grid-template-columns: repeat(4, 1fr);
+                grid-template-columns: 1fr;
             }
-            .container {
-                max-width: 1200px; /* 大屏限制宽度，避免拉伸 */
-                padding: 30px 20px;
+            .title {
+                font-size: 22px;
+            }
+            .status {
+                top: 15px;
+                right: 15px;
+                padding: 5px 10px;
             }
         }
     </style>
@@ -159,34 +192,37 @@
     <div class="container">
         <h1 class="title">实时环境监控</h1>
         
-        <div class="status connecting" id="mqtt-status">
-            <span class="status-text">连接中...</span>
+        <!-- 连接状态：优化背景+绿点 -->
+        <div class="status connected" id="mqtt-status">
+            <span class="status-text">已连接</span>
             <span class="status-dot"></span>
         </div>
         
+        <!-- 数据卡片：增强交互 -->
         <div class="data-grid">
             <div class="data-card">
                 <h3>温度</h3>
-                <div class="data-value" id="temperature">25.8</div>
+                <div class="data-value" id="temperature">30.7</div>
                 <span class="unit">℃</span>
             </div>
             <div class="data-card">
                 <h3>湿度</h3>
-                <div class="data-value" id="humidity">62.5</div>
+                <div class="data-value" id="humidity">30.0</div>
                 <span class="unit">%</span>
             </div>
             <div class="data-card">
                 <h3>风速</h3>
-                <div class="data-value" id="windSpeed">3.2</div>
+                <div class="data-value" id="windSpeed">0.9</div>
                 <span class="unit">m/s</span>
             </div>
             <div class="data-card">
                 <h3>光照强度</h3>
-                <div class="data-value" id="illumination">850</div>
+                <div class="data-value" id="illumination">658.0</div>
                 <span class="unit">lux</span>
             </div>
         </div>
 
+        <!-- 图表区域 -->
         <div class="charts-container">
             <div class="chart-container" id="main-chart"></div>
             <div class="chart-container" id="light-chart"></div>
@@ -195,19 +231,16 @@
 
     <script>
         window.onload = function() {
-            // 延迟初始化，确保容器尺寸稳定
             setTimeout(() => {
                 initMQTTClient();
                 initCharts();
             }, 200);
 
-            // 窗口缩放适配
             window.addEventListener('resize', () => {
                 if (window.mainChart) window.mainChart.resize();
                 if (window.lightChart) window.lightChart.resize();
             });
 
-            // 页面关闭断开MQTT
             window.onbeforeunload = function() {
                 if (window.mqttClient && window.mqttClient.isConnected()) {
                     window.mqttClient.disconnect();
