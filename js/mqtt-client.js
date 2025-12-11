@@ -12,19 +12,19 @@ const MQTT_CONFIG = {
 window.mqttClient = null;
 let reconnectAttempts = 0;
 
-// 存储当前数值，用于对比是否变化
+// 存储当前数值（初始值按10倍处理为一位小数）
 let currentValues = {
     temperature: '25.8',
     humidity: '62.5',
     windSpeed: '3.2',
-    illumination: '850'
+    illumination: '850.0'
 };
 
 function updateMQTTStatus(statusType) {
     const statusElement = document.getElementById('mqtt-status');
     const statusText = statusElement.querySelector('.status-text');
     
-    statusElement.classList.remove('connecting', 'connected', 'failed');
+    statusElement.classList.remove('connecting', 'connected', 'failed', 'disconnected');
     
     switch(statusType) {
         case 'connecting':
@@ -32,35 +32,39 @@ function updateMQTTStatus(statusType) {
             statusElement.classList.add('connecting');
             break;
         case 'success':
-            statusText.textContent = "连接成功";
+            statusText.textContent = "已连接";
             statusElement.classList.add('connected');
             break;
         case 'failed':
-            statusText.textContent = "连接失败";
-            statusElement.classList.add('failed');
+            statusText.textContent = "已断开";
+            statusElement.classList.add('failed', 'disconnected');
             break;
     }
 }
 
-// 核心：更新数值并触发动态效果
+// 核心：处理10倍整数→一位小数并更新
 function updateDataValue(id, value) {
     const dom = document.getElementById(id);
-    if (!dom) return;
-    
-    // 对比数值是否变化
+    if (!dom || value === undefined || value === null) return;
+
+    // 温湿度/风速：扩大10倍的整数 → 除以10并保留1位小数
+    let processedValue;
+    if (['temperature', 'humidity', 'windSpeed'].includes(id)) {
+        processedValue = (Number(value) / 10).toFixed(1);
+    } else {
+        // 光照强度（按需调整，若也是10倍则同理）
+        processedValue = Number(value).toFixed(1);
+    }
+
     const oldValue = currentValues[id];
-    const newValue = value?.toFixed(1) || value || '--';
+    const newValue = processedValue || '--';
     
     if (oldValue !== newValue) {
-        // 更新数值
         dom.textContent = newValue;
-        // 触发动画
         dom.classList.add('changed');
-        // 动画结束后移除类名，以便下次触发
         setTimeout(() => {
             dom.classList.remove('changed');
         }, 800);
-        // 更新当前数值缓存
         currentValues[id] = newValue;
     }
 }
@@ -71,14 +75,21 @@ function onMQTTMessageArrived(message) {
         console.log('✅ 收到MQTT消息：', message.payloadString);
         const data = JSON.parse(message.payloadString);
         
-        // 触发数值动态更新
+        // 更新数值（自动处理10倍整数）
         updateDataValue('temperature', data.temperature);
         updateDataValue('humidity', data.humidity);
         updateDataValue('windSpeed', data.windSpeed);
         updateDataValue('illumination', data.illumination);
 
         if (window.updateChartData) {
-            window.updateChartData(data);
+            // 图表数据也同步处理（保证图表和数值显示一致）
+            const chartData = {
+                temperature: (Number(data.temperature) / 10).toFixed(1),
+                humidity: (Number(data.humidity) / 10).toFixed(1),
+                windSpeed: (Number(data.windSpeed) / 10).toFixed(1),
+                illumination: data.illumination
+            };
+            window.updateChartData(chartData);
         }
     } catch (error) {
         console.error('❌ 解析MQTT消息失败：', error);
