@@ -1,4 +1,4 @@
-// MQTT配置（请确认参数正确）
+// MQTT配置（请替换为实际的服务器参数）
 const MQTT_CONFIG = {
     broker: 'wss://mb67e10b.ala.cn-hangzhou.emqxsl.cn:8084/mqtt',
     clientId: 'web-client-' + Math.random().toString(16).substring(2, 8),
@@ -13,12 +13,12 @@ const MQTT_CONFIG = {
 window.mqttClient = null;
 let reconnectAttempts = 0;
 
-// 状态更新：连接中/成功/失败
+// 更新连接状态（连接中/成功/失败）
 function updateMQTTStatus(statusType) {
     const statusElement = document.getElementById('mqtt-status');
     const statusText = statusElement.querySelector('.status-text');
     
-    // 重置所有class
+    // 重置所有状态类
     statusElement.classList.remove('connecting', 'connected', 'failed');
     
     switch(statusType) {
@@ -43,7 +43,7 @@ function onMQTTMessageArrived(message) {
         console.log('✅ 收到MQTT消息：', message.payloadString);
         const data = JSON.parse(message.payloadString);
         
-        // 更新页面数值
+        // 更新页面数值（容错：避免DOM不存在）
         const tempDom = document.getElementById('temperature');
         const humDom = document.getElementById('humidity');
         const windDom = document.getElementById('windSpeed');
@@ -54,18 +54,18 @@ function onMQTTMessageArrived(message) {
         if (windDom) windDom.textContent = data.windSpeed?.toFixed(1) || '--';
         if (lightDom) lightDom.textContent = data.illumination || '--';
 
-        // 更新图表
+        // 更新图表数据
         if (window.updateChartData) {
             window.updateChartData(data);
         }
     } catch (error) {
-        console.error('❌ 解析消息失败：', error);
+        console.error('❌ 解析MQTT消息失败：', error);
     }
 }
 
 // 连接断开回调
 function onMQTTConnectionLost(responseObject) {
-    updateMQTTStatus('failed'); // 断开=连接失败
+    updateMQTTStatus('failed'); // 断开=失败
     console.error('❌ MQTT连接断开：', responseObject);
     
     // 自动重连
@@ -82,7 +82,7 @@ function onMQTTConnectSuccess() {
     updateMQTTStatus('success'); // 连接成功
     console.log('✅ MQTT连接成功');
 
-    // 订阅Topic
+    // 订阅主题
     window.mqttClient.subscribe(MQTT_CONFIG.topic, {
         onSuccess: () => {
             console.log(`✅ 订阅Topic成功：${MQTT_CONFIG.topic}`);
@@ -101,24 +101,24 @@ function onMQTTConnectFailed(error) {
 
 // 初始化MQTT客户端
 window.initMQTTClient = function() {
-    // 验证Paho库
+    // 验证Paho库是否加载
     if (typeof Paho === 'undefined') {
         updateMQTTStatus('failed');
-        console.error('❌ Paho MQTT库未找到！');
+        console.error('❌ Paho MQTT库未找到！请检查mqttws31.min.js路径');
         return;
     }
 
     // 显示连接中
     updateMQTTStatus('connecting');
 
-    // 销毁旧连接
+    // 销毁旧连接（避免重复连接）
     if (window.mqttClient) {
         try {
             window.mqttClient.disconnect();
         } catch (e) {}
     }
 
-    // 创建客户端
+    // 创建MQTT客户端
     try {
         window.mqttClient = new Paho.MQTT.Client(
             MQTT_CONFIG.broker,
@@ -127,11 +127,11 @@ window.initMQTTClient = function() {
         console.log('✅ MQTT客户端创建成功');
     } catch (e) {
         updateMQTTStatus('failed');
-        console.error('❌ 创建客户端失败：', e);
+        console.error('❌ 创建MQTT客户端失败：', e);
         return;
     }
 
-    // 绑定回调
+    // 绑定回调函数
     window.mqttClient.onConnectionLost = onMQTTConnectionLost;
     window.mqttClient.onMessageArrived = onMQTTMessageArrived;
 
@@ -152,12 +152,12 @@ window.initMQTTClient = function() {
         window.mqttClient.connect(connectOptions);
     } catch (error) {
         updateMQTTStatus('failed');
-        console.error('❌ 连接抛出异常：', error);
+        console.error('❌ MQTT连接抛出异常：', error);
     }
 };
 
-// DOM加载完成后初始化
+// DOM加载完成后初始化（兜底）
 window.addEventListener('DOMContentLoaded', function() {
-    console.log('=== 页面初始化 ===');
+    console.log('=== 页面DOM初始化完成 ===');
     initMQTTClient();
 });

@@ -2,10 +2,14 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
+    <!-- 移动端核心配置：禁止缩放，适配设备宽度 -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>实时环境监控</title>
+    <!-- MQTT核心库 -->
     <script src="js/mqttws31.min.js"></script>
+    <!-- ECharts图表库 -->
     <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <!-- 业务逻辑 -->
     <script src="js/mqtt-client.js"></script>
     <script src="js/chart-utils.js"></script>
 
@@ -16,6 +20,7 @@
             box-sizing: border-box;
             font-family: Arial, sans-serif;
         }
+        /* 全局禁止滚动，占满视口 */
         body {
             background-color: #f5f5f5;
             width: 100vw;
@@ -23,6 +28,7 @@
             overflow: hidden;
             position: relative;
         }
+        /* 容器全屏布局 */
         .container {
             width: 100%;
             height: 100%;
@@ -33,6 +39,7 @@
             gap: 15px;
             position: relative;
         }
+        /* 标题样式 */
         .title {
             text-align: center;
             color: #333;
@@ -40,7 +47,7 @@
             margin: 0;
             flex-shrink: 0;
         }
-        /* 连接状态：仅显示圆点，hover显示文字 */
+        /* 连接状态：右上角圆点+hover文字 */
         .status {
             position: absolute;
             top: 20px;
@@ -48,39 +55,32 @@
             display: flex;
             align-items: center;
             gap: 8px;
-            cursor: pointer; /* 手型提示 */
+            cursor: pointer;
         }
-        /* 状态文字：默认隐藏，hover显示 */
         .status-text {
             font-size: 14px;
             color: #333;
             white-space: nowrap;
-            visibility: hidden; /* 默认隐藏 */
+            visibility: hidden;
             opacity: 0;
             transition: all 0.3s ease;
         }
-        /* hover时显示文字 */
         .status:hover .status-text {
             visibility: visible;
             opacity: 1;
         }
-        /* 状态圆点：默认红色（失败），成功变绿色 */
         .status-dot {
             width: 12px;
             height: 12px;
             border-radius: 50%;
-            background-color: #e74c3c; /* 失败：红色 */
+            background-color: #999; /* 连接中-灰色 */
             transition: background-color 0.3s ease;
         }
-        /* 连接成功：圆点变绿色 */
-        .status.connected .status-dot {
-            background-color: #27ae60; /* 成功：绿色 */
-        }
-        /* 连接中：圆点灰色 */
-        .status.connecting .status-dot {
-            background-color: #999; /* 连接中：灰色 */
-        }
-        /* 四数据卡片 */
+        /* 连接成功-绿色，失败-红色 */
+        .status.connected .status-dot { background-color: #27ae60; }
+        .status.failed .status-dot { background-color: #e74c3c; }
+
+        /* 数据卡片布局 */
         .data-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -111,9 +111,7 @@
             transform: translateY(-3px);
             box-shadow: 0 6px 12px rgba(0,0,0,0.1);
         }
-        .data-card:hover::before {
-            left: 0;
-        }
+        .data-card:hover::before { left: 0; }
         .data-card h3 {
             color: #666;
             margin-bottom: 10px;
@@ -130,7 +128,8 @@
             color: #999;
             margin-left: 6px;
         }
-        /* 图表区域 */
+
+        /* 图表区域（核心：移动端强制最小高度） */
         .charts-container {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -144,30 +143,26 @@
             padding: 8px;
             background: #f8f9fa;
             border-radius: 8px;
+            min-height: 200px; /* 移动端最小高度，避免高度为0 */
         }
-        /* 响应式适配 */
+
+        /* 响应式适配（移动端优化） */
         @media (max-width: 900px) {
-            .data-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
+            .data-grid { grid-template-columns: repeat(2, 1fr); }
             .charts-container {
                 grid-template-columns: 1fr;
+                min-height: 400px; /* 单列时增加总高度 */
             }
-            .data-value {
-                font-size: 24px;
-            }
+            .chart-container { min-height: 200px; }
+            .data-value { font-size: 24px; }
         }
         @media (max-width: 500px) {
-            .data-grid {
-                grid-template-columns: 1fr;
-            }
-            .title {
-                font-size: 20px;
-            }
-            .status {
-                top: 15px;
-                right: 15px;
-            }
+            .data-grid { grid-template-columns: 1fr; }
+            .title { font-size: 20px; }
+            .status { top: 15px; right: 15px; }
+            .chart-container { min-height: 180px; } /* 小屏再调整 */
+            .data-value { font-size: 22px; }
+            .data-card h3 { font-size: 14px; }
         }
     </style>
 </head>
@@ -175,35 +170,37 @@
     <div class="container">
         <h1 class="title">实时环境监控</h1>
         
-        <!-- 连接状态：仅显示圆点，hover显示文字 -->
+        <!-- 连接状态：圆点+hover文字 -->
         <div class="status connecting" id="mqtt-status">
             <span class="status-text">连接中...</span>
             <span class="status-dot"></span>
         </div>
         
+        <!-- 数据卡片 -->
         <div class="data-grid">
             <div class="data-card">
                 <h3>温度</h3>
-                <div class="data-value" id="temperature">0.0</div>
+                <div class="data-value" id="temperature">25.8</div>
                 <span class="unit">℃</span>
             </div>
             <div class="data-card">
                 <h3>湿度</h3>
-                <div class="data-value" id="humidity">0.0</div>
+                <div class="data-value" id="humidity">62.5</div>
                 <span class="unit">%</span>
             </div>
             <div class="data-card">
                 <h3>风速</h3>
-                <div class="data-value" id="windSpeed">0.0</div>
+                <div class="data-value" id="windSpeed">3.2</div>
                 <span class="unit">m/s</span>
             </div>
             <div class="data-card">
                 <h3>光照强度</h3>
-                <div class="data-value" id="illumination">0</div>
+                <div class="data-value" id="illumination">850</div>
                 <span class="unit">lux</span>
             </div>
         </div>
 
+        <!-- 图表容器 -->
         <div class="charts-container">
             <div class="chart-container" id="main-chart"></div>
             <div class="chart-container" id="light-chart"></div>
@@ -211,15 +208,18 @@
     </div>
 
     <script>
+        // 页面加载完成初始化
         window.onload = function() {
-            initMQTTClient();
-            initCharts();
+            initMQTTClient(); // 先初始化MQTT
+            initCharts();     // 后初始化图表
 
+            // 窗口缩放适配
             window.addEventListener('resize', () => {
                 if (window.mainChart) window.mainChart.resize();
                 if (window.lightChart) window.lightChart.resize();
             });
 
+            // 页面关闭断开MQTT
             window.onbeforeunload = function() {
                 if (window.mqttClient && window.mqttClient.isConnected()) {
                     window.mqttClient.disconnect();
