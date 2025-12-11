@@ -24,17 +24,17 @@
             -webkit-overflow-scrolling: touch;
             padding: 15px 0;
         }
-        /* 容器优化：顶部更整洁，边框更柔和 */
+        /* Windows大屏占比优化：扩大容器宽度 */
         .container {
             width: 95%;
-            max-width: 1200px;
+            max-width: 1440px; /* 适配Windows 1080P屏 */
             background: #ffffff;
             padding: 25px 20px;
             margin: 0 auto;
             border-radius: 12px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.06);
         }
-        /* 标题优化：居中更紧凑，字体更协调 */
+        /* 标题优化：整洁分隔线 */
         .title {
             text-align: center;
             color: #1f2937;
@@ -42,19 +42,18 @@
             margin: 0 0 35px 0;
             padding-bottom: 10px;
             font-weight: 700;
-            border-bottom: 1px solid #f0f2f5; /* 顶部加浅分隔线，替代突兀横条 */
+            border-bottom: 1px solid #f0f2f5;
         }
-        /* 右上角连接状态：背景优化，更协调 */
+        /* 右上角状态：极简圆点（无胶囊） */
         .status {
             position: fixed;
             top: 20px;
             right: 20px;
             display: flex;
             align-items: center;
-            gap: 6px; /* 缩小间距 */
+            gap: 6px;
             cursor: pointer;
             z-index: 999;
-            /* 去掉胶囊背景/阴影/内边距 */
             background: transparent;
             padding: 0;
             box-shadow: none;
@@ -67,14 +66,11 @@
             opacity: 0;
             transition: all 0.3s ease;
             font-weight: 500;
-            /* 文字hover时才显示，无背景 */
         }
         .status:hover .status-text {
             visibility: visible;
             opacity: 1;
         }
-        
-        /* 绿点背景优化：增大尺寸+边框，更醒目 */
         .status-dot {
             width: 12px;
             height: 12px;
@@ -88,7 +84,7 @@
             border-color: #ffebee;
         }
 
-        /* 数据卡片：增强交互+美观性 */
+        /* 数据卡片：增强交互 */
         .data-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -102,17 +98,14 @@
             text-align: center;
             box-shadow: 0 3px 8px rgba(0,0,0,0.05);
             border: 1px solid #f0f2f5;
-            /* 鼠标交互反馈 */
             transition: all 0.3s ease;
             cursor: pointer;
         }
-        /* 鼠标移上效果：加深阴影+轻微上移 */
         .data-card:hover {
             transform: translateY(-5px);
             box-shadow: 0 6px 15px rgba(0,0,0,0.1);
             background: #ffffff;
         }
-        /* 点击效果：轻微缩放+深色边框 */
         .data-card:active {
             transform: translateY(-2px);
             border-color: #e2e8f0;
@@ -144,7 +137,7 @@
             margin-left: 8px;
         }
 
-        /* 图表区域：优化内边距+阴影 */
+        /* 图表区域：优化尺寸 */
         .charts-container {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -161,7 +154,31 @@
             border: 1px solid #f0f2f5;
         }
 
-        /* 响应式适配 */
+        /* Windows超宽屏适配（≥1440px） */
+        @media (min-width: 1440px) {
+            .container {
+                max-width: 1600px; /* 超宽屏进一步扩大 */
+                width: 90%; /* 减少左右空白 */
+            }
+            .data-grid {
+                grid-template-columns: repeat(4, 1fr);
+                gap: 25px;
+            }
+            .data-card {
+                min-width: 220px; /* 增大卡片宽度 */
+                padding: 30px 25px;
+            }
+            .chart-container {
+                height: 400px; /* 大屏增大图表高度 */
+            }
+        }
+        /* 常规大屏适配 */
+        @media (min-width: 1024px) {
+            .data-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+        /* 移动端适配 */
         @media (max-width: 768px) {
             .charts-container {
                 grid-template-columns: 1fr;
@@ -183,7 +200,6 @@
             .status {
                 top: 15px;
                 right: 15px;
-                padding: 5px 10px;
             }
         }
     </style>
@@ -192,37 +208,34 @@
     <div class="container">
         <h1 class="title">实时环境监控</h1>
         
-        <!-- 连接状态：优化背景+绿点 -->
         <div class="status connected" id="mqtt-status">
             <span class="status-text">已连接</span>
             <span class="status-dot"></span>
         </div>
         
-        <!-- 数据卡片：增强交互 -->
         <div class="data-grid">
             <div class="data-card">
                 <h3>温度</h3>
-                <div class="data-value" id="temperature">30.7</div>
+                <div class="data-value" id="temperature">0</div>
                 <span class="unit">℃</span>
             </div>
             <div class="data-card">
                 <h3>湿度</h3>
-                <div class="data-value" id="humidity">30.0</div>
+                <div class="data-value" id="humidity">0</div>
                 <span class="unit">%</span>
             </div>
             <div class="data-card">
                 <h3>风速</h3>
-                <div class="data-value" id="windSpeed">0.9</div>
+                <div class="data-value" id="windSpeed">0</div>
                 <span class="unit">m/s</span>
             </div>
             <div class="data-card">
                 <h3>光照强度</h3>
-                <div class="data-value" id="illumination">658.0</div>
+                <div class="data-value" id="illumination">0</div>
                 <span class="unit">lux</span>
             </div>
         </div>
 
-        <!-- 图表区域 -->
         <div class="charts-container">
             <div class="chart-container" id="main-chart"></div>
             <div class="chart-container" id="light-chart"></div>

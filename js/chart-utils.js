@@ -16,46 +16,43 @@ window.initCharts = function() {
     }
 
     const isMobile = window.innerWidth <= 768;
+    const isLargeScreen = window.innerWidth >= 1440; // Windows超宽屏
 
-    // 1. 温/湿/风 图表（浅色主题+修复重叠）
+    // 温/湿/风 图表（无重叠+Windows适配）
     mainChart = echarts.init(mainChartDom);
     const mainOption = {
-        // 标题：调整位置+深黑文字
         title: { 
             text: '温/湿/风 趋势', 
             left: 'center',
-            top: '2%', // 标题上移，留出更多空间
+            top: '2%',
             textStyle: { 
-                color: '#212121', // 标题深黑
-                fontSize: isMobile ? 15 : 17,
+                color: '#1f2937',
+                fontSize: isLargeScreen ? 18 : (isMobile ? 15 : 17),
                 fontWeight: 600
             }
         },
-        // 提示框：浅色背景+深黑文字
         tooltip: { 
             trigger: 'axis',
             backgroundColor: 'rgba(255, 255, 255, 0.95)',
-            textStyle: { color: '#212121' },
+            textStyle: { color: '#1f2937' },
             borderColor: '#e9ecef',
             borderWidth: 1
         },
-        // 图例：下移+深灰文字，避免和标题重叠
         legend: { 
             data: ['温度(℃)', '湿度(%)', '风速(m/s)'], 
-            top: '12%', // 图例下移，和标题错开
+            top: '12%',
             left: 'center',
             textStyle: { 
-                color: '#495057', // 图例中深灰
-                fontSize: isMobile ? 13 : 14,
+                color: '#495057',
+                fontSize: isLargeScreen ? 15 : (isMobile ? 13 : 14),
                 fontWeight: 500
             }
         },
-        // 网格：大幅上移，给标题/图例留足空间
         grid: { 
             left: '6%', 
             right: '6%', 
-            bottom: '18%', // 底部留空间给x轴标签
-            top: '22%',    // 顶部留空间给标题/图例
+            bottom: '18%',
+            top: '22%',
             containLabel: true 
         },
         xAxis: {
@@ -64,11 +61,11 @@ window.initCharts = function() {
             data: window.chartData.time.length > 0 ? window.chartData.time : ['暂无数据'],
             axisLabel: { 
                 interval: 0, 
-                rotate: isMobile ? 25 : 15, // 增大旋转角度，避免标签重叠
-                color: '#495057', // 轴标签中深灰
-                fontSize: isMobile ? 11 : 12
+                rotate: isMobile ? 25 : 15,
+                color: '#495057',
+                fontSize: isLargeScreen ? 13 : (isMobile ? 11 : 12)
             },
-            axisLine: { lineStyle: { color: '#dee2e6' } }, // 轴线条浅灰
+            axisLine: { lineStyle: { color: '#dee2e6' } },
             axisTick: { lineStyle: { color: '#dee2e6' } }
         },
         yAxis: { 
@@ -77,11 +74,11 @@ window.initCharts = function() {
             max: 100,
             axisLabel: { 
                 color: '#495057',
-                fontSize: isMobile ? 11 : 12
+                fontSize: isLargeScreen ? 13 : (isMobile ? 11 : 12)
             },
             axisLine: { lineStyle: { color: '#dee2e6' } },
             axisTick: { lineStyle: { color: '#dee2e6' } },
-            splitLine: { lineStyle: { color: '#f1f3f5' } } // 网格线浅灰
+            splitLine: { lineStyle: { color: '#f1f3f5' } }
         },
         series: [
             { 
@@ -89,7 +86,7 @@ window.initCharts = function() {
                 type: 'line', 
                 smooth: true, 
                 data: window.chartData.temperature.length > 0 ? window.chartData.temperature : [0],
-                lineStyle: { width: 2.5, color: '#42b983' }, // 加粗线条，提升对比
+                lineStyle: { width: 2.5, color: '#42b983' },
                 itemStyle: { color: '#42b983' }
             },
             { 
@@ -113,7 +110,7 @@ window.initCharts = function() {
     };
     mainChart.setOption(mainOption);
 
-    // 2. 光照图表（同逻辑修复）
+    // 光照图表（同逻辑适配，光照为整数）
     lightChart = echarts.init(lightChartDom);
     const lightOption = {
         title: { 
@@ -121,15 +118,15 @@ window.initCharts = function() {
             left: 'center',
             top: '2%',
             textStyle: { 
-                color: '#212121',
-                fontSize: isMobile ? 15 : 17,
+                color: '#1f2937',
+                fontSize: isLargeScreen ? 18 : (isMobile ? 15 : 17),
                 fontWeight: 600
             }
         },
         tooltip: { 
             trigger: 'axis',
             backgroundColor: 'rgba(255, 255, 255, 0.95)',
-            textStyle: { color: '#212121' },
+            textStyle: { color: '#1f2937' },
             borderColor: '#e9ecef',
             borderWidth: 1
         },
@@ -139,7 +136,7 @@ window.initCharts = function() {
             left: 'center',
             textStyle: { 
                 color: '#495057',
-                fontSize: isMobile ? 13 : 14,
+                fontSize: isLargeScreen ? 15 : (isMobile ? 13 : 14),
                 fontWeight: 500
             }
         },
@@ -158,7 +155,7 @@ window.initCharts = function() {
                 interval: 0, 
                 rotate: isMobile ? 25 : 15,
                 color: '#495057',
-                fontSize: isMobile ? 11 : 12
+                fontSize: isLargeScreen ? 13 : (isMobile ? 11 : 12)
             },
             axisLine: { lineStyle: { color: '#dee2e6' } },
             axisTick: { lineStyle: { color: '#dee2e6' } }
@@ -168,7 +165,8 @@ window.initCharts = function() {
             min: 0,
             axisLabel: { 
                 color: '#495057',
-                fontSize: isMobile ? 11 : 12
+                fontSize: isLargeScreen ? 13 : (isMobile ? 11 : 12),
+                formatter: '{value}' // 强制整数显示
             },
             axisLine: { lineStyle: { color: '#dee2e6' } },
             axisTick: { lineStyle: { color: '#dee2e6' } },
@@ -180,8 +178,8 @@ window.initCharts = function() {
                 type: 'line', 
                 smooth: true, 
                 data: window.chartData.illumination.length > 0 ? window.chartData.illumination : [0],
-                lineStyle: { width: 2.5, color: '#e74c3c' }, // 加粗线条
-                areaStyle: { color: 'rgba(231,76,60,0.08)' }, // 浅色面积，不刺眼
+                lineStyle: { width: 2.5, color: '#e74c3c' },
+                areaStyle: { color: 'rgba(231,76,60,0.08)' },
                 itemStyle: { color: '#e74c3c' },
                 emphasis: { focus: 'series' }
             }
@@ -190,15 +188,13 @@ window.initCharts = function() {
     };
     lightChart.setOption(lightOption);
 
-    // 强制resize，确保尺寸正确
     setTimeout(() => {
         mainChart.resize();
         lightChart.resize();
     }, 100);
-    console.log('✅ 图表初始化完成（浅色高对比版）');
+    console.log('✅ 图表初始化完成（Windows大屏适配版）');
 };
 
-// 数据更新逻辑不变，保留容错
 window.updateChartData = function(data) {
     if (!mainChart || !lightChart) {
         console.warn('⚠️ 图表未初始化，跳过更新');
@@ -212,12 +208,11 @@ window.updateChartData = function(data) {
     window.chartData.windSpeed.push(data.windSpeed || 0);
     window.chartData.illumination.push(data.illumination || 0);
 
-    // 保留最近20条数据，避免数据过多导致标签重叠
+    // 保留最近20条数据
     if (window.chartData.time.length > 20) {
         Object.keys(window.chartData).forEach(key => window.chartData[key].shift());
     }
 
-    // 更新图表数据
     mainChart.setOption({
         xAxis: { data: window.chartData.time },
         series: [
@@ -232,7 +227,6 @@ window.updateChartData = function(data) {
         series: [{ data: window.chartData.illumination }]
     });
 
-    // 触发重绘，确保布局正确
     mainChart.resize();
     lightChart.resize();
 };

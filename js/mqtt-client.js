@@ -12,12 +12,12 @@ const MQTT_CONFIG = {
 window.mqttClient = null;
 let reconnectAttempts = 0;
 
-// 存储当前数值（初始值按10倍处理为一位小数）
+// 初始值全为0
 let currentValues = {
-    temperature: '25.8',
-    humidity: '62.5',
-    windSpeed: '3.2',
-    illumination: '850.0'
+    temperature: '0',
+    humidity: '0',
+    windSpeed: '0',
+    illumination: '0'
 };
 
 function updateMQTTStatus(statusType) {
@@ -42,22 +42,25 @@ function updateMQTTStatus(statusType) {
     }
 }
 
-// 核心：处理10倍整数→一位小数并更新
+// 核心：温湿度风速÷10保留1位小数，光照强制整数
 function updateDataValue(id, value) {
     const dom = document.getElementById(id);
     if (!dom || value === undefined || value === null) return;
 
-    // 温湿度/风速：扩大10倍的整数 → 除以10并保留1位小数
     let processedValue;
+    // 温湿度风速：原始值÷10，保留1位小数
     if (['temperature', 'humidity', 'windSpeed'].includes(id)) {
         processedValue = (Number(value) / 10).toFixed(1);
+    } else if (id === 'illumination') {
+        // 光照：强制整数，无小数
+        processedValue = Math.round(Number(value)).toString();
     } else {
-        // 光照强度：直接显示原始值
-        processedValue = Number(value).toFixed(1);
+        processedValue = '0';
     }
 
+    // 对比数值是否变化
     const oldValue = currentValues[id];
-    const newValue = processedValue || '--';
+    const newValue = processedValue || '0';
     
     if (oldValue !== newValue) {
         dom.textContent = newValue;
@@ -69,25 +72,25 @@ function updateDataValue(id, value) {
     }
 }
 
-// MQTT消息接收回调
+// MQTT消息接收回调（处理原始数据）
 function onMQTTMessageArrived(message) {
     try {
         console.log('✅ 收到MQTT消息：', message.payloadString);
         const data = JSON.parse(message.payloadString);
         
-        // 更新数值（自动处理10倍整数）
+        // 更新数值（温湿度风速自动÷10）
         updateDataValue('temperature', data.temperature);
         updateDataValue('humidity', data.humidity);
         updateDataValue('windSpeed', data.windSpeed);
         updateDataValue('illumination', data.illumination);
 
         if (window.updateChartData) {
-            // 图表数据也同步处理（保证图表和数值显示一致）
+            // 图表数据同步处理
             const chartData = {
-                temperature: (Number(data.temperature) / 10).toFixed(1),
-                humidity: (Number(data.humidity) / 10).toFixed(1),
-                windSpeed: (Number(data.windSpeed) / 10).toFixed(1),
-                illumination: data.illumination
+                temperature: Number((Number(data.temperature || 0) / 10).toFixed(1)),
+                humidity: Number((Number(data.humidity || 0) / 10).toFixed(1)),
+                windSpeed: Number((Number(data.windSpeed || 0) / 10).toFixed(1)),
+                illumination: Math.round(Number(data.illumination || 0))
             };
             window.updateChartData(chartData);
         }
