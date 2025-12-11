@@ -1,185 +1,223 @@
-const MQTT_CONFIG = {
-    broker: 'wss://mb67e10b.ala.cn-hangzhou.emqxsl.cn:8084/mqtt',
-    clientId: 'web-client-' + Math.random().toString(16).substring(2, 8),
+/**
+ * MQTT客户端核心逻辑（稳定长连接+数据÷10处理）
+ */
+let mqttClient = null;
+let reconnectTimer = null;
+const RECONNECT_INTERVAL = 5000;
+let baseClientId = 'env-monitor-' + Math.random().toString(16).substr(2, 8);
+
+// 默认配置（优先从本地存储加载）
+let mqttConfig = JSON.parse(localStorage.getItem('mqttConfig')) || {
+    host: 'wss://mb67e10b.ala.cn-hangzhou.emqxsl.cn:8084/mqtt',
+    port: 8084,
+    clientId: baseClientId,
     topic: 'environment/data',
     username: 'WEB',
     password: '123456',
-    reconnect: true,
-    reconnectDelay: 3000,
-    maxReconnectAttempts: 10
+    keepalive: 30,
+    clean: true
 };
 
-window.mqttClient = null;
-let reconnectAttempts = 0;
+// 解析MQTT URL（提取host/port/path/SSL）
+function parseMqttUrl(url) {
+    const parsed = new URL(url);
+    return {
+        host: parsed.hostname,
+        port: parseInt(parsed.port),
+        path: parsed.pathname || '/mqtt',
+        useSSL: parsed.protocol === 'wss:'
+    };
+}
 
-// 初始值全为0
-let currentValues = {
-    temperature: '0',
-    humidity: '0',
-    windSpeed: '0',
-    illumination: '0'
-};
+// 生成唯一ClientId（防重复）
+function generateUniqueClientId() {
+    baseClientId = 'env-monitor-' + Math.random().toString(16).substr(2, 8);
+    return baseClientId;
+}
 
-function updateMQTTStatus(statusType) {
-    const statusElement = document.getElementById('mqtt-status');
-    const statusText = statusElement.querySelector('.status-text');
-    
-    statusElement.classList.remove('connecting', 'connected', 'failed', 'disconnected');
-    
-    switch(statusType) {
+// 手动重连（全覆盖逻辑）
+function reconnect() {
+    if (reconnectTimer || (mqttClient && mqttClient.isConnected())) return;
+    console.log('🔄 准备重连MQTT（生成新ClientId）');
+    mqttConfig.clientId = generateUniqueClientId();
+    reconnectTimer = setTimeout(() => {
+        initMQTTClient();
+        reconnectTimer = null;
+    }, RECONNECT_INTERVAL);
+}
+
+// 更新MQTT连接状态（需在main-utils.js或页面中实现DOM）
+function updateMQTTStatus(status) {
+    const statusEl = document.getElementById('mqtt-status');
+    if (!statusEl) return;
+    switch(status) {
         case 'connecting':
-            statusText.textContent = "连接中...";
-            statusElement.classList.add('connecting');
+            statusEl.textContent = '连接中...';
+            statusEl.style.color = '#ff9800';
             break;
         case 'success':
-            statusText.textContent = "已连接";
-            statusElement.classList.add('connected');
+            statusEl.textContent = '已连接';
+            statusEl.style.color = '#4caf50';
             break;
         case 'failed':
-            statusText.textContent = "已断开";
-            statusElement.classList.add('failed', 'disconnected');
+            statusEl.textContent = '连接失败';
+            statusEl.style.color = '#f44336';
             break;
     }
 }
 
-// 核心：温湿度风速÷10保留1位小数，光照强制整数
+// 更新数据卡片（温/湿/风÷10保留1位小数）
+function updateDataCards(data) {
+    // 温度：÷10保留1位小数
+    if (data.temperature !== undefined) {
+        const tempValue = (parseFloat(data.temperature) / 10).toFixed(1);
+        updateDataValue('temperature', tempValue);
+    }
+    // 湿度：÷10保留1位小数
+    if (data.humidity !== undefined) {
+        const humiValue = (parseFloat(data.humidity) / 10).toFixed(1);
+        updateDataValue('humidity', humiValue);
+    }
+    // 风速：÷10保留1位小数
+    if (data.windSpeed !== undefined) {
+        const windValue = (parseFloat(data.windSpeed) / 10).toFixed(1);
+        updateDataValue('windSpeed', windValue);
+    }
+    // 光照：保持整数
+    if (data.illumination !== undefined) {
+        updateDataValue('illumination', parseInt(data.illumination));
+    }
+}
+
+// 更新单个卡片值（带动画）
 function updateDataValue(id, value) {
-    const dom = document.getElementById(id);
-    if (!dom || value === undefined || value === null) return;
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.classList.remove('changed');
+    void el.offsetWidth; // 强制重绘
+    el.textContent = value;
+    el.classList.add('changed');
+    setTimeout(() => el.classList.remove('changed'), 800);
+}
 
-    let processedValue;
-    // 温湿度风速：原始值÷10，保留1位小数
-    if (['temperature', 'humidity', 'windSpeed'].includes(id)) {
-        processedValue = (Number(value) / 10).toFixed(1);
-    } else if (id === 'illumination') {
-        // 光照：强制整数，无小数
-        processedValue = Math.round(Number(value)).toString();
-    } else {
-        processedValue = '0';
-    }
-
-    // 对比数值是否变化
-    const oldValue = currentValues[id];
-    const newValue = processedValue || '0';
+/**
+ * 初始化MQTT客户端（核心：稳定长连接）
+ */
+window.initMQTTClient = function(newConfig) {
+    mqttConfig = newConfig || mqttConfig;
     
-    if (oldValue !== newValue) {
-        dom.textContent = newValue;
-        dom.classList.add('changed');
-        setTimeout(() => {
-            dom.classList.remove('changed');
-        }, 800);
-        currentValues[id] = newValue;
+    // 清理旧连接和定时器
+    if (mqttClient) {
+        try {
+            mqttClient.disconnect();
+        } catch (e) { console.warn('清理旧连接失败：', e); }
+        mqttClient = null;
     }
-}
-
-// MQTT消息接收回调（处理原始数据）
-function onMQTTMessageArrived(message) {
-    try {
-        console.log('✅ 收到MQTT消息：', message.payloadString);
-        const data = JSON.parse(message.payloadString);
-        
-        // 更新数值（温湿度风速自动÷10）
-        updateDataValue('temperature', data.temperature);
-        updateDataValue('humidity', data.humidity);
-        updateDataValue('windSpeed', data.windSpeed);
-        updateDataValue('illumination', data.illumination);
-
-        if (window.updateChartData) {
-            // 图表数据同步处理
-            const chartData = {
-                temperature: Number((Number(data.temperature || 0) / 10).toFixed(1)),
-                humidity: Number((Number(data.humidity || 0) / 10).toFixed(1)),
-                windSpeed: Number((Number(data.windSpeed || 0) / 10).toFixed(1)),
-                illumination: Math.round(Number(data.illumination || 0))
-            };
-            window.updateChartData(chartData);
-        }
-    } catch (error) {
-        console.error('❌ 解析MQTT消息失败：', error);
-    }
-}
-
-function onMQTTConnectionLost(responseObject) {
-    updateMQTTStatus('failed');
-    console.error('❌ MQTT连接断开：', responseObject);
-    
-    if (MQTT_CONFIG.reconnect && reconnectAttempts < MQTT_CONFIG.maxReconnectAttempts) {
-        reconnectAttempts++;
-        updateMQTTStatus('connecting');
-        setTimeout(initMQTTClient, MQTT_CONFIG.reconnectDelay);
-    }
-}
-
-function onMQTTConnectSuccess() {
-    reconnectAttempts = 0;
-    updateMQTTStatus('success');
-    console.log('✅ MQTT连接成功');
-
-    window.mqttClient.subscribe(MQTT_CONFIG.topic, {
-        onSuccess: () => {
-            console.log(`✅ 订阅Topic成功：${MQTT_CONFIG.topic}`);
-        },
-        onFailure: (err) => {
-            console.error('❌ 订阅Topic失败：', err);
-        }
-    });
-}
-
-function onMQTTConnectFailed(error) {
-    updateMQTTStatus('failed');
-    console.error('❌ MQTT连接失败：', error);
-}
-
-window.initMQTTClient = function() {
-    if (typeof Paho === 'undefined') {
-        updateMQTTStatus('failed');
-        console.error('❌ Paho MQTT库未找到！请检查mqttws31.min.js路径');
-        return;
+    if (reconnectTimer) {
+        clearTimeout(reconnectTimer);
+        reconnectTimer = null;
     }
 
     updateMQTTStatus('connecting');
 
-    if (window.mqttClient) {
-        try {
-            window.mqttClient.disconnect();
-        } catch (e) {}
-    }
-
     try {
-        window.mqttClient = new Paho.MQTT.Client(
-            MQTT_CONFIG.broker,
-            MQTT_CONFIG.clientId
+        const urlInfo = parseMqttUrl(mqttConfig.host);
+        
+        // Paho库正确写法：host, port, path, clientId
+        const client = new Paho.MQTT.Client(
+            urlInfo.host,
+            urlInfo.port,
+            urlInfo.path,
+            mqttConfig.clientId
         );
-        console.log('✅ MQTT客户端创建成功');
+
+        // 连接断开回调（全覆盖重连）
+        client.onConnectionLost = function(responseObject) {
+            const errMsg = responseObject.errorMessage || '无错误信息';
+            console.error(`🔌 MQTT连接断开 [${responseObject.errorCode}]：${errMsg}`);
+            updateMQTTStatus('failed');
+            reconnect(); // 无论是否有错误码，都重连
+        };
+
+        // 消息接收回调
+        client.onMessageArrived = function(message) {
+            console.log('📥 收到MQTT消息：', message.destinationName, message.payloadString);
+            try {
+                const data = JSON.parse(message.payloadString);
+                updateDataCards(data);
+                // 触发图表更新
+                if (window.updateChartData) window.updateChartData(data);
+            } catch (e) {
+                console.error('❌ 消息解析失败：', e);
+            }
+        };
+
+        // 主动发送心跳（防空闲断开）
+        let pingTimer = null;
+        function sendPing() {
+            if (client.isConnected()) {
+                client.sendPing();
+                console.log('📡 主动发送心跳包');
+            } else {
+                clearInterval(pingTimer);
+            }
+        }
+
+        // 连接配置（仅保留Paho支持的属性）
+        const connectOptions = {
+            userName: mqttConfig.username,
+            password: mqttConfig.password,
+            keepAliveInterval: mqttConfig.keepalive,
+            timeout: 10000,
+            useSSL: urlInfo.useSSL,
+            cleanSession: true,
+            onSuccess: function() {
+                console.log(`✅ MQTT连接成功（ClientId：${mqttConfig.clientId}）`);
+                updateMQTTStatus('success');
+
+                // 必须订阅主题（防空闲断开）
+                client.subscribe(mqttConfig.topic, {
+                    onSuccess: () => console.log(`✅ 订阅主题成功：${mqttConfig.topic}`),
+                    onFailure: (res) => {
+                        console.error('❌ 订阅主题失败：', res.errorMessage);
+                        alert('订阅失败：' + res.errorMessage);
+                    }
+                });
+
+                // 每15秒发送一次心跳（心跳间隔的1/2）
+                pingTimer = setInterval(sendPing, (mqttConfig.keepalive * 1000) / 2);
+            },
+            onFailure: function(res) {
+                console.error('❌ MQTT连接失败：', res.errorMessage);
+                updateMQTTStatus('failed');
+                alert('连接失败：' + res.errorMessage);
+                reconnect();
+            }
+        };
+
+        // 发起连接
+        client.connect(connectOptions);
+        mqttClient = client;
+
     } catch (e) {
+        console.error('❌ MQTT初始化失败：', e);
         updateMQTTStatus('failed');
-        console.error('❌ 创建MQTT客户端失败：', e);
-        return;
+        alert('初始化失败：' + e.message);
+        reconnect();
     }
 
-    window.mqttClient.onConnectionLost = onMQTTConnectionLost;
-    window.mqttClient.onMessageArrived = onMQTTMessageArrived;
-
-    const connectOptions = {
-        userName: MQTT_CONFIG.username,
-        password: MQTT_CONFIG.password,
-        useSSL: true,
-        cleanSession: true,
-        keepAliveInterval: 60,
-        timeout: 10,
-        onSuccess: onMQTTConnectSuccess,
-        onFailure: onMQTTConnectFailed
-    };
-
-    try {
-        window.mqttClient.connect(connectOptions);
-    } catch (error) {
-        updateMQTTStatus('failed');
-        console.error('❌ MQTT连接抛出异常：', error);
-    }
+    window.mqttClient = mqttClient;
 };
 
-window.addEventListener('DOMContentLoaded', function() {
-    console.log('=== 页面DOM初始化完成 ===');
-    initMQTTClient();
+// 页面加载初始化
+document.addEventListener('DOMContentLoaded', () => {
+    mqttConfig.clientId = generateUniqueClientId();
+    window.initMQTTClient();
+});
+
+// 页面卸载时断开连接（防残留）
+window.addEventListener('beforeunload', () => {
+    if (mqttClient && mqttClient.isConnected()) {
+        mqttClient.disconnect();
+    }
 });

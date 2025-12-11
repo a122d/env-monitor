@@ -1,3 +1,6 @@
+/**
+ * 环境数据图表工具（温/湿/风÷10处理+双图表适配）
+ */
 window.chartData = {
     time: [],
     temperature: [],
@@ -7,6 +10,7 @@ window.chartData = {
 };
 let mainChart, lightChart;
 
+// 初始化双图表
 window.initCharts = function() {
     const mainChartDom = document.getElementById('main-chart');
     const lightChartDom = document.getElementById('light-chart');
@@ -16,9 +20,9 @@ window.initCharts = function() {
     }
 
     const isMobile = window.innerWidth <= 768;
-    const isLargeScreen = window.innerWidth >= 1440; // Windows超宽屏
+    const isLargeScreen = window.innerWidth >= 1440;
 
-    // 温/湿/风 图表（无重叠+Windows适配）
+    // 温/湿/风图表配置
     mainChart = echarts.init(mainChartDom);
     const mainOption = {
         title: { 
@@ -46,8 +50,7 @@ window.initCharts = function() {
             textStyle: { 
                 color: '#495057',
                 fontSize: isLargeScreen ? 15 : (isMobile ? 13 : 14),
-                fontWeight: 500,
-                fontFamily: "Microsoft YaHei, PingFang SC"
+                fontWeight: 500
             }
         },
         grid: { 
@@ -65,8 +68,7 @@ window.initCharts = function() {
                 interval: 0, 
                 rotate: isMobile ? 25 : 15,
                 color: '#495057',
-                fontSize: isLargeScreen ? 13 : (isMobile ? 11 : 12),
-                fontFamily: "Microsoft YaHei, PingFang SC"
+                fontSize: isLargeScreen ? 13 : (isMobile ? 11 : 12)
             },
             axisLine: { lineStyle: { color: '#dee2e6' } },
             axisTick: { lineStyle: { color: '#dee2e6' } }
@@ -77,8 +79,7 @@ window.initCharts = function() {
             max: 100,
             axisLabel: { 
                 color: '#495057',
-                fontSize: isLargeScreen ? 13 : (isMobile ? 11 : 12),
-                fontFamily: "Microsoft YaHei, PingFang SC"
+                fontSize: isLargeScreen ? 13 : (isMobile ? 11 : 12)
             },
             axisLine: { lineStyle: { color: '#dee2e6' } },
             axisTick: { lineStyle: { color: '#dee2e6' } },
@@ -114,7 +115,7 @@ window.initCharts = function() {
     };
     mainChart.setOption(mainOption);
 
-    // 光照图表（同逻辑适配，光照为整数）
+    // 光照强度图表配置
     lightChart = echarts.init(lightChartDom);
     const lightOption = {
         title: { 
@@ -124,8 +125,7 @@ window.initCharts = function() {
             textStyle: { 
                 color: '#1f2937',
                 fontSize: isLargeScreen ? 18 : (isMobile ? 15 : 17),
-                fontWeight: 600,
-                fontFamily: "Microsoft YaHei, PingFang SC"
+                fontWeight: 600
             }
         },
         tooltip: { 
@@ -142,8 +142,7 @@ window.initCharts = function() {
             textStyle: { 
                 color: '#495057',
                 fontSize: isLargeScreen ? 15 : (isMobile ? 13 : 14),
-                fontWeight: 500,
-                fontFamily: "Microsoft YaHei, PingFang SC"
+                fontWeight: 500
             }
         },
         grid: { 
@@ -161,8 +160,7 @@ window.initCharts = function() {
                 interval: 0, 
                 rotate: isMobile ? 25 : 15,
                 color: '#495057',
-                fontSize: isLargeScreen ? 13 : (isMobile ? 11 : 12),
-                fontFamily: "Microsoft YaHei, PingFang SC"
+                fontSize: isLargeScreen ? 13 : (isMobile ? 11 : 12)
             },
             axisLine: { lineStyle: { color: '#dee2e6' } },
             axisTick: { lineStyle: { color: '#dee2e6' } }
@@ -173,8 +171,7 @@ window.initCharts = function() {
             axisLabel: { 
                 color: '#495057',
                 fontSize: isLargeScreen ? 13 : (isMobile ? 11 : 12),
-                fontFamily: "Microsoft YaHei, PingFang SC",
-                formatter: '{value}' // 强制整数显示
+                formatter: '{value}'
             },
             axisLine: { lineStyle: { color: '#dee2e6' } },
             axisTick: { lineStyle: { color: '#dee2e6' } },
@@ -196,13 +193,15 @@ window.initCharts = function() {
     };
     lightChart.setOption(lightOption);
 
+    // 自适应调整
     setTimeout(() => {
         mainChart.resize();
         lightChart.resize();
     }, 100);
-    console.log('✅ 图表初始化完成（Windows大屏适配版）');
+    console.log('✅ 图表初始化完成');
 };
 
+// 更新图表数据（温/湿/风÷10）
 window.updateChartData = function(data) {
     if (!mainChart || !lightChart) {
         console.warn('⚠️ 图表未初始化，跳过更新');
@@ -211,9 +210,12 @@ window.updateChartData = function(data) {
 
     const now = new Date().toLocaleTimeString();
     window.chartData.time.push(now);
-    window.chartData.temperature.push(data.temperature || 0);
-    window.chartData.humidity.push(data.humidity || 0);
-    window.chartData.windSpeed.push(data.windSpeed || 0);
+    
+    // 核心：温/湿/风÷10保留1位小数
+    window.chartData.temperature.push(data.temperature ? (parseFloat(data.temperature)/10).toFixed(1) : 0);
+    window.chartData.humidity.push(data.humidity ? (parseFloat(data.humidity)/10).toFixed(1) : 0);
+    window.chartData.windSpeed.push(data.windSpeed ? (parseFloat(data.windSpeed)/10).toFixed(1) : 0);
+    // 光照保持原逻辑
     window.chartData.illumination.push(data.illumination || 0);
 
     // 保留最近20条数据
@@ -221,6 +223,7 @@ window.updateChartData = function(data) {
         Object.keys(window.chartData).forEach(key => window.chartData[key].shift());
     }
 
+    // 更新图表
     mainChart.setOption({
         xAxis: { data: window.chartData.time },
         series: [
@@ -238,3 +241,14 @@ window.updateChartData = function(data) {
     mainChart.resize();
     lightChart.resize();
 };
+
+// 页面加载初始化图表
+document.addEventListener('DOMContentLoaded', () => {
+    window.initCharts();
+});
+
+// 窗口大小变化时自适应图表
+window.addEventListener('resize', () => {
+    if (mainChart) mainChart.resize();
+    if (lightChart) lightChart.resize();
+});

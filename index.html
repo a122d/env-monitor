@@ -4,24 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>实时环境监控</title>
-    <!-- 引入外部样式 -->
     <link rel="stylesheet" href="css/style.css">
-    <!-- 提前引入核心JS库 -->
     <script src="js/mqttws31.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
 </head>
 <body>
     <div class="container">
-        <!-- 标题容器 -->
+        <!-- 原有内容：标题/菜单/数据卡片/图表 -->
         <div class="title-container" id="titleContainer">
-            <!-- 菜单容器 -->
             <div class="menu-container">
                 <div class="hamburger-menu" id="hamburgerMenu">
                     <span class="hamburger-line"></span>
                     <span class="hamburger-line"></span>
                     <span class="hamburger-line"></span>
                 </div>
-                <!-- 下拉菜单 -->
                 <ul class="dropdown-menu" id="dropdownMenu">
                     <li class="dropdown-item" data-action="mqtt-config">MQTT连接配置</li>
                     <li class="dropdown-item" data-action="data-clear">清空历史数据</li>
@@ -32,19 +28,15 @@
                     <li class="dropdown-item" data-action="about">关于系统</li>
                 </ul>
             </div>
-
             <div class="title-wrapper">
                 <h1 class="main-title">实时环境监<span class="last-char">控</span></h1>
             </div>
-            
-            <!-- 状态点 -->
             <div class="status connected" id="mqtt-status">
                 <span class="status-dot"></span>
                 <span class="status-text">已连接</span>
             </div>
         </div>
         
-        <!-- 数据卡片 -->
         <div class="data-grid">
             <div class="data-card">
                 <h3>温度</h3>
@@ -68,17 +60,65 @@
             </div>
         </div>
 
-        <!-- 图表区域 -->
         <div class="charts-container">
             <div class="chart-container" id="main-chart"></div>
             <div class="chart-container" id="light-chart"></div>
         </div>
     </div>
 
-    <!-- 按依赖顺序引入JS文件 -->
+    <!-- 新增：MQTT配置弹窗 -->
+    <div class="mqtt-config-modal" id="mqttConfigModal">
+        <div class="modal-mask"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">MQTT连接配置</h3>
+                <span class="modal-close" id="modalClose">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="mqttConfigForm">
+                    <div class="form-group">
+                        <label for="mqttHost">服务器地址</label>
+                        <input type="text" id="mqttHost" placeholder="如：mqtt://broker.emqx.io" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="mqttPort">端口号</label>
+                        <input type="number" id="mqttPort" placeholder="如：8083" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="mqttClientId">客户端ID</label>
+                        <input type="text" id="mqttClientId" placeholder="自动生成或自定义">
+                    </div>
+                    <div class="form-group">
+                        <label for="mqttTopic">订阅主题</label>
+                        <input type="text" id="mqttTopic" placeholder="如：environment/data" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="mqttUsername">用户名（可选）</label>
+                        <input type="text" id="mqttUsername" placeholder="无则留空">
+                    </div>
+                    <div class="form-group">
+                        <label for="mqttPassword">密码（可选）</label>
+                        <input type="password" id="mqttPassword" placeholder="无则留空">
+                    </div>
+                    <div class="form-group">
+                        <label for="mqttKeepalive">心跳间隔（秒）</label>
+                        <input type="number" id="mqttKeepalive" value="60" min="10" max="300">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-test" id="testConnectBtn">测试连接</button>
+                <button type="button" class="btn btn-save" id="saveConfigBtn">保存配置</button>
+                <button type="button" class="btn btn-apply" id="applyConfigBtn">应用配置</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 引入JS文件 -->
     <script src="js/mqtt-client.js"></script>
     <script src="js/chart-utils.js"></script>
     <script src="js/menu-utils.js"></script>
+    <script src="js/mqtt-config.js"></script>
     <script src="js/main-utils.js"></script>
 </body>
 </html>

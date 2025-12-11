@@ -1,3 +1,157 @@
+/* 原有样式保持不变，新增以下内容 */
+
+/* ===== MQTT配置弹窗样式 ===== */
+.mqtt-config-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 1000;
+    display: none;
+}
+.mqtt-config-modal.show {
+    display: block;
+}
+.modal-mask {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    backdrop-filter: blur(2px);
+}
+.modal-content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90%;
+    max-width: 500px;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+    border: 1px solid #f0f2f5;
+    overflow: hidden;
+}
+.modal-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid #f0f2f5;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.modal-title {
+    font-size: 18px;
+    color: #1f2937;
+    font-weight: 600;
+    margin: 0;
+}
+.modal-close {
+    font-size: 24px;
+    color: #64748b;
+    cursor: pointer;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+}
+.modal-close:hover {
+    background: #f8fafc;
+    color: #1f2937;
+}
+.modal-body {
+    padding: 20px;
+    max-height: 70vh;
+    overflow-y: auto;
+}
+.form-group {
+    margin-bottom: 16px;
+}
+.form-group label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 14px;
+    color: #495057;
+    font-weight: 500;
+}
+.form-group input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #e0e6ed;
+    border-radius: 8px;
+    font-size: 14px;
+    color: #1f2937;
+    transition: border-color 0.2s ease;
+}
+.form-group input:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+}
+.form-group input::placeholder {
+    color: #94a3b8;
+}
+.modal-footer {
+    padding: 16px 20px;
+    border-top: 1px solid #f0f2f5;
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+}
+.btn {
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: none;
+}
+.btn-test {
+    background: #f8fafc;
+    color: #495057;
+    border: 1px solid #e0e6ed;
+}
+.btn-test:hover {
+    background: #f0f4f8;
+    color: #1f2937;
+}
+.btn-save {
+    background: #2563eb;
+    color: #ffffff;
+}
+.btn-save:hover {
+    background: #1d4ed8;
+}
+.btn-apply {
+    background: #27ae60;
+    color: #ffffff;
+}
+.btn-apply:hover {
+    background: #219653;
+}
+
+/* 移动端弹窗适配 */
+@media (max-width: 500px) {
+    .modal-content {
+        width: 95%;
+    }
+    .modal-footer {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    .btn {
+        flex: 1;
+        min-width: 100px;
+    }
+}
+
+/* 原有样式 */
 * {
     margin: 0;
     padding: 0;
@@ -14,7 +168,6 @@ body {
     -webkit-text-size-adjust: 100%;
     text-size-adjust: 100%;
 }
-/* 容器基础样式 */
 .container {
     width: 95%;
     max-width: 1440px;
@@ -24,8 +177,6 @@ body {
     border-radius: 12px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.06);
 }
-
-/* ===== 标题容器 + 菜单样式 ===== */
 .title-container {
     display: flex;
     align-items: center;
@@ -36,15 +187,13 @@ body {
     position: relative;
     min-height: 70px;
 }
-/* 菜单容器 */
 .menu-container {
     position: absolute;
-    top: 50%;
+    top: 40%;
     right: 0;
     transform: translateY(-50%);
     z-index: 20;
 }
-/* 汉堡菜单按钮 */
 .hamburger-menu {
     width: 40px;
     height: 40px;
@@ -72,7 +221,6 @@ body {
     border-radius: 1px;
     transition: all 0.3s ease;
 }
-/* 汉堡菜单激活态 */
 .hamburger-menu.active .hamburger-line:nth-child(1) {
     transform: rotate(45deg) translate(5px, 5px);
 }
@@ -82,10 +230,9 @@ body {
 .hamburger-menu.active .hamburger-line:nth-child(3) {
     transform: rotate(-45deg) translate(5px, -5px);
 }
-/* 下拉菜单 */
 .dropdown-menu {
     position: absolute;
-    top: calc(100% + 10px);
+    top: calc(100% + 8px);
     right: 0;
     width: 220px;
     background: #ffffff;
@@ -124,8 +271,6 @@ body {
     from { opacity: 0; transform: translateY(5px); }
     to { opacity: 1; transform: translateY(0); }
 }
-
-/* 标题样式 */
 .title-wrapper {
     text-align: center;
     display: inline-block;
@@ -147,8 +292,6 @@ body {
     position: relative;
     display: inline-block;
 }
-
-/* ===== 状态点样式 ===== */
 .status {
     display: flex;
     align-items: center;
@@ -185,8 +328,6 @@ body {
     visibility: visible;
     opacity: 1;
 }
-
-/* ===== 数据卡片 ===== */
 .data-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -234,8 +375,6 @@ body {
     color: #64748b;
     margin-left: 8px;
 }
-
-/* ===== 图表区域 ===== */
 .charts-container {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -254,8 +393,6 @@ body {
     border: 1px solid #f0f2f5;
     min-height: 420px;
 }
-
-/* ===== 响应式适配 ===== */
 @media (min-width: 1024px) {
     .container {
         max-width: 1600px;
@@ -313,10 +450,12 @@ body {
     :root {
         --dot-margin: 8px;
     }
-    /* 移动端菜单适配 */
     .hamburger-menu {
         width: 36px;
         height: 36px;
+    }
+    .menu-container {
+        top: 41%;
     }
     .dropdown-menu {
         width: 200px;
