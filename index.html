@@ -2,14 +2,10 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <!-- 移动端核心配置：禁止缩放，适配设备宽度 -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>实时环境监控</title>
-    <!-- MQTT核心库 -->
     <script src="js/mqttws31.min.js"></script>
-    <!-- ECharts图表库 -->
     <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
-    <!-- 业务逻辑 -->
     <script src="js/mqtt-client.js"></script>
     <script src="js/chart-utils.js"></script>
 
@@ -20,23 +16,25 @@
             box-sizing: border-box;
             font-family: Arial, sans-serif;
         }
-        /* 全局禁止滚动，占满视口 */
+        /* 核心修改：允许移动端纵向滚动，取消强制100vh */
         body {
             background-color: #f5f5f5;
             width: 100vw;
-            height: 100vh;
-            overflow: hidden;
+            min-height: 100vh; /* 最小高度100vh，内容超出时滚动 */
+            overflow-x: hidden; /* 禁止横向滚动 */
+            overflow-y: auto; /* 允许纵向滚动 */
             position: relative;
+            padding-bottom: 20px; /* 底部留白，避免内容贴边 */
         }
-        /* 容器全屏布局 */
+        /* 容器：自适应高度，取消强制100%高度 */
         .container {
             width: 100%;
-            height: 100%;
+            min-height: 100vh; /* 最小高度占满屏幕 */
             background: white;
             padding: 20px 15px;
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            gap: 20px; /* 增大元素间距，避免堆叠 */
             position: relative;
         }
         /* 标题样式 */
@@ -46,6 +44,7 @@
             font-size: 24px;
             margin: 0;
             flex-shrink: 0;
+            padding: 10px 0; /* 增加上下间距 */
         }
         /* 连接状态：右上角圆点+hover文字 */
         .status {
@@ -56,6 +55,7 @@
             align-items: center;
             gap: 8px;
             cursor: pointer;
+            z-index: 10; /* 确保在最上层 */
         }
         .status-text {
             font-size: 14px;
@@ -80,22 +80,24 @@
         .status.connected .status-dot { background-color: #27ae60; }
         .status.failed .status-dot { background-color: #e74c3c; }
 
-        /* 数据卡片布局 */
+        /* 数据卡片布局：增大间距，优化移动端显示 */
         .data-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 12px;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); /* 缩小最小宽度，适配小屏 */
+            gap: 15px;
             flex-shrink: 0;
             padding: 0 5px;
+            margin: 10px 0; /* 增加上下间距 */
         }
         .data-card {
-            padding: 15px 10px;
+            padding: 20px 10px; /* 增大内边距，提升点击体验 */
             background: #f8f9fa;
             border-radius: 8px;
             text-align: center;
             transition: all 0.3s ease;
             position: relative;
             overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05); /* 轻微阴影，区分卡片 */
         }
         .data-card::before {
             content: "";
@@ -114,7 +116,7 @@
         .data-card:hover::before { left: 0; }
         .data-card h3 {
             color: #666;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
             font-size: 16px;
         }
         .data-value {
@@ -129,40 +131,47 @@
             margin-left: 6px;
         }
 
-        /* 图表区域（核心：移动端强制最小高度） */
+        /* 图表区域：优化移动端高度，允许滚动 */
         .charts-container {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 12px;
-            flex: 1;
+            gap: 15px;
+            flex-shrink: 0;
             padding: 0 5px;
-            min-height: 0;
+            margin: 10px 0 20px; /* 增加底部间距 */
+            min-height: 400px; /* 基础高度，确保图表显示完整 */
         }
         .chart-container {
             height: 100%;
-            padding: 8px;
+            padding: 10px;
             background: #f8f9fa;
             border-radius: 8px;
-            min-height: 200px; /* 移动端最小高度，避免高度为0 */
+            min-height: 200px; /* 图表最小高度 */
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
 
-        /* 响应式适配（移动端优化） */
+        /* 响应式适配（重点优化移动端） */
         @media (max-width: 900px) {
             .data-grid { grid-template-columns: repeat(2, 1fr); }
             .charts-container {
                 grid-template-columns: 1fr;
-                min-height: 400px; /* 单列时增加总高度 */
+                min-height: 600px; /* 移动端单列，增大图表区域高度 */
             }
-            .chart-container { min-height: 200px; }
+            .chart-container { 
+                min-height: 280px; /* 增大移动端图表高度 */
+                margin-bottom: 15px; /* 增加图表间距 */
+            }
             .data-value { font-size: 24px; }
         }
         @media (max-width: 500px) {
             .data-grid { grid-template-columns: 1fr; }
             .title { font-size: 20px; }
             .status { top: 15px; right: 15px; }
-            .chart-container { min-height: 180px; } /* 小屏再调整 */
+            .chart-container { min-height: 250px; } /* 小屏图表高度 */
             .data-value { font-size: 22px; }
             .data-card h3 { font-size: 14px; }
+            .charts-container { min-height: 500px; }
+            .container { gap: 15px; padding: 15px 10px; } /* 小屏缩小容器内边距 */
         }
     </style>
 </head>
