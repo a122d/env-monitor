@@ -103,7 +103,7 @@ window.initCharts = function() {
                 itemStyle: { color: '#3498db' }
             },
             { 
-                name: '风速(m/s)', 
+                name: '风速速(m/s)', 
                 type: 'line', 
                 smooth: true, 
                 data: window.chartData.windSpeed.length > 0 ? window.chartData.windSpeed : [0],
@@ -240,6 +240,42 @@ window.updateChartData = function(data) {
 
     mainChart.resize();
     lightChart.resize();
+};
+
+// 清空图表数据
+window.clearChartData = function() {
+    window.chartData = {
+        time: [],
+        temperature: [],
+        humidity: [],
+        windSpeed: [],
+        illumination: []
+    };
+    
+    // 重置图表显示
+    if (mainChart) {
+        mainChart.setOption({
+            xAxis: { data: ['暂无数据'] },
+            series: [
+                { data: [0] },
+                { data: [0] },
+                { data: [0] }
+            ]
+        });
+    }
+    
+    if (lightChart) {
+        lightChart.setOption({
+            xAxis: { data: ['暂无数据'] },
+            series: [{ data: [0] }]
+        });
+    }
+    
+    // 重置数据卡片
+    updateDataValue('temperature', 0);
+    updateDataValue('humidity', 0);
+    updateDataValue('windSpeed', 0);
+    updateDataValue('illumination', 0);
 };
 
 // 页面加载初始化图表

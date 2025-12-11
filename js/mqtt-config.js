@@ -200,8 +200,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // 事件绑定
     function bindEvents() {
         modalClose.addEventListener('click', closeModal);
-        mqttConfigModal.addEventListener('click', (e) => {
-            if (e.target === mqttConfigModal) closeModal();
+        mqttConfigModal.addEventListener('click', () => {
+            closeModal();
         });
         testConnectBtn.addEventListener('click', testConnect);
         saveConfigBtn.addEventListener('click', saveConfig);

@@ -36,7 +36,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'data-clear':
                     if (confirm('确定要清空所有历史监控数据吗？')) {
                         console.log('清空历史数据');
-                        // clearChartData(); // 预留函数
+                        clearChartData(); // 预留函数
                     }
                     break;
                 case 'chart-setting':
