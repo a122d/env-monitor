@@ -34,7 +34,7 @@
             border-radius: 12px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.06);
         }
-        /* 标题容器：整体居中，标题文字严格居中，绿点在标题文字右侧 */
+        /* 标题容器：整体居中，标题文字严格居中 */
         .title-container {
             display: flex;
             align-items: center;
@@ -43,6 +43,7 @@
             padding-bottom: 15px;
             border-bottom: 1px solid #f0f2f5;
             position: relative;
+            min-height: 60px; /* 保证绿点定位空间 */
         }
         /* 标题文字容器：确保标题严格居中 */
         .title-wrapper {
@@ -55,17 +56,18 @@
             color: #1f2937;
             font-weight: 700;
             letter-spacing: 1.5px;
+            line-height: 1.2;
         }
-        /* 状态容器：绝对定位在标题文字右侧，不影响整体居中 */
+        /* 状态容器：绝对定位在标题文字右上侧（中间稍偏上） */
         .status {
             display: flex;
             align-items: center;
             gap: 6px;
             cursor: pointer;
             position: absolute;
-            left: calc(50% + 120px); /* 标题居中后，绿点在标题文字右侧 */
-            top: 50%;
-            transform: translateY(-50%);
+            left: calc(50% + 120px); /* 标题右侧偏移 */
+            top: 35%; /* 中间稍偏上（原50%改为35%） */
+            transform: translateY(-50%); /* 自身垂直居中，整体偏上 */
         }
         /* 状态绿点：优化尺寸，更醒目 */
         .status-dot {
@@ -101,7 +103,7 @@
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
             gap: 20px;
-            margin: 0 0 30px 0; /* 减少卡片和图表间距，给图表更多空间 */
+            margin: 0 0 30px 0; /* 减少卡片和图表间距 */
         }
         .data-card {
             padding: 25px 20px;
@@ -149,17 +151,17 @@
             margin-left: 8px;
         }
 
-        /* 图表区域样式：大幅增大尺寸 */
+        /* 图表区域样式：最大化尺寸 */
         .charts-container {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 20px; /* 减少图表间距，增大可用空间 */
+            gap: 20px;
             margin: 0 0 30px 0;
             width: 100%;
         }
         .chart-container {
             width: 100%;
-            height: 400px; /* 基础高度大幅增大 */
+            height: 400px; /* 基础高度最大化 */
             padding: 20px;
             background: #f8fafc;
             border-radius: 12px;
@@ -167,17 +169,18 @@
             border: 1px solid #f0f2f5;
         }
 
-        /* Windows超宽屏适配（≥1440px）：图表进一步增大 */
+        /* Windows超宽屏适配（≥1440px） */
         @media (min-width: 1440px) {
             .container {
                 max-width: 1600px;
                 width: 90%;
             }
             .main-title {
-                font-size: 36px; /* 超宽屏标题更大 */
+                font-size: 36px;
             }
             .status {
-                left: calc(50% + 140px); /* 适配更大标题 */
+                left: calc(50% + 140px); /* 适配大标题偏移 */
+                top: 35%; /* 保持偏上 */
             }
             .data-grid {
                 grid-template-columns: repeat(4, 1fr);
@@ -188,7 +191,7 @@
                 padding: 30px 25px;
             }
             .chart-container {
-                height: 480px; /* 超宽屏图表高度最大化 */
+                height: 480px; /* 超宽屏图表最大化 */
             }
         }
         /* 常规大屏适配（≥1024px） */
@@ -197,22 +200,23 @@
                 grid-template-columns: repeat(4, 1fr);
             }
             .chart-container {
-                height: 450px; /* 常规大屏图表高度增大 */
+                height: 450px;
             }
         }
         /* 平板适配（768-1023px） */
         @media (max-width: 1023px) and (min-width: 768px) {
             .chart-container {
-                height: 420px; /* 平板图表高度增大 */
+                height: 420px;
             }
         }
         /* 移动端适配 */
         @media (max-width: 767px) {
             .main-title {
-                font-size: 28px; /* 移动端标题适配 */
+                font-size: 28px;
             }
             .status {
-                left: calc(50% + 90px); /* 适配小屏标题 */
+                left: calc(50% + 90px);
+                top: 30%; /* 移动端更偏上一点 */
                 gap: 4px;
             }
             .status-dot {
@@ -226,7 +230,7 @@
                 grid-template-columns: 1fr;
             }
             .chart-container {
-                height: 380px; /* 移动端图表也增大 */
+                height: 380px;
             }
             .data-value {
                 font-size: 30px;
@@ -238,24 +242,25 @@
             }
             .status {
                 left: calc(50% + 70px);
+                top: 30%;
             }
             .data-grid {
                 grid-template-columns: 1fr;
             }
             .chart-container {
-                height: 350px; /* 小屏移动端图表适配 */
+                height: 350px;
             }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- 标题容器：整体居中，标题文字严格居中 -->
+        <!-- 标题容器：整体居中 -->
         <div class="title-container">
             <div class="title-wrapper">
                 <h1 class="main-title">实时环境监控</h1>
             </div>
-            <!-- 状态绿点：绝对定位在标题文字右侧，不影响整体居中 -->
+            <!-- 状态绿点：标题右上侧（中间稍偏上） -->
             <div class="status connected" id="mqtt-status">
                 <span class="status-dot"></span>
                 <span class="status-text">已连接</span>
@@ -286,7 +291,7 @@
             </div>
         </div>
 
-        <!-- 图表区域：大幅增大尺寸 -->
+        <!-- 图表区域：最大化尺寸 -->
         <div class="charts-container">
             <div class="chart-container" id="main-chart"></div>
             <div class="chart-container" id="light-chart"></div>
