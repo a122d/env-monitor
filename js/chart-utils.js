@@ -1,4 +1,3 @@
-// 全局图表数据
 window.chartData = {
     time: [],
     temperature: [],
@@ -6,59 +5,83 @@ window.chartData = {
     windSpeed: [],
     illumination: []
 };
-// 全局图表实例
 let mainChart, lightChart;
 
-// 初始化图表（移动端适配+保留所有样式）
 window.initCharts = function() {
     const mainChartDom = document.getElementById('main-chart');
     const lightChartDom = document.getElementById('light-chart');
-    
-    // 验证容器存在
     if (!mainChartDom || !lightChartDom) {
         console.error('❌ 图表容器未找到！');
         return;
     }
 
-    // 检测是否为移动端（用于适配）
     const isMobile = window.innerWidth <= 768;
 
-    // 1. 温/湿/风 图表初始化
+    // 1. 温/湿/风 图表（浅色主题+修复重叠）
     mainChart = echarts.init(mainChartDom);
     const mainOption = {
+        // 标题：调整位置+深黑文字
         title: { 
             text: '温/湿/风 趋势', 
-            fontSize: isMobile ? 14 : 16 // 移动端缩小标题
+            left: 'center',
+            top: '2%', // 标题上移，留出更多空间
+            textStyle: { 
+                color: '#212121', // 标题深黑
+                fontSize: isMobile ? 15 : 17,
+                fontWeight: 600
+            }
         },
-        tooltip: { trigger: 'axis' },
+        // 提示框：浅色背景+深黑文字
+        tooltip: { 
+            trigger: 'axis',
+            backgroundColor: 'rgba(255, 255, 255, 0.95)',
+            textStyle: { color: '#212121' },
+            borderColor: '#e9ecef',
+            borderWidth: 1
+        },
+        // 图例：下移+深灰文字，避免和标题重叠
         legend: { 
             data: ['温度(℃)', '湿度(%)', '风速(m/s)'], 
-            top: 10,
-            fontSize: isMobile ? 12 : 14 // 移动端缩小图例
+            top: '12%', // 图例下移，和标题错开
+            left: 'center',
+            textStyle: { 
+                color: '#495057', // 图例中深灰
+                fontSize: isMobile ? 13 : 14,
+                fontWeight: 500
+            }
         },
+        // 网格：大幅上移，给标题/图例留足空间
         grid: { 
-            left: '5%', 
-            right: '5%', 
-            bottom: '12%', // 移动端增加底部边距，避免标签遮挡
-            top: '18%',
+            left: '6%', 
+            right: '6%', 
+            bottom: '18%', // 底部留空间给x轴标签
+            top: '22%',    // 顶部留空间给标题/图例
             containLabel: true 
         },
         xAxis: {
             type: 'category',
             boundaryGap: false,
-            // 空数据时显示默认值，避免报错
             data: window.chartData.time.length > 0 ? window.chartData.time : ['暂无数据'],
             axisLabel: { 
                 interval: 0, 
-                rotate: isMobile ? 20 : 15, // 移动端增加旋转角度
-                fontSize: isMobile ? 10 : 12
-            }
+                rotate: isMobile ? 25 : 15, // 增大旋转角度，避免标签重叠
+                color: '#495057', // 轴标签中深灰
+                fontSize: isMobile ? 11 : 12
+            },
+            axisLine: { lineStyle: { color: '#dee2e6' } }, // 轴线条浅灰
+            axisTick: { lineStyle: { color: '#dee2e6' } }
         },
         yAxis: { 
             type: 'value', 
             min: 0, 
             max: 100,
-            axisLabel: { fontSize: isMobile ? 10 : 12 }
+            axisLabel: { 
+                color: '#495057',
+                fontSize: isMobile ? 11 : 12
+            },
+            axisLine: { lineStyle: { color: '#dee2e6' } },
+            axisTick: { lineStyle: { color: '#dee2e6' } },
+            splitLine: { lineStyle: { color: '#f1f3f5' } } // 网格线浅灰
         },
         series: [
             { 
@@ -66,45 +89,65 @@ window.initCharts = function() {
                 type: 'line', 
                 smooth: true, 
                 data: window.chartData.temperature.length > 0 ? window.chartData.temperature : [0],
-                lineStyle: { width: 2, color: '#42b983' }
+                lineStyle: { width: 2.5, color: '#42b983' }, // 加粗线条，提升对比
+                itemStyle: { color: '#42b983' }
             },
             { 
                 name: '湿度(%)', 
                 type: 'line', 
                 smooth: true, 
                 data: window.chartData.humidity.length > 0 ? window.chartData.humidity : [0],
-                lineStyle: { width: 2, color: '#3498db' }
+                lineStyle: { width: 2.5, color: '#3498db' },
+                itemStyle: { color: '#3498db' }
             },
             { 
                 name: '风速(m/s)', 
                 type: 'line', 
                 smooth: true, 
                 data: window.chartData.windSpeed.length > 0 ? window.chartData.windSpeed : [0],
-                lineStyle: { width: 2, color: '#9b59b6' }
+                lineStyle: { width: 2.5, color: '#9b59b6' },
+                itemStyle: { color: '#9b59b6' }
             }
         ],
         animationDuration: 1000
     };
     mainChart.setOption(mainOption);
 
-    // 2. 光照图表初始化
+    // 2. 光照图表（同逻辑修复）
     lightChart = echarts.init(lightChartDom);
     const lightOption = {
         title: { 
             text: '光照强度趋势', 
-            fontSize: isMobile ? 14 : 16 
+            left: 'center',
+            top: '2%',
+            textStyle: { 
+                color: '#212121',
+                fontSize: isMobile ? 15 : 17,
+                fontWeight: 600
+            }
         },
-        tooltip: { trigger: 'axis' },
+        tooltip: { 
+            trigger: 'axis',
+            backgroundColor: 'rgba(255, 255, 255, 0.95)',
+            textStyle: { color: '#212121' },
+            borderColor: '#e9ecef',
+            borderWidth: 1
+        },
         legend: { 
             data: ['光照(lux)'], 
-            top: 10,
-            fontSize: isMobile ? 12 : 14 
+            top: '12%',
+            left: 'center',
+            textStyle: { 
+                color: '#495057',
+                fontSize: isMobile ? 13 : 14,
+                fontWeight: 500
+            }
         },
         grid: { 
-            left: '5%', 
-            right: '5%', 
-            bottom: '12%',
-            top: '18%',
+            left: '6%', 
+            right: '6%', 
+            bottom: '18%',
+            top: '22%',
             containLabel: true 
         },
         xAxis: {
@@ -113,14 +156,23 @@ window.initCharts = function() {
             data: window.chartData.time.length > 0 ? window.chartData.time : ['暂无数据'],
             axisLabel: { 
                 interval: 0, 
-                rotate: isMobile ? 20 : 15,
-                fontSize: isMobile ? 10 : 12
-            }
+                rotate: isMobile ? 25 : 15,
+                color: '#495057',
+                fontSize: isMobile ? 11 : 12
+            },
+            axisLine: { lineStyle: { color: '#dee2e6' } },
+            axisTick: { lineStyle: { color: '#dee2e6' } }
         },
         yAxis: { 
             type: 'value', 
             min: 0,
-            axisLabel: { fontSize: isMobile ? 10 : 12 }
+            axisLabel: { 
+                color: '#495057',
+                fontSize: isMobile ? 11 : 12
+            },
+            axisLine: { lineStyle: { color: '#dee2e6' } },
+            axisTick: { lineStyle: { color: '#dee2e6' } },
+            splitLine: { lineStyle: { color: '#f1f3f5' } }
         },
         series: [
             { 
@@ -128,32 +180,31 @@ window.initCharts = function() {
                 type: 'line', 
                 smooth: true, 
                 data: window.chartData.illumination.length > 0 ? window.chartData.illumination : [0],
-                lineStyle: { width: 2, color: '#e74c3c' },
-                areaStyle: { color: 'rgba(231,76,60,0.1)' }, // 保留面积样式
-                emphasis: { focus: 'series' } // 交互优化
+                lineStyle: { width: 2.5, color: '#e74c3c' }, // 加粗线条
+                areaStyle: { color: 'rgba(231,76,60,0.08)' }, // 浅色面积，不刺眼
+                itemStyle: { color: '#e74c3c' },
+                emphasis: { focus: 'series' }
             }
         ],
         animationDuration: 1000
     };
     lightChart.setOption(lightOption);
 
-    // 移动端延迟resize，确保尺寸稳定
+    // 强制resize，确保尺寸正确
     setTimeout(() => {
         mainChart.resize();
         lightChart.resize();
     }, 100);
-
-    console.log('✅ 图表初始化完成（移动端适配版）');
+    console.log('✅ 图表初始化完成（浅色高对比版）');
 };
 
-// 更新图表数据（保留最近20条）
+// 数据更新逻辑不变，保留容错
 window.updateChartData = function(data) {
     if (!mainChart || !lightChart) {
-        console.warn('⚠️ 图表未初始化，跳过数据更新');
+        console.warn('⚠️ 图表未初始化，跳过更新');
         return;
     }
 
-    // 追加新数据
     const now = new Date().toLocaleTimeString();
     window.chartData.time.push(now);
     window.chartData.temperature.push(data.temperature || 0);
@@ -161,12 +212,12 @@ window.updateChartData = function(data) {
     window.chartData.windSpeed.push(data.windSpeed || 0);
     window.chartData.illumination.push(data.illumination || 0);
 
-    // 保留最近20条数据，避免数据过多
+    // 保留最近20条数据，避免数据过多导致标签重叠
     if (window.chartData.time.length > 20) {
         Object.keys(window.chartData).forEach(key => window.chartData[key].shift());
     }
 
-    // 强制更新图表数据
+    // 更新图表数据
     mainChart.setOption({
         xAxis: { data: window.chartData.time },
         series: [
@@ -181,8 +232,7 @@ window.updateChartData = function(data) {
         series: [{ data: window.chartData.illumination }]
     });
 
-    // 触发图表重绘
+    // 触发重绘，确保布局正确
     mainChart.resize();
     lightChart.resize();
-    console.log('✅ 图表数据更新完成：', data);
 };

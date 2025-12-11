@@ -2,7 +2,6 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <!-- 移动端滑动核心配置：允许触摸滚动 -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, touch-action: pan-y">
     <title>实时环境监控</title>
     <script src="js/mqttws31.min.js"></script>
@@ -17,52 +16,55 @@
             box-sizing: border-box;
             font-family: Arial, sans-serif;
         }
-        /* 1. 彻底允许移动端纵向滚动 */
+        /* 浅色基础+高对比文字 */
         body {
-            background-color: #f5f5f5;
+            background-color: #f5f5f5; /* 页面浅灰背景 */
             width: 100vw;
-            overflow-x: hidden; /* 禁止横向滚动 */
-            overflow-y: auto; /* 强制允许纵向滚动 */
-            position: relative;
-            padding: 10px 0; /* 上下留白，避免内容贴边 */
-            -webkit-overflow-scrolling: touch; /* 开启移动端弹性滚动（兼容iOS） */
+            overflow-x: hidden;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch; /* iOS弹性滚动 */
+            padding: 10px 0;
         }
-        /* 2. 容器改用自然流布局（放弃flex，避免高度强制） */
         .container {
             width: 100%;
-            background: white;
+            background: #ffffff; /* 容器纯白背景 */
             padding: 20px 15px;
             margin: 0 auto;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
         }
-        /* 3. 标题样式：增加间距 */
+        /* 标题：深黑高对比 */
         .title {
             text-align: center;
-            color: #333;
+            color: #212121; /* 标题深黑 */
             font-size: 24px;
-            margin: 0 0 25px 0; /* 底部间距，分隔标题和内容 */
+            margin: 0 0 30px 0; /* 增大底部间距，避免和卡片重叠 */
             padding-top: 10px;
+            font-weight: 600;
         }
-        /* 4. 连接状态：固定在顶部，避免滚动时消失 */
+        /* 连接状态：浅背景+深文字 */
         .status {
-            position: fixed; /* 改为fixed，始终显示在右上角 */
+            position: fixed;
             top: 15px;
             right: 15px;
             display: flex;
             align-items: center;
             gap: 8px;
             cursor: pointer;
-            z-index: 999; /* 确保在最上层 */
-            background: rgba(255,255,255,0.8); /* 增加背景，避免被内容遮挡 */
-            padding: 2px 8px;
+            z-index: 999;
+            background: rgba(255, 255, 255, 0.9); /* 白色半透明 */
+            padding: 4px 10px;
             border-radius: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         .status-text {
             font-size: 14px;
-            color: #333;
+            color: #212121; /* 深黑文字 */
             white-space: nowrap;
             visibility: hidden;
             opacity: 0;
             transition: all 0.3s ease;
+            font-weight: 500;
         }
         .status:hover .status-text {
             visibility: visible;
@@ -78,52 +80,55 @@
         .status.connected .status-dot { background-color: #27ae60; }
         .status.failed .status-dot { background-color: #e74c3c; }
 
-        /* 5. 数据卡片：自然流布局，增加间距 */
+        /* 数据卡片：浅灰背景+深黑文字（高对比） */
         .data-grid {
             display: grid;
-            grid-template-columns: 1fr; /* 移动端强制单列，避免挤压 */
-            gap: 15px;
-            margin: 0 0 30px 0; /* 底部大间距，分隔卡片和图表 */
+            grid-template-columns: 1fr; /* 移动端单列 */
+            gap: 18px;
+            margin: 0 0 35px 0; /* 增大底部间距，分隔卡片和图表 */
         }
         .data-card {
-            padding: 20px 15px;
-            background: #f8f9fa;
+            padding: 22px 18px;
+            background: #f8f9fa; /* 卡片浅灰 */
             border-radius: 10px;
             text-align: center;
             box-shadow: 0 3px 6px rgba(0,0,0,0.08);
+            border: 1px solid #e9ecef; /* 边框强化区分 */
         }
         .data-card h3 {
-            color: #666;
-            margin-bottom: 12px;
+            color: #495057; /* 副标题中灰 */
+            margin-bottom: 15px;
             font-size: 16px;
+            font-weight: 500;
         }
         .data-value {
-            font-size: 30px;
+            font-size: 32px; /* 增大数值，提升对比 */
             font-weight: bold;
-            color: #2c3e50;
+            color: #212121; /* 数值深黑 */
         }
         .unit {
             font-size: 16px;
-            color: #999;
-            margin-left: 6px;
+            color: #6c757d; /* 单位中灰 */
+            margin-left: 8px;
         }
 
-        /* 6. 图表区域：强制足够高度，避免堆叠 */
+        /* 图表区域：浅灰背景+足够高度+大间距 */
         .charts-container {
-            display: block; /* 单列布局 */
+            display: block;
             margin: 0 0 30px 0;
         }
         .chart-container {
             width: 100%;
-            height: 300px; /* 移动端强制图表高度 */
-            padding: 10px;
+            height: 330px; /* 增大图表高度，避免内容挤压 */
+            padding: 20px 15px;
             background: #f8f9fa;
             border-radius: 10px;
             box-shadow: 0 3px 6px rgba(0,0,0,0.08);
-            margin-bottom: 20px; /* 图表之间的间距 */
+            border: 1px solid #e9ecef;
+            margin-bottom: 30px; /* 增大图表间距，避免重叠 */
         }
 
-        /* 7. 大屏适配（非移动端恢复多列） */
+        /* 大屏适配 */
         @media (min-width: 768px) {
             .data-grid {
                 grid-template-columns: repeat(2, 1fr);
@@ -132,15 +137,20 @@
             .charts-container {
                 display: grid;
                 grid-template-columns: 1fr 1fr;
-                gap: 20px;
+                gap: 25px;
             }
             .chart-container {
-                height: 350px;
+                height: 360px;
+                margin-bottom: 0; /* 大屏取消图表底部间距 */
             }
         }
         @media (min-width: 1024px) {
             .data-grid {
                 grid-template-columns: repeat(4, 1fr);
+            }
+            .container {
+                max-width: 1200px; /* 大屏限制宽度，避免拉伸 */
+                padding: 30px 20px;
             }
         }
     </style>
@@ -149,13 +159,11 @@
     <div class="container">
         <h1 class="title">实时环境监控</h1>
         
-        <!-- 连接状态：固定在右上角 -->
         <div class="status connecting" id="mqtt-status">
             <span class="status-text">连接中...</span>
             <span class="status-dot"></span>
         </div>
         
-        <!-- 数据卡片（移动端单列） -->
         <div class="data-grid">
             <div class="data-card">
                 <h3>温度</h3>
@@ -179,7 +187,6 @@
             </div>
         </div>
 
-        <!-- 图表区域（移动端单列） -->
         <div class="charts-container">
             <div class="chart-container" id="main-chart"></div>
             <div class="chart-container" id="light-chart"></div>
@@ -187,9 +194,8 @@
     </div>
 
     <script>
-        // 页面加载完成初始化
         window.onload = function() {
-            // 确保图表容器高度正确后再初始化
+            // 延迟初始化，确保容器尺寸稳定
             setTimeout(() => {
                 initMQTTClient();
                 initCharts();
