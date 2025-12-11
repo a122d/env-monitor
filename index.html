@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, touch-action: pan-y">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>实时环境监控</title>
     <script src="js/mqttws31.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
@@ -23,8 +23,10 @@
             overflow-y: auto;
             -webkit-overflow-scrolling: touch;
             padding: 15px 0;
+            -webkit-text-size-adjust: 100%;
+            text-size-adjust: 100%;
         }
-        /* Windows大屏占比优化 */
+        /* 容器基础样式 */
         .container {
             width: 95%;
             max-width: 1440px;
@@ -34,42 +36,54 @@
             border-radius: 12px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.06);
         }
-        /* 标题容器：整体居中，标题文字严格居中 */
+
+        /* ===== 标题容器：保证标题绝对居中（核心） ===== */
         .title-container {
             display: flex;
             align-items: center;
-            justify-content: center;
+            justify-content: center; /* 容器内所有元素整体居中 */
             margin: 0 0 40px 0;
             padding-bottom: 15px;
             border-bottom: 1px solid #f0f2f5;
             position: relative;
-            min-height: 60px; /* 保证绿点定位空间 */
+            min-height: 70px;
         }
-        /* 标题文字容器：确保标题严格居中 */
+        /* 标题文字容器：仅承载文字，无任何偏移，保证文字绝对居中 */
         .title-wrapper {
-            text-align: center;
-            position: relative;
+            text-align: center; /* 文字水平居中 */
+            display: inline-block; /* 宽度自适应文字，不占满容器 */
+            /* 无任何左右padding/margin，避免标题偏左/右 */
+            padding: 0;
+            margin: 0;
         }
-        /* 标题美化：增大字号、优化字体、增加字间距 */
+        /* 标题文字：美化+绝对居中 */
         .main-title {
             font-size: 32px;
             color: #1f2937;
             font-weight: 700;
             letter-spacing: 1.5px;
             line-height: 1.2;
+            -webkit-font-smoothing: antialiased;
+            font-smoothing: antialiased;
+            /* 文字本身无偏移 */
+            margin: 0;
+            padding: 0;
         }
-        /* 状态容器：绝对定位在标题文字右上侧（中间稍偏上） */
+
+        /* ===== 状态点：仅叠加在标题右侧，不影响标题居中 ===== */
         .status {
             display: flex;
             align-items: center;
             gap: 6px;
             cursor: pointer;
             position: absolute;
-            left: calc(50% + 120px); /* 标题右侧偏移 */
-            top: 35%; /* 中间稍偏上（原50%改为35%） */
-            transform: translateY(-50%); /* 自身垂直居中，整体偏上 */
+            /* 核心定位：先居中，再向右偏移（仅叠加，不影响标题） */
+            left: 50%;
+            top: 35%;
+            /* Win端：向右偏移60px（靠近标题），自身垂直居中 */
+            transform: translate(calc(60px + 50%), -50%);
+            z-index: 10;
         }
-        /* 状态绿点：优化尺寸，更醒目 */
         .status-dot {
             width: 14px;
             height: 14px;
@@ -78,12 +92,10 @@
             border: 2px solid #f0f9f4;
             transition: all 0.3s ease;
         }
-        /* 断开连接时红点样式 */
         .status.disconnected .status-dot {
             background-color: #e74c3c;
             border-color: #ffebee;
         }
-        /* 状态文字：hover显示，绿点右侧 */
         .status-text {
             font-size: 15px;
             color: #495057;
@@ -98,12 +110,12 @@
             opacity: 1;
         }
 
-        /* 数据卡片样式 */
+        /* ===== 数据卡片 ===== */
         .data-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
             gap: 20px;
-            margin: 0 0 30px 0; /* 减少卡片和图表间距 */
+            margin: 0 0 20px 0;
         }
         .data-card {
             padding: 25px 20px;
@@ -119,10 +131,6 @@
             transform: translateY(-5px);
             box-shadow: 0 6px 15px rgba(0,0,0,0.1);
             background: #ffffff;
-        }
-        .data-card:active {
-            transform: translateY(-2px);
-            border-color: #e2e8f0;
         }
         .data-card h3 {
             color: #64748b;
@@ -151,26 +159,28 @@
             margin-left: 8px;
         }
 
-        /* 图表区域样式：最大化尺寸 */
+        /* ===== 图表区域 ===== */
         .charts-container {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 20px;
+            gap: 15px;
             margin: 0 0 30px 0;
             width: 100%;
+            min-width: 0;
         }
         .chart-container {
             width: 100%;
-            height: 400px; /* 基础高度最大化 */
-            padding: 20px;
+            height: 420px;
+            padding: 15px;
             background: #f8fafc;
             border-radius: 12px;
             box-shadow: 0 3px 8px rgba(0,0,0,0.05);
             border: 1px solid #f0f2f5;
+            min-height: 420px;
         }
 
-        /* Windows超宽屏适配（≥1440px） */
-        @media (min-width: 1440px) {
+        /* ===== Windows大屏适配（≥1024px）：状态点近+标题大+图表大 ===== */
+        @media (min-width: 1024px) {
             .container {
                 max-width: 1600px;
                 width: 90%;
@@ -178,9 +188,10 @@
             .main-title {
                 font-size: 36px;
             }
+            /* Win大屏：状态点仅向右偏移70px（更近，不影响标题居中） */
             .status {
-                left: calc(50% + 140px); /* 适配大标题偏移 */
-                top: 35%; /* 保持偏上 */
+                transform: translate(calc(70px + 50%), -50%);
+                top: 35%;
             }
             .data-grid {
                 grid-template-columns: repeat(4, 1fr);
@@ -191,32 +202,41 @@
                 padding: 30px 25px;
             }
             .chart-container {
-                height: 480px; /* 超宽屏图表最大化 */
+                height: 480px;
+                min-height: 480px;
             }
         }
-        /* 常规大屏适配（≥1024px） */
-        @media (min-width: 1024px) {
-            .data-grid {
-                grid-template-columns: repeat(4, 1fr);
-            }
-            .chart-container {
-                height: 450px;
-            }
-        }
-        /* 平板适配（768-1023px） */
-        @media (max-width: 1023px) and (min-width: 768px) {
-            .chart-container {
-                height: 420px;
-            }
-        }
-        /* 移动端适配 */
-        @media (max-width: 767px) {
-            .main-title {
-                font-size: 28px;
-            }
+        /* Windows超宽屏（≥1440px） */
+        @media (min-width: 1440px) {
             .status {
-                left: calc(50% + 90px);
-                top: 30%; /* 移动端更偏上一点 */
+                transform: translate(calc(80px + 50%), -50%); /* 稍远但仍近 */
+            }
+            .chart-container {
+                height: 500px;
+                min-height: 500px;
+            }
+        }
+
+        /* ===== 平板适配（768-1023px） ===== */
+        @media (min-width: 768px) and (max-width: 1023px) {
+            .status {
+                transform: translate(calc(70px + 50%), -50%);
+            }
+            .chart-container {
+                height: 460px;
+                min-height: 460px;
+            }
+        }
+
+        /* ===== 安卓设备适配（≤767px）：状态点远+标题适配+图表大 ===== */
+        @media (max-width: 767px) and (max-device-width: 1024px) {
+            .main-title {
+                font-size: 30px;
+            }
+            /* 安卓：状态点向右偏移90px（避开“控”字，不影响标题居中） */
+            .status {
+                transform: translate(calc(90px + 50%), -50%);
+                top: 30%;
                 gap: 4px;
             }
             .status-dot {
@@ -226,48 +246,53 @@
             .status-text {
                 font-size: 13px;
             }
+            /* 安卓图表最大化 */
             .charts-container {
                 grid-template-columns: 1fr;
+                gap: 20px;
             }
             .chart-container {
-                height: 380px;
-            }
-            .data-value {
-                font-size: 30px;
+                height: calc(70vw);
+                min-height: 450px;
             }
         }
+
+        /* ===== 小屏安卓（≤500px） ===== */
         @media (max-width: 500px) {
             .main-title {
-                font-size: 24px;
+                font-size: 28px;
             }
+            /* 小屏安卓：状态点偏移80px，兼顾间距和不重合 */
             .status {
-                left: calc(50% + 70px);
+                transform: translate(calc(80px + 50%), -50%);
                 top: 30%;
             }
             .data-grid {
                 grid-template-columns: 1fr;
             }
             .chart-container {
-                height: 350px;
+                height: calc(75vw);
+                min-height: 380px;
             }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- 标题容器：整体居中 -->
+        <!-- 标题容器：绝对居中 -->
         <div class="title-container">
+            <!-- 标题文字：无任何偏移，绝对居中 -->
             <div class="title-wrapper">
                 <h1 class="main-title">实时环境监控</h1>
             </div>
-            <!-- 状态绿点：标题右上侧（中间稍偏上） -->
+            <!-- 状态点：仅叠加在标题右侧，不影响标题居中 -->
             <div class="status connected" id="mqtt-status">
                 <span class="status-dot"></span>
                 <span class="status-text">已连接</span>
             </div>
         </div>
         
-        <!-- 数据卡片区域 -->
+        <!-- 数据卡片 -->
         <div class="data-grid">
             <div class="data-card">
                 <h3>温度</h3>
@@ -291,7 +316,7 @@
             </div>
         </div>
 
-        <!-- 图表区域：最大化尺寸 -->
+        <!-- 图表区域 -->
         <div class="charts-container">
             <div class="chart-container" id="main-chart"></div>
             <div class="chart-container" id="light-chart"></div>
@@ -300,11 +325,22 @@
 
     <script>
         window.onload = function() {
+            // 识别设备类型
+            const isAndroid = /Android/i.test(navigator.userAgent);
+            const delay = isAndroid ? 300 : 200;
+            
+            // 延迟初始化保证渲染稳定
             setTimeout(() => {
                 initMQTTClient();
                 initCharts();
-            }, 200);
+                // 强制刷新图表尺寸
+                setTimeout(() => {
+                    if (window.mainChart) window.mainChart.resize();
+                    if (window.lightChart) window.lightChart.resize();
+                }, isAndroid ? 300 : 100);
+            }, delay);
 
+            // 窗口变化时刷新图表
             window.addEventListener('resize', () => {
                 if (window.mainChart) window.mainChart.resize();
                 if (window.lightChart) window.lightChart.resize();
