@@ -28,7 +28,8 @@ window.initCharts = function() {
             textStyle: { 
                 color: '#1f2937',
                 fontSize: isLargeScreen ? 18 : (isMobile ? 15 : 17),
-                fontWeight: 600
+                fontWeight: 600,
+                fontFamily: "Microsoft YaHei, PingFang SC"
             }
         },
         tooltip: { 
@@ -45,7 +46,8 @@ window.initCharts = function() {
             textStyle: { 
                 color: '#495057',
                 fontSize: isLargeScreen ? 15 : (isMobile ? 13 : 14),
-                fontWeight: 500
+                fontWeight: 500,
+                fontFamily: "Microsoft YaHei, PingFang SC"
             }
         },
         grid: { 
@@ -63,7 +65,8 @@ window.initCharts = function() {
                 interval: 0, 
                 rotate: isMobile ? 25 : 15,
                 color: '#495057',
-                fontSize: isLargeScreen ? 13 : (isMobile ? 11 : 12)
+                fontSize: isLargeScreen ? 13 : (isMobile ? 11 : 12),
+                fontFamily: "Microsoft YaHei, PingFang SC"
             },
             axisLine: { lineStyle: { color: '#dee2e6' } },
             axisTick: { lineStyle: { color: '#dee2e6' } }
@@ -74,7 +77,8 @@ window.initCharts = function() {
             max: 100,
             axisLabel: { 
                 color: '#495057',
-                fontSize: isLargeScreen ? 13 : (isMobile ? 11 : 12)
+                fontSize: isLargeScreen ? 13 : (isMobile ? 11 : 12),
+                fontFamily: "Microsoft YaHei, PingFang SC"
             },
             axisLine: { lineStyle: { color: '#dee2e6' } },
             axisTick: { lineStyle: { color: '#dee2e6' } },
@@ -120,7 +124,8 @@ window.initCharts = function() {
             textStyle: { 
                 color: '#1f2937',
                 fontSize: isLargeScreen ? 18 : (isMobile ? 15 : 17),
-                fontWeight: 600
+                fontWeight: 600,
+                fontFamily: "Microsoft YaHei, PingFang SC"
             }
         },
         tooltip: { 
@@ -137,7 +142,8 @@ window.initCharts = function() {
             textStyle: { 
                 color: '#495057',
                 fontSize: isLargeScreen ? 15 : (isMobile ? 13 : 14),
-                fontWeight: 500
+                fontWeight: 500,
+                fontFamily: "Microsoft YaHei, PingFang SC"
             }
         },
         grid: { 
@@ -155,7 +161,8 @@ window.initCharts = function() {
                 interval: 0, 
                 rotate: isMobile ? 25 : 15,
                 color: '#495057',
-                fontSize: isLargeScreen ? 13 : (isMobile ? 11 : 12)
+                fontSize: isLargeScreen ? 13 : (isMobile ? 11 : 12),
+                fontFamily: "Microsoft YaHei, PingFang SC"
             },
             axisLine: { lineStyle: { color: '#dee2e6' } },
             axisTick: { lineStyle: { color: '#dee2e6' } }
@@ -166,6 +173,7 @@ window.initCharts = function() {
             axisLabel: { 
                 color: '#495057',
                 fontSize: isLargeScreen ? 13 : (isMobile ? 11 : 12),
+                fontFamily: "Microsoft YaHei, PingFang SC",
                 formatter: '{value}' // 强制整数显示
             },
             axisLine: { lineStyle: { color: '#dee2e6' } },
