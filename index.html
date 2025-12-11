@@ -4,270 +4,40 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>实时环境监控</title>
+    <!-- 引入外部样式 -->
+    <link rel="stylesheet" href="css/style.css">
+    <!-- 提前引入核心JS库 -->
     <script src="js/mqttws31.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
-    <script src="js/mqtt-client.js"></script>
-    <script src="js/chart-utils.js"></script>
-
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: "Microsoft YaHei", "PingFang SC", "Hiragino Sans GB", "SimHei", sans-serif;
-        }
-        body {
-            background-color: #f9fafb;
-            width: 100vw;
-            overflow-x: hidden;
-            overflow-y: auto;
-            -webkit-overflow-scrolling: touch;
-            padding: 15px 0;
-            -webkit-text-size-adjust: 100%;
-            text-size-adjust: 100%;
-        }
-        /* 容器基础样式 */
-        .container {
-            width: 95%;
-            max-width: 1440px;
-            background: #ffffff;
-            padding: 30px 25px;
-            margin: 0 auto;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.06);
-        }
-
-        /* ===== 标题容器：保证标题绝对居中 ===== */
-        .title-container {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 0 40px 0;
-            padding-bottom: 15px;
-            border-bottom: 1px solid #f0f2f5;
-            position: relative;
-            min-height: 70px;
-        }
-        .title-wrapper {
-            text-align: center;
-            display: inline-block;
-            padding: 0;
-            margin: 0;
-        }
-        .main-title {
-            font-size: 32px;
-            color: #1f2937;
-            font-weight: 700;
-            letter-spacing: 1.5px;
-            line-height: 1.2;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-            font-smoothing: antialiased;
-            margin: 0;
-            padding: 0;
-        }
-        .last-char {
-            position: relative;
-            display: inline-block;
-        }
-
-        /* ===== 状态点样式 ===== */
-        .status {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            cursor: pointer;
-            position: absolute;
-            z-index: 10;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-            transform: translateY(-50%);
-        }
-        .status-dot {
-            width: 14px;
-            height: 14px;
-            border-radius: 50%;
-            background-color: #27ae60;
-            border: 2px solid #f0f9f4;
-            transition: all 0.3s ease;
-        }
-        .status.disconnected .status-dot {
-            background-color: #e74c3c;
-            border-color: #ffebee;
-        }
-        .status-text {
-            font-size: 15px;
-            color: #495057;
-            white-space: nowrap;
-            visibility: hidden;
-            opacity: 0;
-            transition: all 0.3s ease;
-            font-weight: 500;
-        }
-        .status:hover .status-text {
-            visibility: visible;
-            opacity: 1;
-        }
-
-        /* ===== 数据卡片 ===== */
-        .data-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 20px;
-            margin: 0 0 20px 0;
-        }
-        .data-card {
-            padding: 25px 20px;
-            background: #f8fafc;
-            border-radius: 12px;
-            text-align: center;
-            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
-            border: 1px solid #f0f2f5;
-            transition: all 0.3s ease;
-            cursor: pointer;
-        }
-        .data-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 6px 15px rgba(0,0,0,0.1);
-            background: #ffffff;
-        }
-        .data-card h3 {
-            color: #64748b;
-            margin-bottom: 18px;
-            font-size: 16px;
-            font-weight: 500;
-        }
-        .data-value {
-            font-size: 34px;
-            font-weight: bold;
-            color: #1f2937;
-            transition: all 0.8s ease-in-out;
-            display: inline-block;
-        }
-        .data-value.changed {
-            animation: pulse 0.8s ease-in-out;
-        }
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.08); }
-            100% { transform: scale(1); }
-        }
-        .unit {
-            font-size: 16px;
-            color: #64748b;
-            margin-left: 8px;
-        }
-
-        /* ===== 图表区域（核心修复安卓端偏小） ===== */
-        .charts-container {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin: 0 0 30px 0;
-            width: 100%;
-            min-width: 0;
-        }
-        .chart-container {
-            width: 100%;
-            height: 420px;
-            padding: 10px; /* 减小内边距，扩大绘图区域 */
-            background: #f8fafc;
-            border-radius: 12px;
-            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
-            border: 1px solid #f0f2f5;
-            min-height: 420px;
-        }
-
-        /* ===== 响应式适配 ===== */
-        @media (min-width: 1024px) {
-            .container {
-                max-width: 1600px;
-                width: 90%;
-            }
-            .main-title {
-                font-size: 36px;
-            }
-            .chart-container {
-                height: 480px;
-                min-height: 480px;
-                padding: 15px;
-            }
-            .data-grid {
-                grid-template-columns: repeat(4, 1fr);
-                gap: 25px;
-            }
-            .data-card {
-                min-width: 220px;
-                padding: 30px 25px;
-            }
-            :root {
-                --dot-margin: 10px;
-            }
-        }
-        @media (min-width: 1440px) {
-            .main-title {
-                font-size: 38px;
-            }
-            .chart-container {
-                height: 500px;
-                min-height: 500px;
-            }
-        }
-        /* 安卓端（移动端）图表高度放大 */
-        @media (max-width: 767px) {
-            .main-title {
-                font-size: 30px;
-            }
-            .charts-container {
-                grid-template-columns: 1fr;
-                gap: 20px; /* 增大图表间距，避免拥挤 */
-            }
-            /* 核心：安卓端图表高度放大 */
-            .chart-container {
-                height: calc(85vw);
-                min-height: 500px;
-                padding: 10px;
-            }
-            .status-dot {
-                width: 12px;
-                height: 12px;
-            }
-            .status-text {
-                font-size: 13px;
-            }
-            :root {
-                --dot-margin: 8px;
-            }
-        }
-        @media (max-width: 500px) {
-            .main-title {
-                font-size: 28px;
-            }
-            .data-grid {
-                grid-template-columns: 1fr;
-            }
-            /* 小屏安卓图表进一步放大 */
-            .chart-container {
-                height: calc(90vw);
-                min-height: 480px;
-            }
-            :root {
-                --dot-margin: 6px;
-            }
-        }
-        :root {
-            --dot-margin: 9px;
-        }
-    </style>
 </head>
 <body>
     <div class="container">
-        <!-- 标题容器：仅保留标题和状态点 -->
+        <!-- 标题容器 -->
         <div class="title-container" id="titleContainer">
+            <!-- 菜单容器 -->
+            <div class="menu-container">
+                <div class="hamburger-menu" id="hamburgerMenu">
+                    <span class="hamburger-line"></span>
+                    <span class="hamburger-line"></span>
+                    <span class="hamburger-line"></span>
+                </div>
+                <!-- 下拉菜单 -->
+                <ul class="dropdown-menu" id="dropdownMenu">
+                    <li class="dropdown-item" data-action="mqtt-config">MQTT连接配置</li>
+                    <li class="dropdown-item" data-action="data-clear">清空历史数据</li>
+                    <li class="dropdown-divider"></li>
+                    <li class="dropdown-item" data-action="chart-setting">图表显示设置</li>
+                    <li class="dropdown-item" data-action="data-export">导出监控数据</li>
+                    <li class="dropdown-divider"></li>
+                    <li class="dropdown-item" data-action="about">关于系统</li>
+                </ul>
+            </div>
+
             <div class="title-wrapper">
                 <h1 class="main-title">实时环境监<span class="last-char">控</span></h1>
             </div>
-            <!-- 状态点：控字右侧空白中心点 -->
+            
+            <!-- 状态点 -->
             <div class="status connected" id="mqtt-status">
                 <span class="status-dot"></span>
                 <span class="status-text">已连接</span>
@@ -305,96 +75,10 @@
         </div>
     </div>
 
-    <script>
-        // 核心：动态计算状态点位置（控字右侧空白中心点）
-        function setStatusDotPosition() {
-            const lastChar = document.querySelector('.last-char');
-            const status = document.getElementById('mqtt-status');
-            const titleContainer = document.getElementById('titleContainer');
-            
-            if (!lastChar || !status || !titleContainer) return;
-
-            const lastCharRect = lastChar.getBoundingClientRect();
-            const containerRect = titleContainer.getBoundingClientRect();
-            const dotMargin = getComputedStyle(document.documentElement).getPropertyValue('--dot-margin').trim();
-            
-            // 水平：控字右侧空白
-            const left = (lastCharRect.left - containerRect.left) + lastCharRect.width + parseInt(dotMargin);
-            // 垂直：控字中心点
-            const top = (lastCharRect.top - containerRect.top) + (lastCharRect.height / 2);
-
-            status.style.left = `${left}px`;
-            status.style.top = `${top}px`;
-            status.style.opacity = 1;
-        }
-
-        // 初始化逻辑
-        window.addEventListener('load', () => {
-            const isAndroid = /Android/i.test(navigator.userAgent);
-            // 安卓端延长初始化延迟，确保容器尺寸稳定
-            const delay = isAndroid ? 500 : 200;
-            
-            setTimeout(() => {
-                // 初始化MQTT和图表
-                if (typeof initMQTTClient === 'function') initMQTTClient();
-                if (typeof initCharts === 'function') initCharts();
-                
-                // 计算状态点位置
-                setStatusDotPosition();
-                
-                // 安卓端额外延迟刷新图表，确保高度生效
-                setTimeout(() => {
-                    if (window.mainChart) window.mainChart.resize();
-                    if (window.lightChart) window.lightChart.resize();
-                }, isAndroid ? 800 : 100);
-            }, delay);
-        });
-
-        // 窗口变化时重新计算状态点+刷新图表
-        window.addEventListener('resize', () => {
-            setStatusDotPosition();
-            if (window.mainChart) window.mainChart.resize();
-            if (window.lightChart) window.lightChart.resize();
-        });
-        window.addEventListener('orientationchange', () => {
-            setStatusDotPosition();
-            setTimeout(() => {
-                if (window.mainChart) window.mainChart.resize();
-                if (window.lightChart) window.lightChart.resize();
-            }, 300);
-        });
-
-        // MQTT状态更新逻辑（保留核心）
-        function updateMQTTStatus(statusType) {
-            const statusElement = document.getElementById('mqtt-status');
-            const statusText = statusElement.querySelector('.status-text');
-            if (!statusElement || !statusText) return;
-            
-            statusElement.classList.remove('connecting', 'connected', 'failed', 'disconnected');
-            
-            switch(statusType) {
-                case 'connecting':
-                    statusText.textContent = "连接中...";
-                    statusElement.classList.add('connecting');
-                    break;
-                case 'success':
-                    statusText.textContent = "已连接";
-                    statusElement.classList.add('connected');
-                    break;
-                case 'failed':
-                    statusText.textContent = "已断开";
-                    statusElement.classList.add('failed', 'disconnected');
-                    break;
-            }
-            setStatusDotPosition();
-        }
-
-        // 原有卸载逻辑
-        window.onbeforeunload = function() {
-            if (window.mqttClient && window.mqttClient.isConnected()) {
-                window.mqttClient.disconnect();
-            }
-        };
-    </script>
+    <!-- 按依赖顺序引入JS文件 -->
+    <script src="js/mqtt-client.js"></script>
+    <script src="js/chart-utils.js"></script>
+    <script src="js/menu-utils.js"></script>
+    <script src="js/main-utils.js"></script>
 </body>
 </html>
