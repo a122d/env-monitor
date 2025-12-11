@@ -37,26 +37,25 @@
             box-shadow: 0 4px 12px rgba(0,0,0,0.06);
         }
 
-        /* ===== 标题容器：保证标题绝对居中（核心） ===== */
+        /* ===== 标题容器：保证标题绝对居中 ===== */
         .title-container {
             display: flex;
             align-items: center;
-            justify-content: center; /* 容器内所有元素整体居中 */
+            justify-content: center;
             margin: 0 0 40px 0;
             padding-bottom: 15px;
             border-bottom: 1px solid #f0f2f5;
             position: relative;
             min-height: 70px;
         }
-        /* 标题文字容器：仅承载文字，无任何偏移，保证文字绝对居中 */
+        /* 标题文字容器：整体居中 */
         .title-wrapper {
-            text-align: center; /* 文字水平居中 */
-            display: inline-block; /* 宽度自适应文字，不占满容器 */
-            /* 无任何左右padding/margin，避免标题偏左/右 */
+            text-align: center;
+            display: inline-block;
             padding: 0;
             margin: 0;
         }
-        /* 标题文字：美化+绝对居中 */
+        /* 标题主样式 */
         .main-title {
             font-size: 32px;
             color: #1f2937;
@@ -65,24 +64,28 @@
             line-height: 1.2;
             -webkit-font-smoothing: antialiased;
             font-smoothing: antialiased;
-            /* 文字本身无偏移 */
             margin: 0;
             padding: 0;
         }
+        /* 最后一个字的包裹元素：用于精准定位 */
+        .last-char {
+            position: relative;
+            display: inline-block;
+        }
 
-        /* ===== 状态点：仅叠加在标题右侧，不影响标题居中 ===== */
+        /* ===== 状态点样式：初始绝对定位，JS动态设置位置 ===== */
         .status {
             display: flex;
             align-items: center;
             gap: 6px;
             cursor: pointer;
             position: absolute;
-            /* 核心定位：先居中，再向右偏移（仅叠加，不影响标题） */
-            left: 50%;
-            top: 35%;
-            /* Win端：向右偏移60px（靠近标题），自身垂直居中 */
-            transform: translate(calc(60px + 50%), -50%);
             z-index: 10;
+            /* 初始隐藏，JS计算后显示 */
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            /* 自身垂直居中（确保状态点中心点与目标位置对齐） */
+            transform: translateY(-50%);
         }
         .status-dot {
             width: 14px;
@@ -179,7 +182,7 @@
             min-height: 420px;
         }
 
-        /* ===== Windows大屏适配（≥1024px）：状态点近+标题大+图表大 ===== */
+        /* ===== 响应式适配 ===== */
         @media (min-width: 1024px) {
             .container {
                 max-width: 1600px;
@@ -188,10 +191,9 @@
             .main-title {
                 font-size: 36px;
             }
-            /* Win大屏：状态点仅向右偏移70px（更近，不影响标题居中） */
-            .status {
-                transform: translate(calc(70px + 50%), -50%);
-                top: 35%;
+            .chart-container {
+                height: 480px;
+                min-height: 480px;
             }
             .data-grid {
                 grid-template-columns: repeat(4, 1fr);
@@ -201,52 +203,24 @@
                 min-width: 220px;
                 padding: 30px 25px;
             }
-            .chart-container {
-                height: 480px;
-                min-height: 480px;
+            /* Win大屏：状态点与控字间距10px */
+            :root {
+                --dot-margin: 10px;
             }
         }
-        /* Windows超宽屏（≥1440px） */
         @media (min-width: 1440px) {
-            .status {
-                transform: translate(calc(80px + 50%), -50%); /* 稍远但仍近 */
+            .main-title {
+                font-size: 38px;
             }
             .chart-container {
                 height: 500px;
                 min-height: 500px;
             }
         }
-
-        /* ===== 平板适配（768-1023px） ===== */
-        @media (min-width: 768px) and (max-width: 1023px) {
-            .status {
-                transform: translate(calc(70px + 50%), -50%);
-            }
-            .chart-container {
-                height: 460px;
-                min-height: 460px;
-            }
-        }
-
-        /* ===== 安卓设备适配（≤767px）：状态点远+标题适配+图表大 ===== */
-        @media (max-width: 767px) and (max-device-width: 1024px) {
+        @media (max-width: 767px) {
             .main-title {
                 font-size: 30px;
             }
-            /* 安卓：状态点向右偏移90px（避开“控”字，不影响标题居中） */
-            .status {
-                transform: translate(calc(90px + 50%), -50%);
-                top: 30%;
-                gap: 4px;
-            }
-            .status-dot {
-                width: 12px;
-                height: 12px;
-            }
-            .status-text {
-                font-size: 13px;
-            }
-            /* 安卓图表最大化 */
             .charts-container {
                 grid-template-columns: 1fr;
                 gap: 20px;
@@ -255,17 +229,21 @@
                 height: calc(70vw);
                 min-height: 450px;
             }
+            .status-dot {
+                width: 12px;
+                height: 12px;
+            }
+            .status-text {
+                font-size: 13px;
+            }
+            /* 移动端：状态点与控字间距8px */
+            :root {
+                --dot-margin: 8px;
+            }
         }
-
-        /* ===== 小屏安卓（≤500px） ===== */
         @media (max-width: 500px) {
             .main-title {
                 font-size: 28px;
-            }
-            /* 小屏安卓：状态点偏移80px，兼顾间距和不重合 */
-            .status {
-                transform: translate(calc(80px + 50%), -50%);
-                top: 30%;
             }
             .data-grid {
                 grid-template-columns: 1fr;
@@ -274,18 +252,26 @@
                 height: calc(75vw);
                 min-height: 380px;
             }
+            /* 小屏移动端：间距6px */
+            :root {
+                --dot-margin: 6px;
+            }
+        }
+        /* 默认间距 */
+        :root {
+            --dot-margin: 9px;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <!-- 标题容器：绝对居中 -->
-        <div class="title-container">
-            <!-- 标题文字：无任何偏移，绝对居中 -->
+        <div class="title-container" id="titleContainer">
+            <!-- 标题文字：最后一字单独包裹用于定位 -->
             <div class="title-wrapper">
-                <h1 class="main-title">实时环境监控</h1>
+                <h1 class="main-title">实时环境监<span class="last-char">控</span></h1>
             </div>
-            <!-- 状态点：仅叠加在标题右侧，不影响标题居中 -->
+            <!-- 状态点：JS动态定位到控字右侧空白中心点 -->
             <div class="status connected" id="mqtt-status">
                 <span class="status-dot"></span>
                 <span class="status-text">已连接</span>
@@ -324,33 +310,93 @@
     </div>
 
     <script>
-        window.onload = function() {
-            // 识别设备类型
+        // 核心：动态计算状态点位置（控字右侧空白中心点）
+        function setStatusDotPosition() {
+            // 获取关键DOM元素
+            const lastChar = document.querySelector('.last-char');
+            const status = document.getElementById('mqtt-status');
+            const titleContainer = document.getElementById('titleContainer');
+            
+            if (!lastChar || !status || !titleContainer) return;
+
+            // 获取最后一字（控）的位置和尺寸（相对于视口）
+            const lastCharRect = lastChar.getBoundingClientRect();
+            // 获取标题容器的位置（相对于视口）
+            const containerRect = titleContainer.getBoundingClientRect();
+            
+            // 获取自定义间距（不同屏幕适配）
+            const dotMargin = getComputedStyle(document.documentElement).getPropertyValue('--dot-margin').trim();
+            
+            // 计算状态点位置：
+            // 水平：控字右侧空白区域 = 控字左偏移 - 容器左偏移 + 控字宽度 + 自定义间距
+            const left = (lastCharRect.left - containerRect.left) + lastCharRect.width + parseInt(dotMargin);
+            // 垂直：控字的垂直中心点（核心修改：从1/4改为1/2）
+            const top = (lastCharRect.top - containerRect.top) + (lastCharRect.height / 2);
+
+            // 设置状态点位置（绝对定位相对于标题容器）
+            status.style.left = `${left}px`;
+            status.style.top = `${top}px`;
+            status.style.opacity = 1; // 显示状态点
+        }
+
+        // 初始化+窗口变化时重新计算位置（动态布局）
+        window.addEventListener('load', () => {
+            // 初始化MQTT和图表
             const isAndroid = /Android/i.test(navigator.userAgent);
             const delay = isAndroid ? 300 : 200;
             
-            // 延迟初始化保证渲染稳定
             setTimeout(() => {
-                initMQTTClient();
-                initCharts();
-                // 强制刷新图表尺寸
+                // 执行原有MQTT和图表初始化
+                if (typeof initMQTTClient === 'function') initMQTTClient();
+                if (typeof initCharts === 'function') initCharts();
+                
+                // 首次计算状态点位置
+                setStatusDotPosition();
+                
+                // 延迟刷新图表（适配安卓渲染）
                 setTimeout(() => {
                     if (window.mainChart) window.mainChart.resize();
                     if (window.lightChart) window.lightChart.resize();
                 }, isAndroid ? 300 : 100);
             }, delay);
+        });
 
-            // 窗口变化时刷新图表
-            window.addEventListener('resize', () => {
-                if (window.mainChart) window.mainChart.resize();
-                if (window.lightChart) window.lightChart.resize();
-            });
+        // 窗口resize/旋转时重新计算状态点位置（动态适配）
+        window.addEventListener('resize', setStatusDotPosition);
+        window.addEventListener('orientationchange', setStatusDotPosition);
 
-            window.onbeforeunload = function() {
-                if (window.mqttClient && window.mqttClient.isConnected()) {
-                    window.mqttClient.disconnect();
-                }
-            };
+        // MQTT状态更新（兼容原有逻辑）
+        function updateMQTTStatus(statusType) {
+            const statusElement = document.getElementById('mqtt-status');
+            const statusText = statusElement.querySelector('.status-text');
+            
+            if (!statusElement || !statusText) return;
+            
+            statusElement.classList.remove('connecting', 'connected', 'failed', 'disconnected');
+            
+            switch(statusType) {
+                case 'connecting':
+                    statusText.textContent = "连接中...";
+                    statusElement.classList.add('connecting');
+                    break;
+                case 'success':
+                    statusText.textContent = "已连接";
+                    statusElement.classList.add('connected');
+                    break;
+                case 'failed':
+                    statusText.textContent = "已断开";
+                    statusElement.classList.add('failed', 'disconnected');
+                    break;
+            }
+            // 状态变化后重新计算位置（防止布局偏移）
+            setStatusDotPosition();
+        }
+
+        // 原有卸载逻辑
+        window.onbeforeunload = function() {
+            if (window.mqttClient && window.mqttClient.isConnected()) {
+                window.mqttClient.disconnect();
+            }
         };
     </script>
 </body>
