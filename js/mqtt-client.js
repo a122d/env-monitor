@@ -11,8 +11,8 @@ let mqttConfig = JSON.parse(localStorage.getItem('mqttConfig')) || {
     host: 'wss://mb67e10b.ala.cn-hangzhou.emqxsl.cn:8084/mqtt',
     clientId: baseClientId,
     topic: 'environment/data',
-    username: '',
-    password: '',
+    username: 'WEB',
+    password: '123456',
     keepalive: 30,
     clean: true
 };

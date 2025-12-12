@@ -23,8 +23,8 @@ document.addEventListener('DOMContentLoaded', () => {
         host: 'wss://mb67e10b.ala.cn-hangzhou.emqxsl.cn:8084/mqtt',
         clientId: 'env-monitor-' + Math.random().toString(16).substr(2, 8),
         topic: 'environment/data',
-        username: '',
-        password: '',
+        username: 'WEB',
+        password: '123456',
         keepalive: 30
     };
 
