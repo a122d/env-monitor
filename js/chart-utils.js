@@ -73,7 +73,7 @@ window.initCharts = function() {
             data: window.chartData.time.length > 0 ? window.chartData.time : ['暂无数据'],
             axisLabel: { 
                 interval: 0, 
-                rotate: isMobile ? 25 : 15,
+                rotate: isMobile ? 45 : 30,
                 color: '#495057',
                 fontSize: isLargeScreen ? 13 : (isMobile ? 11 : 12)
             },
@@ -165,7 +165,7 @@ window.initCharts = function() {
             data: window.chartData.time.length > 0 ? window.chartData.time : ['暂无数据'],
             axisLabel: { 
                 interval: 0, 
-                rotate: isMobile ? 25 : 15,
+                rotate: isMobile ? 45 : 30,
                 color: '#495057',
                 fontSize: isLargeScreen ? 13 : (isMobile ? 11 : 12)
             },

@@ -16,7 +16,7 @@
         frame-ancestors 'none';
         upgrade-insecure-requests
     ">
-    <title>实时环境监控</title>
+    <title>校园环境监测系统</title>
     <link rel="stylesheet" href="css/style.css">
     <!-- ECharts 库必须首先加载 -->
     <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
@@ -25,6 +25,11 @@
 </head>
 <body>
     <div class="container">
+        <!-- 加载指示器 -->
+        <div id="loadingIndicator" class="loading-indicator" style="display: none;">
+            <div class="spinner"></div>
+        </div>
+
         <!-- 原有内容：标题/菜单/数据卡片/图表 -->
         <div class="title-container" id="titleContainer">
             <div class="menu-container">
@@ -44,7 +49,7 @@
                 </ul>
             </div>
             <div class="title-wrapper">
-                <h1 class="main-title">实时环境监<span class="last-char">控</span></h1>
+                <h1 class="main-title">环境数据</h1>
             </div>
             <div class="status connected" id="mqtt-status">
                 <span class="status-dot"></span>
