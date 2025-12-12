@@ -46,7 +46,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     alert('即将导出监控数据为Excel（后续开发）');
                     break;
                 case 'about':
-                    alert('实时环境监控系统 v1.0\n基于MQTT协议的环境数据采集与可视化');
+                    alert('实时环境监控系统 v2.0\n基于MQTT协议的环境数据采集与可视化');
                     break;
             }
         }

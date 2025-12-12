@@ -16,6 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const mqttTopic = document.getElementById('mqttTopic');
     const mqttUsername = document.getElementById('mqttUsername');
     const mqttPassword = document.getElementById('mqttPassword');
+    const sessionSaveCheckbox = document.getElementById('sessionSaveCredentials');
     const mqttKeepalive = document.getElementById('mqttKeepalive');
 
     // 默认配置
@@ -23,8 +24,8 @@ document.addEventListener('DOMContentLoaded', () => {
         host: 'wss://mb67e10b.ala.cn-hangzhou.emqxsl.cn:8084/mqtt',
         clientId: 'env-monitor-' + Math.random().toString(16).substr(2, 8),
         topic: 'environment/data',
-        username: 'WEB',
-        password: '123456',
+        username: '',
+        password: '',
         keepalive: 30
     };
 
@@ -47,8 +48,17 @@ document.addEventListener('DOMContentLoaded', () => {
         mqttHost.value = config.host || DEFAULT_CONFIG.host;
         mqttClientId.value = config.clientId || DEFAULT_CONFIG.clientId;
         mqttTopic.value = config.topic || DEFAULT_CONFIG.topic;
+        // 用户名可以从本地配置或会话凭据填充；密码不从 localStorage 预填
         mqttUsername.value = config.username || '';
-        mqttPassword.value = config.password || '';
+        // 优先使用会话内凭据（内存），否则不预填密码以避免明文泄露
+        if (window.SESSION_MQTT_CREDENTIALS && window.SESSION_MQTT_CREDENTIALS.username) {
+            mqttUsername.value = window.SESSION_MQTT_CREDENTIALS.username || mqttUsername.value;
+            mqttPassword.value = window.SESSION_MQTT_CREDENTIALS.password || '';
+            if (sessionSaveCheckbox) sessionSaveCheckbox.checked = true;
+        } else {
+            mqttPassword.value = '';
+            if (sessionSaveCheckbox) sessionSaveCheckbox.checked = false;
+        }
         mqttKeepalive.value = config.keepalive || DEFAULT_CONFIG.keepalive;
     }
 
@@ -210,8 +220,21 @@ document.addEventListener('DOMContentLoaded', () => {
     function saveConfig() {
         if (!validateForm()) return;
         const config = getFormConfig();
-        localStorage.setItem('mqttConfig', JSON.stringify(config));
-        alert('配置保存成功！');
+        // 不将密码保存到 localStorage，若勾选“会话保存”则仅存入内存
+        const configToSave = Object.assign({}, config);
+        delete configToSave.password;
+        localStorage.setItem('mqttConfig', JSON.stringify(configToSave));
+
+        if (sessionSaveCheckbox && sessionSaveCheckbox.checked) {
+            window.SESSION_MQTT_CREDENTIALS = {
+                username: config.username,
+                password: config.password
+            };
+        } else {
+            window.SESSION_MQTT_CREDENTIALS = null;
+        }
+
+        alert('配置保存成功（密码仅保存在会话内，刷新后失效）！');
     }
 
     // 应用配置
@@ -222,8 +245,18 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log('📋 验证通过，保存配置:', config);
         
         // 保存到本地存储
-        localStorage.setItem('mqttConfig', JSON.stringify(config));
-        console.log('💾 配置已保存到本地存储');
+        // 不将密码写入 localStorage
+        const configToSave = Object.assign({}, config);
+        delete configToSave.password;
+        localStorage.setItem('mqttConfig', JSON.stringify(configToSave));
+        console.log('💾 配置（不含密码）已保存到本地存储');
+
+        // 会话内保存凭据（仅内存）
+        if (sessionSaveCheckbox && sessionSaveCheckbox.checked) {
+            window.SESSION_MQTT_CREDENTIALS = { username: config.username, password: config.password };
+        } else {
+            window.SESSION_MQTT_CREDENTIALS = null;
+        }
         
         // 禁用应用按钮，防止重复点击
         applyConfigBtn.disabled = true;
