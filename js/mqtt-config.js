@@ -83,11 +83,30 @@ document.addEventListener('DOMContentLoaded', () => {
             mqttHost.focus();
             return false;
         }
-        if (!mqttTopic.value.trim()) {
+        
+        // 添加主题校验（防止订阅系统主题）
+        const topic = mqttTopic.value.trim();
+        if (!topic) {
             alert('请输入订阅主题');
             mqttTopic.focus();
             return false;
         }
+        
+        // 白名单校验：仅允许特定前缀的主题
+        const allowedTopicPattern = /^[a-zA-Z0-9_\-\/]+$/;  // 仅允许字母数字、下划线、连字符、斜杠
+        if (!allowedTopicPattern.test(topic)) {
+            alert('主题格式不合法，仅允许字母、数字、_ 、 - 、 / ');
+            mqttTopic.focus();
+            return false;
+        }
+        
+        // 禁用系统主题
+        if (topic.startsWith('$') || topic === '#' || topic === '+') {
+            alert('不允许订阅系统主题或通配符');
+            mqttTopic.focus();
+            return false;
+        }
+        
         if (!mqttKeepalive.value || isNaN(mqttKeepalive.value) || mqttKeepalive.value < 10 || mqttKeepalive.value > 300) {
             alert('心跳间隔请输入10-300之间的数字');
             mqttKeepalive.focus();
@@ -179,16 +198,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const config = getFormConfig();
         localStorage.setItem('mqttConfig', JSON.stringify(config));
         
-        // 断开旧连接，重新初始化
-        if (window.mqttClient && window.mqttClient.isConnected()) {
-            window.mqttClient.disconnect();
-        }
-        if (window.initMQTTClient) {
-            window.initMQTTClient(config);
+        if (window.MQTTApp && typeof window.MQTTApp.init === 'function') {
+            window.MQTTApp.init(config);
             alert('配置已应用，正在重新连接MQTT...');
-            mqttConfigModal.classList.remove('show');
-        } else {
-            alert('配置已保存，但未找到MQTT初始化函数');
         }
     }
 
@@ -200,8 +212,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // 事件绑定
     function bindEvents() {
         modalClose.addEventListener('click', closeModal);
-        mqttConfigModal.addEventListener('click', () => {
-            closeModal();
+        mqttConfigModal.addEventListener('click', (e) => {
+            if (e.target === mqttConfigModal) closeModal();
         });
         testConnectBtn.addEventListener('click', testConnect);
         saveConfigBtn.addEventListener('click', saveConfig);

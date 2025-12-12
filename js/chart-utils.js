@@ -1,5 +1,5 @@
 /**
- * 环境数据图表工具（温/湿/风÷10处理+双图表适配）
+ * 环境数据图表工具（完整实现+清空数据功能）
  */
 window.chartData = {
     time: [],
@@ -12,6 +12,13 @@ let mainChart, lightChart;
 
 // 初始化双图表
 window.initCharts = function() {
+    // 确保 echarts 库已加载
+    if (typeof echarts === 'undefined') {
+        console.error('❌ ECharts 库未加载！');
+        setTimeout(window.initCharts, 200);
+        return;
+    }
+    
     const mainChartDom = document.getElementById('main-chart');
     const lightChartDom = document.getElementById('light-chart');
     if (!mainChartDom || !lightChartDom) {
@@ -103,7 +110,7 @@ window.initCharts = function() {
                 itemStyle: { color: '#3498db' }
             },
             { 
-                name: '风速速(m/s)', 
+                name: '风速(m/s)', 
                 type: 'line', 
                 smooth: true, 
                 data: window.chartData.windSpeed.length > 0 ? window.chartData.windSpeed : [0],
@@ -212,11 +219,32 @@ window.updateChartData = function(data) {
     window.chartData.time.push(now);
     
     // 核心：温/湿/风÷10保留1位小数
-    window.chartData.temperature.push(data.temperature ? (parseFloat(data.temperature)/10).toFixed(1) : 0);
-    window.chartData.humidity.push(data.humidity ? (parseFloat(data.humidity)/10).toFixed(1) : 0);
-    window.chartData.windSpeed.push(data.windSpeed ? (parseFloat(data.windSpeed)/10).toFixed(1) : 0);
-    // 光照保持原逻辑
-    window.chartData.illumination.push(data.illumination || 0);
+    const temp = data.temperature !== undefined && data.temperature !== null 
+        ? (parseFloat(data.temperature)/10).toFixed(1) 
+        : 0;
+    window.chartData.temperature.push(temp);
+
+    // 简化版 - 对所有字段统一处理
+    window.chartData.temperature.push(
+        data.temperature !== undefined && data.temperature !== null 
+            ? parseFloat(data.temperature / 10).toFixed(1) 
+            : 0
+    );
+    window.chartData.humidity.push(
+        data.humidity !== undefined && data.humidity !== null 
+            ? parseFloat(data.humidity / 10).toFixed(1) 
+            : 0
+    );
+    window.chartData.windSpeed.push(
+        data.windSpeed !== undefined && data.windSpeed !== null 
+            ? parseFloat(data.windSpeed / 10).toFixed(1) 
+            : 0
+    );
+    window.chartData.illumination.push(
+        data.illumination !== undefined && data.illumination !== null 
+            ? parseInt(data.illumination) 
+            : 0
+    );
 
     // 保留最近20条数据
     if (window.chartData.time.length > 20) {
@@ -242,7 +270,7 @@ window.updateChartData = function(data) {
     lightChart.resize();
 };
 
-// 清空图表数据
+// 清空图表数据（完整实现）
 window.clearChartData = function() {
     window.chartData = {
         time: [],
@@ -272,16 +300,16 @@ window.clearChartData = function() {
     }
     
     // 重置数据卡片
-    updateDataValue('temperature', 0);
-    updateDataValue('humidity', 0);
-    updateDataValue('windSpeed', 0);
-    updateDataValue('illumination', 0);
+    if (typeof updateDataValue === 'function') {
+        updateDataValue('temperature', 0);
+        updateDataValue('humidity', 0);
+        updateDataValue('windSpeed', 0);
+        updateDataValue('illumination', 0);
+    }
 };
 
-// 页面加载初始化图表
-document.addEventListener('DOMContentLoaded', () => {
-    window.initCharts();
-});
+// 页面加载初始化由 main-utils.js 在 load 事件中统一管理
+// 避免重复初始化
 
 // 窗口大小变化时自适应图表
 window.addEventListener('resize', () => {

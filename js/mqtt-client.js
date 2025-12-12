@@ -35,15 +35,51 @@ function generateUniqueClientId() {
     return baseClientId;
 }
 
+// 重连配置
+const RECONNECT_CONFIG = {
+    baseInterval: 1000,      // 初始延迟 1s
+    maxInterval: 30000,      // 最大延迟 30s
+    multiplier: 1.5,         // 指数退避系数
+    maxRetries: 10,          // 最大重试 10 次
+    jitter: 0.1              // 抖动 10%
+};
+
+let reconnectCount = 0;
+
+// 计算退避延迟
+function getReconnectDelay() {
+    if (reconnectCount >= RECONNECT_CONFIG.maxRetries) {
+        console.warn('❌ 重连次数已达上限，停止重连');
+        return null;
+    }
+    
+    let delay = RECONNECT_CONFIG.baseInterval * 
+        Math.pow(RECONNECT_CONFIG.multiplier, reconnectCount);
+    delay = Math.min(delay, RECONNECT_CONFIG.maxInterval);
+    
+    // 加入抖动，避免同时重连
+    const jitterRange = delay * RECONNECT_CONFIG.jitter;
+    delay += Math.random() * jitterRange;
+    
+    console.log(`🔄 第 ${reconnectCount + 1} 次重连，延迟 ${Math.round(delay)}ms`);
+    return delay;
+}
+
 // 手动重连（全覆盖逻辑）
 function reconnect() {
     if (reconnectTimer || (mqttClient && mqttClient.isConnected())) return;
-    console.log('🔄 准备重连MQTT（生成新ClientId）');
-    mqttConfig.clientId = generateUniqueClientId();
+    
+    const delay = getReconnectDelay();
+    if (delay === null) {
+        updateMQTTStatus('failed');
+        return;
+    }
+    
+    reconnectCount++;
     reconnectTimer = setTimeout(() => {
         initMQTTClient();
         reconnectTimer = null;
-    }, RECONNECT_INTERVAL);
+    }, delay);
 }
 
 // 更新MQTT连接状态（需在main-utils.js或页面中实现DOM）
@@ -152,30 +188,19 @@ window.initMQTTClient = function(newConfig) {
             }
         };
 
-        // 主动发送心跳（防空闲断开）
-        let pingTimer = null;
-        function sendPing() {
-            if (client.isConnected()) {
-                client.sendPing();
-                console.log('📡 主动发送心跳包');
-            } else {
-                clearInterval(pingTimer);
-            }
-        }
-
         // 连接配置（仅保留Paho支持的属性）
         const connectOptions = {
             userName: mqttConfig.username,
             password: mqttConfig.password,
-            keepAliveInterval: mqttConfig.keepalive,
+            keepAliveInterval: mqttConfig.keepalive,  // Paho 自动发 PING
             timeout: 10000,
             useSSL: urlInfo.useSSL,
             cleanSession: true,
             onSuccess: function() {
                 console.log(`✅ MQTT连接成功（ClientId：${mqttConfig.clientId}）`);
                 updateMQTTStatus('success');
+                reconnectCount = 0; // 连接成功时重置计数
 
-                // 必须订阅主题（防空闲断开）
                 client.subscribe(mqttConfig.topic, {
                     onSuccess: () => console.log(`✅ 订阅主题成功：${mqttConfig.topic}`),
                     onFailure: (res) => {
@@ -183,9 +208,6 @@ window.initMQTTClient = function(newConfig) {
                         alert('订阅失败：' + res.errorMessage);
                     }
                 });
-
-                // 每15秒发送一次心跳（心跳间隔的1/2）
-                pingTimer = setInterval(sendPing, (mqttConfig.keepalive * 1000) / 2);
             },
             onFailure: function(res) {
                 console.error('❌ MQTT连接失败：', res.errorMessage);
@@ -209,10 +231,116 @@ window.initMQTTClient = function(newConfig) {
     window.mqttClient = mqttClient;
 };
 
+// 创建命名空间对象
+window.MQTTApp = window.MQTTApp || {};
+
+// 仅暴露必要的公共 API
+window.MQTTApp.init = function(newConfig) {
+    mqttConfig = newConfig || mqttConfig;
+    
+    // 清理旧连接和定时器
+    if (mqttClient) {
+        try {
+            mqttClient.disconnect();
+        } catch (e) { console.warn('清理旧连接失败：', e); }
+        mqttClient = null;
+    }
+    if (reconnectTimer) {
+        clearTimeout(reconnectTimer);
+        reconnectTimer = null;
+    }
+
+    updateMQTTStatus('connecting');
+
+    try {
+        const urlInfo = parseMqttUrl(mqttConfig.host);
+        
+        // Paho库正确写法：host, port, path, clientId
+        const client = new Paho.MQTT.Client(
+            urlInfo.host,
+            urlInfo.port,
+            urlInfo.path,
+            mqttConfig.clientId
+        );
+
+        // 连接断开回调（全覆盖重连）
+        client.onConnectionLost = function(responseObject) {
+            const errMsg = responseObject.errorMessage || '无错误信息';
+            console.error(`🔌 MQTT连接断开 [${responseObject.errorCode}]：${errMsg}`);
+            updateMQTTStatus('failed');
+            reconnect(); // 无论是否有错误码，都重连
+        };
+
+        // 消息接收回调
+        client.onMessageArrived = function(message) {
+            console.log('📥 收到MQTT消息：', message.destinationName, message.payloadString);
+            try {
+                const data = JSON.parse(message.payloadString);
+                updateDataCards(data);
+                // 触发图表更新
+                if (window.updateChartData) window.updateChartData(data);
+            } catch (e) {
+                console.error('❌ 消息解析失败：', e);
+            }
+        };
+
+        // 连接配置（仅保留Paho支持的属性）
+        const connectOptions = {
+            userName: mqttConfig.username,
+            password: mqttConfig.password,
+            keepAliveInterval: mqttConfig.keepalive,  // Paho 自动发 PING
+            timeout: 10000,
+            useSSL: urlInfo.useSSL,
+            cleanSession: true,
+            onSuccess: function() {
+                console.log(`✅ MQTT连接成功（ClientId：${mqttConfig.clientId}）`);
+                updateMQTTStatus('success');
+                reconnectCount = 0; // 连接成功时重置计数
+
+                client.subscribe(mqttConfig.topic, {
+                    onSuccess: () => console.log(`✅ 订阅主题成功：${mqttConfig.topic}`),
+                    onFailure: (res) => {
+                        console.error('❌ 订阅主题失败：', res.errorMessage);
+                        alert('订阅失败：' + res.errorMessage);
+                    }
+                });
+            },
+            onFailure: function(res) {
+                console.error('❌ MQTT连接失败：', res.errorMessage);
+                updateMQTTStatus('failed');
+                alert('连接失败：' + res.errorMessage);
+                reconnect();
+            }
+        };
+
+        // 发起连接
+        client.connect(connectOptions);
+        mqttClient = client;
+
+    } catch (e) {
+        console.error('❌ MQTT初始化失败：', e);
+        updateMQTTStatus('failed');
+        alert('初始化失败：' + e.message);
+        reconnect();
+    }
+
+    window.mqttClient = mqttClient;
+};
+
+window.MQTTApp.getStatus = function() {
+    return mqttClient ? mqttClient.isConnected() : false;
+};
+
+window.MQTTApp.disconnect = function() {
+    if (mqttClient && mqttClient.isConnected()) {
+        mqttClient.disconnect();
+    }
+};
+
 // 页面加载初始化
 document.addEventListener('DOMContentLoaded', () => {
     mqttConfig.clientId = generateUniqueClientId();
-    window.initMQTTClient();
+    window.MQTTApp.init();
 });
 
 // 页面卸载时断开连接（防残留）

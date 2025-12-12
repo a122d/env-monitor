@@ -3,10 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <!-- 严格 CSP 防止 XSS 与供应链攻击 -->
+    <meta http-equiv="Content-Security-Policy" content="
+        default-src 'self';
+        script-src 'self' https://cdn.jsdelivr.net;
+        style-src 'self' 'unsafe-inline';
+        connect-src 'self' wss:;
+        img-src 'self' data:;
+        font-src 'self';
+        base-uri 'self';
+        form-action 'self';
+        frame-ancestors 'none';
+        upgrade-insecure-requests
+    ">
     <title>实时环境监控</title>
     <link rel="stylesheet" href="css/style.css">
-    <script src="js/mqttws31.min.js"></script>
+    <!-- ECharts 库必须首先加载 -->
     <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <!-- 本地 MQTT 库 -->
+    <script src="js/mqttws31.min.js"></script>
 </head>
 <body>
     <div class="container">
