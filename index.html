@@ -58,10 +58,61 @@
         </div>
         
         <div class="data-grid">
-            <div class="data-card">
-                <h3>温度</h3>
-                <div class="data-value" id="temperature">0</div>
-                <span class="unit">℃</span>
+            <div class="data-card temp-card" id="temperatureCard">
+                <div class="temp-header">
+                    <h3>温度</h3>
+                    <span class="temp-icon" id="tempIcon">🌡️</span>
+                </div>
+                
+                <div class="temp-main-display">
+                    <div class="temp-value-wrapper">
+                        <div class="temp-value" id="temperature">0</div>
+                        <span class="temp-unit">℃</span>
+                    </div>
+                    <div class="temp-status">
+                        <span class="temp-level" id="tempLevel">--</span>
+                        <span class="temp-trend" id="tempTrend">→</span>
+                    </div>
+                </div>
+
+                <div class="temp-progress-bar">
+                    <div class="progress-track">
+                        <div class="progress-fill" id="tempProgress" style="width: 50%;"></div>
+                        <div class="progress-marker cold" title="0℃"></div>
+                        <div class="progress-marker normal" title="16℃"></div>
+                        <div class="progress-marker hot" title="32℃"></div>
+                    </div>
+                    <div class="progress-labels">
+                        <span>0</span>
+                        <span>16</span>
+                        <span>32</span>
+                    </div>
+                </div>
+
+                <div class="temp-details" id="tempDetails">
+                    <div class="details-grid">
+                        <div class="detail-item">
+                            <span class="detail-label">实时</span>
+                            <span class="detail-value" id="tempCurrent">--</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">最高</span>
+                            <span class="detail-value" id="tempMax">--</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">最低</span>
+                            <span class="detail-value" id="tempMin">--</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">平均</span>
+                            <span class="detail-value" id="tempAvg">--</span>
+                        </div>
+                    </div>
+                    <div class="detail-change-rate">
+                        <span class="change-label">变化速率：</span>
+                        <span class="change-value" id="tempChangeRate">--℃/min</span>
+                    </div>
+                </div>
             </div>
             <div class="data-card">
                 <h3>湿度</h3>

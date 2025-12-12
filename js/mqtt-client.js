@@ -6,6 +6,58 @@ let reconnectTimer = null;
 const RECONNECT_INTERVAL = 5000;
 let baseClientId = 'env-monitor-' + Math.random().toString(16).substr(2, 8);
 
+// 温度统计数据（增强版）
+let temperatureStats = {
+    current: 0,
+    max: -Infinity,
+    min: Infinity,
+    sum: 0,
+    count: 0,
+    history: [],           // 保存最近10次数据用于趋势计算
+    lastUpdateTime: null,  // 上次更新时间
+    changeRate: 0          // 变化速率（℃/分钟）
+};
+
+// 获取温度等级描述
+function getTempLevel(temp) {
+    if (temp < 0) return '❄️ 严寒';
+    if (temp < 7) return '🥶 寒冷';
+    if (temp < 16) return '❄️ 冷';
+    if (temp < 20) return '🌤️ 凉爽';
+    if (temp < 25) return '😊 舒适';
+    if (temp < 30) return '☀️ 温暖';
+    if (temp < 35) return '🔥 炎热';
+    return '🌋 酷热';
+}
+
+// 计算温度变化趋势
+function calculateTempTrend() {
+    const history = temperatureStats.history;
+    if (history.length < 2) {
+        return { trend: '→', rate: 0 };
+    }
+    
+    // 计算最近变化
+    const current = history[history.length - 1];
+    const previous = history[Math.max(0, history.length - 5)];
+    const change = current - previous;
+    
+    // 计算变化速率（℃/分钟）
+    let rate = 0;
+    if (temperatureStats.lastUpdateTime) {
+        const timeDiff = (Date.now() - temperatureStats.lastUpdateTime) / 60000; // 转换为分钟
+        if (timeDiff > 0) {
+            rate = (change / timeDiff);
+        }
+    }
+    
+    let trend = '→';
+    if (change > 0.1) trend = '↑';
+    if (change < -0.1) trend = '↓';
+    
+    return { trend, rate };
+}
+
 // 默认配置（优先从本地存储加载）
 let mqttConfig = JSON.parse(localStorage.getItem('mqttConfig')) || {
     host: 'wss://mb67e10b.ala.cn-hangzhou.emqxsl.cn:8084/mqtt',
@@ -103,9 +155,10 @@ function updateMQTTStatus(status) {
 
 // 更新数据卡片（温/湿/风÷10保留1位小数）
 function updateDataCards(data) {
-    // 温度：÷10保留1位小数
+    // 温度：÷10保留1位小数，更新统计信息和颜色
     if (data.temperature !== undefined) {
         const tempValue = (parseFloat(data.temperature) / 10).toFixed(1);
+        updateTemperatureCard(tempValue);
         updateDataValue('temperature', tempValue);
     }
     // 湿度：÷10保留1位小数
@@ -121,6 +174,121 @@ function updateDataCards(data) {
     // 光照：保持整数
     if (data.illumination !== undefined) {
         updateDataValue('illumination', parseInt(data.illumination));
+    }
+}
+
+// 更新温度卡片（增强版）
+function updateTemperatureCard(tempValue) {
+    const tempNum = parseFloat(tempValue);
+    const card = document.getElementById('temperatureCard');
+    if (!card) return;
+    
+    // 保存上次更新时间
+    temperatureStats.lastUpdateTime = Date.now();
+    
+    // 更新历史数据（最多保留10个）
+    temperatureStats.history.push(tempNum);
+    if (temperatureStats.history.length > 10) {
+        temperatureStats.history.shift();
+    }
+    
+    // 更新温度统计
+    temperatureStats.current = tempNum;
+    if (temperatureStats.count === 0) {
+        temperatureStats.max = tempNum;
+        temperatureStats.min = tempNum;
+    } else {
+        temperatureStats.max = Math.max(temperatureStats.max, tempNum);
+        temperatureStats.min = Math.min(temperatureStats.min, tempNum);
+    }
+    temperatureStats.sum += tempNum;
+    temperatureStats.count++;
+    
+    // 更新颜色类
+    card.classList.remove('temp-cold', 'temp-normal', 'temp-hot');
+    if (tempNum < 7) {
+        card.classList.add('temp-cold');
+    } else if (tempNum > 25) {
+        card.classList.add('temp-hot');
+    } else {
+        card.classList.add('temp-normal');
+    }
+    
+    // 更新温度图标和等级
+    const icon = card.querySelector('.temp-icon');
+    if (tempNum < 7) {
+        icon.textContent = '❄️';
+    } else if (tempNum > 25) {
+        icon.textContent = '🔥';
+    } else {
+        icon.textContent = '🌡️';
+    }
+    
+    // 更新温度等级标签
+    const levelEl = card.querySelector('.temp-level');
+    if (levelEl) {
+        levelEl.textContent = getTempLevel(tempNum);
+    }
+    
+    // 更新温度进度条
+    updateProgressBar(tempNum);
+    
+    // 更新趋势显示
+    const trendData = calculateTempTrend();
+    const trendEl = card.querySelector('.temp-trend');
+    if (trendEl) {
+        trendEl.textContent = trendData.trend;
+        trendEl.classList.remove('up', 'down', 'stable');
+        if (trendData.trend === '↑') {
+            trendEl.classList.add('up');
+        } else if (trendData.trend === '↓') {
+            trendEl.classList.add('down');
+        } else {
+            trendEl.classList.add('stable');
+        }
+    }
+    temperatureStats.changeRate = trendData.rate;
+    
+    // 更新详细信息
+    updateTemperatureDetails();
+}
+
+// 更新进度条位置
+function updateProgressBar(tempNum) {
+    const progressFill = document.getElementById('tempProgress');
+    if (!progressFill) return;
+    
+    // 将温度映射到0-100%
+    // 0℃ = 0%, 32℃ = 100%
+    const percentage = Math.max(0, Math.min(100, (tempNum / 32) * 100));
+    progressFill.style.width = percentage + '%';
+}
+
+// 更新温度详细信息（增强版）
+function updateTemperatureDetails() {
+    const detailsContainer = document.getElementById('tempDetails');
+    if (!detailsContainer) return;
+    
+    const avg = temperatureStats.count > 0 ? (temperatureStats.sum / temperatureStats.count).toFixed(1) : '--';
+    const max = temperatureStats.max !== -Infinity ? temperatureStats.max.toFixed(1) : '--';
+    const min = temperatureStats.min !== Infinity ? temperatureStats.min.toFixed(1) : '--';
+    
+    document.getElementById('tempCurrent').textContent = temperatureStats.current.toFixed(1) || '--';
+    document.getElementById('tempMax').textContent = max;
+    document.getElementById('tempMin').textContent = min;
+    document.getElementById('tempAvg').textContent = avg;
+    
+    // 更新变化速率
+    const changeRateEl = document.getElementById('tempChangeRate');
+    if (changeRateEl) {
+        if (temperatureStats.changeRate === undefined || isNaN(temperatureStats.changeRate)) {
+            changeRateEl.textContent = '--℃/min';
+        } else {
+            const rateText = temperatureStats.changeRate > 0 
+                ? '+' + temperatureStats.changeRate.toFixed(2) 
+                : temperatureStats.changeRate.toFixed(2);
+            changeRateEl.textContent = rateText + '℃/min';
+        }
     }
 }
 
