@@ -9,11 +9,10 @@ let baseClientId = 'env-monitor-' + Math.random().toString(16).substr(2, 8);
 // 默认配置（优先从本地存储加载）
 let mqttConfig = JSON.parse(localStorage.getItem('mqttConfig')) || {
     host: 'wss://mb67e10b.ala.cn-hangzhou.emqxsl.cn:8084/mqtt',
-    port: 8084,
     clientId: baseClientId,
     topic: 'environment/data',
-    username: 'WEB',
-    password: '123456',
+    username: '',
+    password: '',
     keepalive: 30,
     clean: true
 };
@@ -208,11 +207,28 @@ window.initMQTTClient = function(newConfig) {
                         alert('订阅失败：' + res.errorMessage);
                     }
                 });
+                
+                // 触发连接成功的全局事件，供配置界面使用
+                if (window.onMQTTConnectSuccess) {
+                    console.log('🔔 触发连接成功回调事件');
+                    window.onMQTTConnectSuccess();
+                }
             },
             onFailure: function(res) {
                 console.error('❌ MQTT连接失败：', res.errorMessage);
                 updateMQTTStatus('failed');
-                alert('连接失败：' + res.errorMessage);
+                
+                // 触发连接失败的全局事件，供配置界面使用
+                if (window.onMQTTConnectFailure) {
+                    console.log('🔔 触发连接失败回调事件');
+                    window.onMQTTConnectFailure(res.errorMessage);
+                }
+                
+                // 如果不是来自应用配置界面的连接，弹出提示
+                if (!window.onMQTTConnectSuccess) {
+                    alert('连接失败：' + res.errorMessage);
+                }
+                
                 reconnect();
             }
         };
@@ -304,11 +320,28 @@ window.MQTTApp.init = function(newConfig) {
                         alert('订阅失败：' + res.errorMessage);
                     }
                 });
+                
+                // 触发连接成功的全局事件，供配置界面使用
+                if (window.onMQTTConnectSuccess) {
+                    console.log('🔔 触发连接成功回调事件');
+                    window.onMQTTConnectSuccess();
+                }
             },
             onFailure: function(res) {
                 console.error('❌ MQTT连接失败：', res.errorMessage);
                 updateMQTTStatus('failed');
-                alert('连接失败：' + res.errorMessage);
+                
+                // 触发连接失败的全局事件，供配置界面使用
+                if (window.onMQTTConnectFailure) {
+                    console.log('🔔 触发连接失败回调事件');
+                    window.onMQTTConnectFailure(res.errorMessage);
+                }
+                
+                // 如果不是来自应用配置界面的连接，弹出提示
+                if (!window.onMQTTConnectSuccess) {
+                    alert('连接失败：' + res.errorMessage);
+                }
+                
                 reconnect();
             }
         };

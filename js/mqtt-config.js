@@ -12,7 +12,6 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // 配置项DOM
     const mqttHost = document.getElementById('mqttHost');
-    const mqttPort = document.getElementById('mqttPort');
     const mqttClientId = document.getElementById('mqttClientId');
     const mqttTopic = document.getElementById('mqttTopic');
     const mqttUsername = document.getElementById('mqttUsername');
@@ -22,11 +21,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // 默认配置
     const DEFAULT_CONFIG = {
         host: 'wss://mb67e10b.ala.cn-hangzhou.emqxsl.cn:8084/mqtt',
-        port: 8084,
         clientId: 'env-monitor-' + Math.random().toString(16).substr(2, 8),
         topic: 'environment/data',
-        username: 'WEB',
-        password: '123456',
+        username: '',
+        password: '',
         keepalive: 30
     };
 
@@ -47,7 +45,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const config = savedConfig ? JSON.parse(savedConfig) : DEFAULT_CONFIG;
         
         mqttHost.value = config.host || DEFAULT_CONFIG.host;
-        mqttPort.value = config.port || DEFAULT_CONFIG.port;
         mqttClientId.value = config.clientId || DEFAULT_CONFIG.clientId;
         mqttTopic.value = config.topic || DEFAULT_CONFIG.topic;
         mqttUsername.value = config.username || '';
@@ -59,7 +56,6 @@ document.addEventListener('DOMContentLoaded', () => {
     function getFormConfig() {
         return {
             host: mqttHost.value.trim(),
-            port: parseInt(mqttPort.value),
             clientId: mqttClientId.value.trim() || DEFAULT_CONFIG.clientId,
             topic: mqttTopic.value.trim(),
             username: mqttUsername.value.trim(),
@@ -122,6 +118,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const config = getFormConfig();
         testConnectBtn.disabled = true;
         testConnectBtn.textContent = '测试中...';
+        
+        let testTimeoutId = null;
+        let isConnected = false;
 
         try {
             const urlInfo = parseMqttUrl(config.host);
@@ -136,11 +135,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // 连接断开回调
             testClient.onConnectionLost = function(responseObject) {
+                if (isConnected) {
+                    // 已连接后断开，说明是正常断开
+                    console.log('✅ 测试连接已正常断开');
+                    return;
+                }
                 const errMsg = responseObject.errorMessage || '未知错误';
-                alert(`连接断开：${errMsg}`);
-                testClient.disconnect();
-                testConnectBtn.disabled = false;
-                testConnectBtn.textContent = '测试连接';
+                console.error('❌ 测试连接断开：', errMsg);
             };
 
             // 连接配置
@@ -152,14 +153,29 @@ document.addEventListener('DOMContentLoaded', () => {
                 useSSL: urlInfo.useSSL,
                 cleanSession: true,
                 onSuccess: function() {
+                    isConnected = true;
+                    console.log('✅ 测试连接成功');
+                    // 清除超时定时器
+                    if (testTimeoutId) clearTimeout(testTimeoutId);
                     alert('连接成功！');
-                    testClient.disconnect();
+                    try {
+                        testClient.disconnect();
+                    } catch (e) {
+                        console.warn('测试客户端断开时出错：', e);
+                    }
                     testConnectBtn.disabled = false;
                     testConnectBtn.textContent = '测试连接';
                 },
                 onFailure: function(response) {
+                    console.error('❌ 测试连接失败：', response.errorMessage);
+                    // 清除超时定时器
+                    if (testTimeoutId) clearTimeout(testTimeoutId);
                     alert(`连接失败：${response.errorMessage}`);
-                    testClient.disconnect();
+                    try {
+                        testClient.disconnect();
+                    } catch (e) {
+                        console.warn('测试客户端断开时出错：', e);
+                    }
                     testConnectBtn.disabled = false;
                     testConnectBtn.textContent = '测试连接';
                 }
@@ -168,16 +184,22 @@ document.addEventListener('DOMContentLoaded', () => {
             testClient.connect(connectOptions);
 
             // 超时兜底
-            setTimeout(() => {
-                if (testClient.isConnected() !== true) {
+            testTimeoutId = setTimeout(() => {
+                if (!isConnected && testClient.isConnected() !== true) {
+                    console.error('❌ 测试连接超时');
                     alert('连接超时，请检查配置或网络');
-                    testClient.disconnect();
+                    try {
+                        testClient.disconnect();
+                    } catch (e) {
+                        console.warn('测试客户端断开时出错：', e);
+                    }
                     testConnectBtn.disabled = false;
                     testConnectBtn.textContent = '测试连接';
                 }
-            }, 5000);
+            }, 6000);  // 略长于连接超时时间
 
         } catch (err) {
+            console.error('❌ 测试连接配置错误：', err.message);
             alert(`配置错误：${err.message}`);
             testConnectBtn.disabled = false;
             testConnectBtn.textContent = '测试连接';
@@ -195,26 +217,87 @@ document.addEventListener('DOMContentLoaded', () => {
     // 应用配置
     function applyConfig() {
         if (!validateForm()) return;
-        const config = getFormConfig();
-        localStorage.setItem('mqttConfig', JSON.stringify(config));
         
+        const config = getFormConfig();
+        console.log('📋 验证通过，保存配置:', config);
+        
+        // 保存到本地存储
+        localStorage.setItem('mqttConfig', JSON.stringify(config));
+        console.log('💾 配置已保存到本地存储');
+        
+        // 禁用应用按钮，防止重复点击
+        applyConfigBtn.disabled = true;
+        applyConfigBtn.textContent = '应用中...';
+        
+        // 设置连接成功回调，连接成功后自动关闭弝窗
+        window.onMQTTConnectSuccess = function() {
+            console.log('✅ MQTT 连接成功，关闭配置界面');
+            // 恢复按钮状态
+            applyConfigBtn.disabled = false;
+            applyConfigBtn.textContent = '应用配置';
+            // 关闭弹窗
+            closeModal();
+            // 清除回调，避免其他连接时也触发
+            window.onMQTTConnectSuccess = null;
+        };
+        
+        // 同时设置连接失败处理
+        window.onMQTTConnectFailure = function(errorMessage) {
+            console.error('❌ MQTT 连接失败:', errorMessage);
+            // 恢复按钮状态
+            applyConfigBtn.disabled = false;
+            applyConfigBtn.textContent = '应用配置';
+            // 清除回调
+            window.onMQTTConnectFailure = null;
+        };
+        
+        // 初始化 MQTT 客户端，传入新配置
         if (window.MQTTApp && typeof window.MQTTApp.init === 'function') {
+            console.log('🚀 调用 MQTT 初始化函数...');
             window.MQTTApp.init(config);
-            alert('配置已应用，正在重新连接MQTT...');
+        } else {
+            console.error('❌ 未找到 MQTT 初始化函数');
+            applyConfigBtn.disabled = false;
+            applyConfigBtn.textContent = '应用配置';
+            alert('配置已保存，但未找到MQTT初始化函数');
         }
     }
 
-    // 关闭弹窗
+    // 关闭弹窗（恢复到上次保存的配置，不保存当前修改）
     function closeModal() {
+        console.log('关闭 MQTT 配置弹窗，恢复上次保存的配置');
+        // 重置表单内容为已保存的配置
+        initConfig();
+        // 隐藏弹窗
         mqttConfigModal.classList.remove('show');
     }
 
     // 事件绑定
     function bindEvents() {
+        // 关闭按钮
         modalClose.addEventListener('click', closeModal);
-        mqttConfigModal.addEventListener('click', (e) => {
-            if (e.target === mqttConfigModal) closeModal();
+        
+        // 点击空白区域（modal-mask）关闭弹窗
+        const modalMask = document.querySelector('.modal-mask');
+        if (modalMask) {
+            modalMask.addEventListener('click', closeModal);
+        }
+        
+        // 防止点击弹窗内容时关闭
+        const modalContent = document.querySelector('.modal-content');
+        if (modalContent) {
+            modalContent.addEventListener('click', (e) => {
+                e.stopPropagation();
+            });
+        }
+        
+        // 按 Escape 键关闭弹窗
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && mqttConfigModal.classList.contains('show')) {
+                closeModal();
+            }
         });
+        
         testConnectBtn.addEventListener('click', testConnect);
         saveConfigBtn.addEventListener('click', saveConfig);
         applyConfigBtn.addEventListener('click', applyConfig);
