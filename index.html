@@ -114,20 +114,173 @@
                     </div>
                 </div>
             </div>
-            <div class="data-card">
-                <h3>湿度</h3>
-                <div class="data-value" id="humidity">0</div>
-                <span class="unit">%</span>
+            <div class="data-card humidity-card" id="humidityCard">
+                <div class="card-header">
+                    <h3>湿度</h3>
+                    <span class="card-icon" id="humidityIcon">💧</span>
+                </div>
+                
+                <div class="card-main-display">
+                    <div class="card-value-wrapper">
+                        <div class="card-value" id="humidity">0</div>
+                        <span class="card-unit">%</span>
+                    </div>
+                    <div class="card-status">
+                        <span class="card-level" id="humidityLevel">--</span>
+                        <span class="card-trend" id="humidityTrend">→</span>
+                    </div>
+                </div>
+
+                <div class="card-progress-bar">
+                    <div class="progress-track">
+                        <div class="progress-fill" id="humidityProgress" style="width: 50%;"></div>
+                        <div class="progress-marker" title="0%"></div>
+                        <div class="progress-marker" title="50%"></div>
+                        <div class="progress-marker" title="100%"></div>
+                    </div>
+                    <div class="progress-labels">
+                        <span>0</span>
+                        <span>50</span>
+                        <span>100</span>
+                    </div>
+                </div>
+
+                <div class="card-details" id="humidityDetails">
+                    <div class="details-grid">
+                        <div class="detail-item">
+                            <span class="detail-label">实时</span>
+                            <span class="detail-value" id="humidityCurrent">--</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">最高</span>
+                            <span class="detail-value" id="humidityMax">--</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">最低</span>
+                            <span class="detail-value" id="humidityMin">--</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">平均</span>
+                            <span class="detail-value" id="humidityAvg">--</span>
+                        </div>
+                    </div>
+                    <div class="detail-change-rate">
+                        <span class="change-label">变化速率：</span>
+                        <span class="change-value" id="humidityChangeRate">--%/min</span>
+                    </div>
+                </div>
             </div>
-            <div class="data-card">
-                <h3>风速</h3>
-                <div class="data-value" id="windSpeed">0</div>
-                <span class="unit">m/s</span>
+            <div class="data-card wind-card" id="windSpeedCard">
+                <div class="card-header">
+                    <h3>风速</h3>
+                    <span class="card-icon" id="windSpeedIcon">💨</span>
+                </div>
+                
+                <div class="card-main-display">
+                    <div class="card-value-wrapper">
+                        <div class="card-value" id="windSpeed">0</div>
+                        <span class="card-unit">m/s</span>
+                    </div>
+                    <div class="card-status">
+                        <span class="card-level" id="windSpeedLevel">--</span>
+                        <span class="card-trend" id="windSpeedTrend">→</span>
+                    </div>
+                </div>
+
+                <div class="card-progress-bar">
+                    <div class="progress-track">
+                        <div class="progress-fill" id="windSpeedProgress" style="width: 50%;"></div>
+                        <div class="progress-marker" title="0m/s"></div>
+                        <div class="progress-marker" title="5m/s"></div>
+                        <div class="progress-marker" title="10m/s"></div>
+                    </div>
+                    <div class="progress-labels">
+                        <span>0</span>
+                        <span>5</span>
+                        <span>10</span>
+                    </div>
+                </div>
+
+                <div class="card-details" id="windSpeedDetails">
+                    <div class="details-grid">
+                        <div class="detail-item">
+                            <span class="detail-label">实时</span>
+                            <span class="detail-value" id="windSpeedCurrent">--</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">最高</span>
+                            <span class="detail-value" id="windSpeedMax">--</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">最低</span>
+                            <span class="detail-value" id="windSpeedMin">--</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">平均</span>
+                            <span class="detail-value" id="windSpeedAvg">--</span>
+                        </div>
+                    </div>
+                    <div class="detail-change-rate">
+                        <span class="change-label">变化速率：</span>
+                        <span class="change-value" id="windSpeedChangeRate">--m/s/min</span>
+                    </div>
+                </div>
             </div>
-            <div class="data-card">
-                <h3>光照强度</h3>
-                <div class="data-value" id="illumination">0</div>
-                <span class="unit">lux</span>
+            <div class="data-card illumination-card" id="illuminationCard">
+                <div class="card-header">
+                    <h3>光照强度</h3>
+                    <span class="card-icon" id="illuminationIcon">☀️</span>
+                </div>
+                
+                <div class="card-main-display">
+                    <div class="card-value-wrapper">
+                        <div class="card-value" id="illumination">0</div>
+                        <span class="card-unit">lux</span>
+                    </div>
+                    <div class="card-status">
+                        <span class="card-level" id="illuminationLevel">--</span>
+                        <span class="card-trend" id="illuminationTrend">→</span>
+                    </div>
+                </div>
+
+                <div class="card-progress-bar">
+                    <div class="progress-track">
+                        <div class="progress-fill" id="illuminationProgress" style="width: 50%;"></div>
+                        <div class="progress-marker" title="0lux"></div>
+                        <div class="progress-marker" title="5000lux"></div>
+                        <div class="progress-marker" title="10000lux"></div>
+                    </div>
+                    <div class="progress-labels">
+                        <span>0</span>
+                        <span>5000</span>
+                        <span>10000</span>
+                    </div>
+                </div>
+
+                <div class="card-details" id="illuminationDetails">
+                    <div class="details-grid">
+                        <div class="detail-item">
+                            <span class="detail-label">实时</span>
+                            <span class="detail-value" id="illuminationCurrent">--</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">最高</span>
+                            <span class="detail-value" id="illuminationMax">--</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">最低</span>
+                            <span class="detail-value" id="illuminationMin">--</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">平均</span>
+                            <span class="detail-value" id="illuminationAvg">--</span>
+                        </div>
+                    </div>
+                    <div class="detail-change-rate">
+                        <span class="change-label">变化速率：</span>
+                        <span class="change-value" id="illuminationChangeRate">--lux/min</span>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -182,6 +335,58 @@
                 <button type="button" class="btn btn-test" id="testConnectBtn">测试连接</button>
                 <button type="button" class="btn btn-save" id="saveConfigBtn">保存配置</button>
                 <button type="button" class="btn btn-apply" id="applyConfigBtn">应用配置</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 关于系统弹窗 -->
+    <div class="about-modal" id="aboutModal">
+        <div class="modal-mask"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">关于系统</h3>
+                <span class="modal-close" id="aboutModalClose">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="about-content">
+                    <div class="system-info">
+                        <h4>实时环境监控系统</h4>
+                        <p class="version">版本：<span>V3.0</span></p>
+                    </div>
+                    
+                    <div class="about-section">
+                        <h5>系统介绍</h5>
+                        <p>本系统是一个基于MQTT协议的实时环境数据采集与可视化平台。通过与物联网传感器网络对接，实时监测校园环境中的温度、湿度、风速和光照强度等关键指标。</p>
+                    </div>
+                    
+                    <div class="about-section">
+                        <h5>主要功能</h5>
+                        <ul class="features-list">
+                            <li>🌡️ <strong>温度监测</strong> - 实时温度数据采集与趋势分析</li>
+                            <li>💧 <strong>湿度监测</strong> - 环境湿度变化追踪</li>
+                            <li>💨 <strong>风速监测</strong> - 实时风速数据采集</li>
+                            <li>☀️ <strong>光照监测</strong> - 光照强度实时显示</li>
+                            <li>📊 <strong>数据可视化</strong> - 时间序列图表展示</li>
+                            <li>⚙️ <strong>灵活配置</strong> - 支持自定义MQTT连接参数</li>
+                            <li>💾 <strong>数据统计</strong> - 最大值、最小值、平均值计算</li>
+                            <li>📈 <strong>趋势分析</strong> - 实时数据变化速率计算</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="about-section">
+                        <h5>技术架构</h5>
+                        <p>前端采用 HTML5 + CSS3 + JavaScript 原生开发，无外部UI框架依赖。数据通信基于WebSocket实现的MQTT协议，确保低延迟的实时数据传输。图表可视化采用ECharts库提供强大的数据展示能力。</p>
+                    </div>
+                    
+                    <div class="about-section">
+                        <h5>数据处理</h5>
+                        <p>系统支持大数据量的实时处理，自动计算各类环境参数的统计数据，包括实时值、最大值、最小值、平均值以及数据变化速率，为用户提供全面的数据分析视图。</p>
+                    </div>
+                    
+                    <div class="about-footer">
+                        <p style="margin: 0; color: #64748b; font-size: 13px;">© 校园环境监测系统 | 基于开源MQTT.js库</p>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

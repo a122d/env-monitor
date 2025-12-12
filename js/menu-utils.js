@@ -3,6 +3,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const hamburgerMenu = document.getElementById('hamburgerMenu');
     const dropdownMenu = document.getElementById('dropdownMenu');
     const mqttConfigModal = document.getElementById('mqttConfigModal');
+    const aboutModal = document.getElementById('aboutModal');
+    const aboutModalClose = document.getElementById('aboutModalClose');
 
     // 点击汉堡菜单切换显隐
     hamburgerMenu.addEventListener('click', (e) => {
@@ -16,6 +18,22 @@ document.addEventListener('DOMContentLoaded', () => {
         hamburgerMenu.classList.remove('active');
         dropdownMenu.classList.remove('show');
     });
+
+    // 关于系统弹窗关闭按钮
+    if (aboutModalClose) {
+        aboutModalClose.addEventListener('click', () => {
+            aboutModal.classList.remove('show');
+        });
+    }
+
+    // 点击背景关闭弹窗
+    if (aboutModal) {
+        aboutModal.addEventListener('click', (e) => {
+            if (e.target === aboutModal) {
+                aboutModal.classList.remove('show');
+            }
+        });
+    }
 
     // 菜单项点击事件
     dropdownMenu.addEventListener('click', (e) => {
@@ -46,7 +64,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     alert('即将导出监控数据为Excel（后续开发）');
                     break;
                 case 'about':
-                    alert('实时环境监控系统 v2.0\n基于MQTT协议的环境数据采集与可视化');
+                    // 打开关于系统弹窗
+                    aboutModal.classList.add('show');
+                    // 关闭汉堡菜单
+                    hamburgerMenu.classList.remove('active');
+                    dropdownMenu.classList.remove('show');
                     break;
             }
         }

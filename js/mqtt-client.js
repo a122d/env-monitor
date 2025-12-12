@@ -18,6 +18,42 @@ let temperatureStats = {
     changeRate: 0          // 变化速率（℃/分钟）
 };
 
+// 湿度统计数据
+let humidityStats = {
+    current: 0,
+    max: -Infinity,
+    min: Infinity,
+    sum: 0,
+    count: 0,
+    history: [],
+    lastUpdateTime: null,
+    changeRate: 0
+};
+
+// 风速统计数据
+let windSpeedStats = {
+    current: 0,
+    max: -Infinity,
+    min: Infinity,
+    sum: 0,
+    count: 0,
+    history: [],
+    lastUpdateTime: null,
+    changeRate: 0
+};
+
+// 光照强度统计数据
+let illuminationStats = {
+    current: 0,
+    max: -Infinity,
+    min: Infinity,
+    sum: 0,
+    count: 0,
+    history: [],
+    lastUpdateTime: null,
+    changeRate: 0
+};
+
 // 获取温度等级描述
 function getTempLevel(temp) {
     if (temp < 0) return '❄️ 严寒';
@@ -164,16 +200,20 @@ function updateDataCards(data) {
     // 湿度：÷10保留1位小数
     if (data.humidity !== undefined) {
         const humiValue = (parseFloat(data.humidity) / 10).toFixed(1);
+        updateHumidityCard(humiValue);
         updateDataValue('humidity', humiValue);
     }
     // 风速：÷10保留1位小数
     if (data.windSpeed !== undefined) {
         const windValue = (parseFloat(data.windSpeed) / 10).toFixed(1);
+        updateWindSpeedCard(windValue);
         updateDataValue('windSpeed', windValue);
     }
     // 光照：保持整数
     if (data.illumination !== undefined) {
-        updateDataValue('illumination', parseInt(data.illumination));
+        const illuminationValue = parseInt(data.illumination);
+        updateIlluminationCard(illuminationValue);
+        updateDataValue('illumination', illuminationValue);
     }
 }
 
@@ -288,6 +328,276 @@ function updateTemperatureDetails() {
                 ? '+' + temperatureStats.changeRate.toFixed(2) 
                 : temperatureStats.changeRate.toFixed(2);
             changeRateEl.textContent = rateText + '℃/min';
+        }
+    }
+}
+
+// 更新湿度卡片
+function updateHumidityCard(humidityValue) {
+    const humidityNum = parseFloat(humidityValue);
+    const card = document.getElementById('humidityCard');
+    if (!card) return;
+    
+    humidityStats.lastUpdateTime = Date.now();
+    humidityStats.history.push(humidityNum);
+    if (humidityStats.history.length > 10) {
+        humidityStats.history.shift();
+    }
+    
+    humidityStats.current = humidityNum;
+    if (humidityStats.count === 0) {
+        humidityStats.max = humidityNum;
+        humidityStats.min = humidityNum;
+    } else {
+        humidityStats.max = Math.max(humidityStats.max, humidityNum);
+        humidityStats.min = Math.min(humidityStats.min, humidityNum);
+    }
+    humidityStats.sum += humidityNum;
+    humidityStats.count++;
+    
+    // 更新湿度等级标签
+    const levelEl = card.querySelector('.card-level');
+    if (levelEl) {
+        if (humidityNum < 30) {
+            levelEl.textContent = '干燥';
+        } else if (humidityNum < 70) {
+            levelEl.textContent = '舒适';
+        } else {
+            levelEl.textContent = '潮湿';
+        }
+    }
+    
+    // 更新进度条
+    const progressFill = card.querySelector('.card-progress-bar .progress-fill');
+    if (progressFill) {
+        const percentage = Math.max(0, Math.min(100, humidityNum));
+        progressFill.style.width = percentage + '%';
+    }
+    
+    // 更新趋势
+    updateCardTrend(card, humidityStats, '.card-trend');
+    
+    // 更新详细信息
+    updateHumidityDetails();
+}
+
+// 更新风速卡片
+function updateWindSpeedCard(windSpeedValue) {
+    const windNum = parseFloat(windSpeedValue);
+    const card = document.getElementById('windSpeedCard');
+    if (!card) return;
+    
+    windSpeedStats.lastUpdateTime = Date.now();
+    windSpeedStats.history.push(windNum);
+    if (windSpeedStats.history.length > 10) {
+        windSpeedStats.history.shift();
+    }
+    
+    windSpeedStats.current = windNum;
+    if (windSpeedStats.count === 0) {
+        windSpeedStats.max = windNum;
+        windSpeedStats.min = windNum;
+    } else {
+        windSpeedStats.max = Math.max(windSpeedStats.max, windNum);
+        windSpeedStats.min = Math.min(windSpeedStats.min, windNum);
+    }
+    windSpeedStats.sum += windNum;
+    windSpeedStats.count++;
+    
+    // 更新风速等级标签
+    const levelEl = card.querySelector('.card-level');
+    if (levelEl) {
+        if (windNum < 2) {
+            levelEl.textContent = '平静';
+        } else if (windNum < 5) {
+            levelEl.textContent = '温和';
+        } else if (windNum < 8) {
+            levelEl.textContent = '较强';
+        } else {
+            levelEl.textContent = '强风';
+        }
+    }
+    
+    // 更新进度条
+    const progressFill = card.querySelector('.card-progress-bar .progress-fill');
+    if (progressFill) {
+        const percentage = Math.max(0, Math.min(100, (windNum / 10) * 100));
+        progressFill.style.width = percentage + '%';
+    }
+    
+    // 更新趋势
+    updateCardTrend(card, windSpeedStats, '.card-trend');
+    
+    // 更新详细信息
+    updateWindSpeedDetails();
+}
+
+// 更新光照强度卡片
+function updateIlluminationCard(illuminationValue) {
+    const illuminationNum = parseFloat(illuminationValue);
+    const card = document.getElementById('illuminationCard');
+    if (!card) return;
+    
+    illuminationStats.lastUpdateTime = Date.now();
+    illuminationStats.history.push(illuminationNum);
+    if (illuminationStats.history.length > 10) {
+        illuminationStats.history.shift();
+    }
+    
+    illuminationStats.current = illuminationNum;
+    if (illuminationStats.count === 0) {
+        illuminationStats.max = illuminationNum;
+        illuminationStats.min = illuminationNum;
+    } else {
+        illuminationStats.max = Math.max(illuminationStats.max, illuminationNum);
+        illuminationStats.min = Math.min(illuminationStats.min, illuminationNum);
+    }
+    illuminationStats.sum += illuminationNum;
+    illuminationStats.count++;
+    
+    // 更新光照等级标签
+    const levelEl = card.querySelector('.card-level');
+    if (levelEl) {
+        if (illuminationNum < 100) {
+            levelEl.textContent = '黑暗';
+        } else if (illuminationNum < 1000) {
+            levelEl.textContent = '微弱';
+        } else if (illuminationNum < 5000) {
+            levelEl.textContent = '适中';
+        } else if (illuminationNum < 10000) {
+            levelEl.textContent = '明亮';
+        } else {
+            levelEl.textContent = '极亮';
+        }
+    }
+    
+    // 更新进度条
+    const progressFill = card.querySelector('.card-progress-bar .progress-fill');
+    if (progressFill) {
+        const percentage = Math.max(0, Math.min(100, (illuminationNum / 10000) * 100));
+        progressFill.style.width = percentage + '%';
+    }
+    
+    // 更新趋势
+    updateCardTrend(card, illuminationStats, '.card-trend');
+    
+    // 更新详细信息
+    updateIlluminationDetails();
+}
+
+// 通用卡片趋势更新函数
+function updateCardTrend(card, stats, trendSelector) {
+    const history = stats.history;
+    if (history.length < 2) return;
+    
+    const current = history[history.length - 1];
+    const previous = history[Math.max(0, history.length - 5)];
+    const change = current - previous;
+    
+    let trend = '→';
+    if (change > 0.1) trend = '↑';
+    if (change < -0.1) trend = '↓';
+    
+    const trendEl = card.querySelector(trendSelector);
+    if (trendEl) {
+        trendEl.textContent = trend;
+        trendEl.classList.remove('up', 'down', 'stable');
+        if (trend === '↑') {
+            trendEl.classList.add('up');
+        } else if (trend === '↓') {
+            trendEl.classList.add('down');
+        } else {
+            trendEl.classList.add('stable');
+        }
+    }
+}
+
+// 更新湿度详细信息
+function updateHumidityDetails() {
+    const avg = humidityStats.count > 0 ? (humidityStats.sum / humidityStats.count).toFixed(1) : '--';
+    const max = humidityStats.max !== -Infinity ? humidityStats.max.toFixed(1) : '--';
+    const min = humidityStats.min !== Infinity ? humidityStats.min.toFixed(1) : '--';
+    
+    document.getElementById('humidityCurrent').textContent = humidityStats.current.toFixed(1) || '--';
+    document.getElementById('humidityMax').textContent = max;
+    document.getElementById('humidityMin').textContent = min;
+    document.getElementById('humidityAvg').textContent = avg;
+    
+    const changeRateEl = document.getElementById('humidityChangeRate');
+    if (changeRateEl) {
+        const history = humidityStats.history;
+        let rate = 0;
+        if (history.length >= 2 && humidityStats.lastUpdateTime) {
+            const change = history[history.length - 1] - history[Math.max(0, history.length - 5)];
+            const timeDiff = (Date.now() - humidityStats.lastUpdateTime) / 60000;
+            if (timeDiff > 0) rate = change / timeDiff;
+        }
+        
+        if (isNaN(rate) || rate === 0) {
+            changeRateEl.textContent = '--%/min';
+        } else {
+            const rateText = rate > 0 ? '+' + rate.toFixed(2) : rate.toFixed(2);
+            changeRateEl.textContent = rateText + '%/min';
+        }
+    }
+}
+
+// 更新风速详细信息
+function updateWindSpeedDetails() {
+    const avg = windSpeedStats.count > 0 ? (windSpeedStats.sum / windSpeedStats.count).toFixed(1) : '--';
+    const max = windSpeedStats.max !== -Infinity ? windSpeedStats.max.toFixed(1) : '--';
+    const min = windSpeedStats.min !== Infinity ? windSpeedStats.min.toFixed(1) : '--';
+    
+    document.getElementById('windSpeedCurrent').textContent = windSpeedStats.current.toFixed(1) || '--';
+    document.getElementById('windSpeedMax').textContent = max;
+    document.getElementById('windSpeedMin').textContent = min;
+    document.getElementById('windSpeedAvg').textContent = avg;
+    
+    const changeRateEl = document.getElementById('windSpeedChangeRate');
+    if (changeRateEl) {
+        const history = windSpeedStats.history;
+        let rate = 0;
+        if (history.length >= 2 && windSpeedStats.lastUpdateTime) {
+            const change = history[history.length - 1] - history[Math.max(0, history.length - 5)];
+            const timeDiff = (Date.now() - windSpeedStats.lastUpdateTime) / 60000;
+            if (timeDiff > 0) rate = change / timeDiff;
+        }
+        
+        if (isNaN(rate) || rate === 0) {
+            changeRateEl.textContent = '--m/s/min';
+        } else {
+            const rateText = rate > 0 ? '+' + rate.toFixed(2) : rate.toFixed(2);
+            changeRateEl.textContent = rateText + 'm/s/min';
+        }
+    }
+}
+
+// 更新光照强度详细信息
+function updateIlluminationDetails() {
+    const avg = illuminationStats.count > 0 ? (illuminationStats.sum / illuminationStats.count).toFixed(1) : '--';
+    const max = illuminationStats.max !== -Infinity ? illuminationStats.max.toFixed(1) : '--';
+    const min = illuminationStats.min !== Infinity ? illuminationStats.min.toFixed(1) : '--';
+    
+    document.getElementById('illuminationCurrent').textContent = illuminationStats.current.toFixed(1) || '--';
+    document.getElementById('illuminationMax').textContent = max;
+    document.getElementById('illuminationMin').textContent = min;
+    document.getElementById('illuminationAvg').textContent = avg;
+    
+    const changeRateEl = document.getElementById('illuminationChangeRate');
+    if (changeRateEl) {
+        const history = illuminationStats.history;
+        let rate = 0;
+        if (history.length >= 2 && illuminationStats.lastUpdateTime) {
+            const change = history[history.length - 1] - history[Math.max(0, history.length - 5)];
+            const timeDiff = (Date.now() - illuminationStats.lastUpdateTime) / 60000;
+            if (timeDiff > 0) rate = change / timeDiff;
+        }
+        
+        if (isNaN(rate) || rate === 0) {
+            changeRateEl.textContent = '--lux/min';
+        } else {
+            const rateText = rate > 0 ? '+' + rate.toFixed(2) : rate.toFixed(2);
+            changeRateEl.textContent = rateText + 'lux/min';
         }
     }
 }
