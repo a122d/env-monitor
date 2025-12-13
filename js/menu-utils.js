@@ -19,7 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
         dropdownMenu.classList.remove('show');
     });
 
-    // 关于系统弹窗关闭按钮
+    // 关于系统弹窗 关闭按钮
     if (aboutModalClose) {
         aboutModalClose.addEventListener('click', () => {
             aboutModal.classList.remove('show');
@@ -28,14 +28,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 点击背景关闭弹窗
     if (aboutModal) {
-        aboutModal.addEventListener('click', (e) => {
-            if (e.target === aboutModal) {
-                aboutModal.classList.remove('show');
-            }
+        aboutModal.addEventListener('click', () => {
+            aboutModal.classList.remove('show');  
+        });
+    }
+    // 点击关于系统弹窗内容区域阻止关闭
+    const aboutModalContent = aboutModal.querySelector('.modal-content');
+    if (aboutModalContent) {
+        aboutModalContent.addEventListener('click', (e) => {
+            e.stopPropagation();
         });
     }
 
-    // 菜单项点击事件
+    // 菜单项点击事件处理
     dropdownMenu.addEventListener('click', (e) => {
         e.stopPropagation();
         const targetItem = e.target.closest('.dropdown-item');
@@ -74,3 +79,4 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 });
+
