@@ -1,0 +1,21 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        
+        
+        {
+            "type": "msedge",
+            "request": "launch",
+            "name": "使用 Edge 打开",
+            "url": "file:///d:/G_Project/HTML/mqtt-environment-monitor/index.html",
+            "webRoot": "${workspaceFolder}"
+        },
+        {
+            "type": "msedge",
+            "request": "launch",
+            "name": "使用 Edge 打开 (本地服务器)",
+            "url": "http://localhost:5500/mqtt-environment-monitor/index.html",
+            "webRoot": "${workspaceFolder}"
+        }
+    ]
+}
