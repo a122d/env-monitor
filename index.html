@@ -307,6 +307,15 @@
                     </div>
                     
                     <div class="about-section">
+                        <h5>V3.6.3 更新内容</h5>
+                        <ul class="features-list">
+                            <li>🛡️ <strong>自定义提示弹窗</strong> - 弹窗z-index提升，确保所有弹窗始终最上层</li>
+                            <li>🧩 <strong>统一反馈机制</strong> - 配置保存、API获取等操作全部统一为ToastAlert弹窗反馈</li>
+                            <li>⏳ <strong>修复按键闪烁</strong> - 获取API按钮等待期间新增loading遮罩，防止闪烁和误操作</li>                       
+                        </ul>
+                    </div>
+
+                    <div class="about-section">
                         <h5>V3.6.1 更新内容</h5>
                         <ul class="features-list">
                             <li>📱 <strong>AI 弹窗重构</strong> - 居中弹出、渐进缩放，聊天区滚动不再被遮挡</li>
@@ -316,17 +325,6 @@
                         </ul>
                     </div>
 
-                    <div class="about-section">
-                        <h5>V3.5 更新内容</h5>
-                        <ul class="features-list">
-                            <li>🤖 <strong>AI 助手功能</strong> - 集成火山方舟豆包 API，提供智能分析</li>
-                            <li>🔗 <strong>MQTT 获取 API</strong> - 通过 MQTT 话题安全获取 API Key</li>
-                            <li>💬 <strong>对话管理</strong> - 智能对话历史管理，防止内存溢出</li>
-                            <li>🔒 <strong>安全加固</strong> - API Key 密码输入、XSS 防护、JSON 错误处理</li>
-                            <li>🎨 <strong>UI 改进</strong> - 模型选择重新排列，优化按键交互</li>
-                        </ul>
-                    </div>
-                    
                     <div class="about-section">
                         <h5>技术架构</h5>
                         <p>前端采用 HTML5 + CSS3 + JavaScript 原生开发，无外部UI框架依赖。数据通信基于 WebSocket 实现的 MQTT 协议，确保低延迟的实时数据传输。图表可视化采用 ECharts 库提供强大的数据展示能力。AI 分析功能基于火山方舟豆包大模型。</p>

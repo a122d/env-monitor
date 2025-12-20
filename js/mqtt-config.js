@@ -1,6 +1,6 @@
 // 统一版本号管理
-const APP_VERSION = 'V-3.6.3';
-//const APP_VERSION = 'beta-3.6.2-1';
+//const APP_VERSION = '3.6.4';
+const APP_VERSION = '3.6.3-1 beta';
 window.APP_VERSION = APP_VERSION;
 
 // 将版本写入页面中的 #appVersion 元素（DOM 安全处理）
@@ -31,7 +31,7 @@ window.MQTT_DEFAULT_CONFIG = {
     keepalive: 30,
     clean: true,
     
-    // 🤖 AI API 主题配置（仅本地运行）
+    // 🤖 AI API 主题配置
     aiRequestTopic: 'Get/AI_API',        // 📤 发送AI请求的主题（包含clientId）
     aiResponseTopic: 'Set/AI_API',       // 📥 接收API响应的主题（应用层ClientID过滤）
     aiLocalOnly: true                    // ✅ 仅允许本地客户端模式
