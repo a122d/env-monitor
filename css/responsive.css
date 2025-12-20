@@ -1,0 +1,141 @@
+/* ===== 响应式设计 - 大屏幕优化 ===== */
+@media (min-width: 1024px) {
+    .container {
+        max-width: 1600px;
+        width: 90%;
+    }
+    .main-title {
+        font-size: 36px;
+    }
+    .chart-container {
+        min-height: 520px;
+        padding: 15px;
+    }
+    .data-grid {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 25px;
+    }
+    .data-card {
+        min-width: 220px;
+        padding: 30px 25px;
+    }
+    :root {
+        --dot-margin: 18px;
+    }
+}
+
+@media (min-width: 1440px) {
+    .main-title {
+        font-size: 38px;
+    }
+    .chart-container {
+        min-height: 600px;
+    }
+}
+
+/* ===== 响应式设计 - 平板适配 ===== */
+@media (min-width: 768px) and (max-width: 1023px) {
+    .data-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 18px;
+    }
+    .charts-container {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .chart-container {
+        min-height: 400px;
+    }
+}
+
+/* ===== 响应式设计 - 移动端适配 ===== */
+@media (max-width: 767px) {
+    body {
+        padding: max(10px, env(safe-area-inset-top)) 0 max(10px, env(safe-area-inset-bottom)) 0;
+    }
+    .container {
+        width: 98%;
+        padding: 16px 12px;
+        border-radius: 12px;
+    }
+    .main-title {
+        font-size: clamp(20px, 5.5vw, 28px);
+    }
+    .data-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+    .charts-container {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+    .chart-container {
+        aspect-ratio: 5/4;
+        min-height: 300px;
+        max-height: none;
+        padding: 8px;
+    }
+    .status-dot {
+        width: 12px;
+        height: 12px;
+    }
+    .status-text {
+        font-size: 13px;
+    }
+    :root {
+        --dot-margin: 15px;
+    }
+    .hamburger-menu {
+        width: 36px;
+        height: 36px;
+    }
+    .menu-container {
+        top: 41%;
+        right: 10px;
+    }
+    .dropdown-menu {
+        width: 200px;
+        right: -5px;
+    }
+}
+
+/* ===== 响应式设计 - 小屏手机适配 ===== */
+@media (max-width: 480px) {
+    body {
+        padding: 0;
+        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    }
+    
+    .container {
+        width: 100%;
+        margin: 0;
+        border-radius: 0;
+        padding: 12px 10px;
+        border: none;
+        box-shadow: none;
+    }
+    .main-title {
+        font-size: 20px;
+        letter-spacing: 0.5px;
+    }
+    .title-container {
+        min-height: 48px;
+        margin-bottom: 16px;
+        padding-bottom: 12px;
+    }
+    .data-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+    }
+    .data-card {
+        padding: 14px 10px;
+        border-radius: 10px;
+    }
+    .chart-container {
+        aspect-ratio: 1;
+        min-height: 280px;
+        border-radius: 10px;
+    }
+    :root {
+        --dot-margin: 10px;
+    }
+}

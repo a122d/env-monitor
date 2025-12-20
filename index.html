@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, minimum-scale=1.0, viewport-fit=cover">
+    <!-- PWA 和主题支持 -->
+    <meta name="theme-color" content="#2563eb" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#1e40af" media="(prefers-color-scheme: dark)">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+    <!-- SEO优化 -->
+    <meta name="description" content="基于MQTT的校园环境实时监测系统，支持温度、湿度、风速、光照等多参数监控">
+    <meta name="keywords" content="环境监测,MQTT,物联网,温度监控,智慧校园">
+    <!-- 严格 CSP 防止 XSS 与供应链攻击 -->
+    <meta http-equiv="Content-Security-Policy" content="
+        default-src 'self';
+        script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net;
+        style-src 'self' 'unsafe-inline';
+        connect-src 'self' wss: ws: https://ark.cn-beijing.volces.com;
+        img-src 'self' data:;
+        font-src 'self';
+        base-uri 'self';
+        form-action 'self';
+        frame-ancestors 'none';
+        upgrade-insecure-requests
+    ">
+    <title>校园环境监测系统</title>
+    <!-- 预加载关键资源 -->
+    <link rel="preconnect" href="https://cdn.jsdelivr.net">
+    <link rel="stylesheet" href="css/style.css">
+
+    <!-- ECharts 库必须首先加载 -->
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <!-- MQTT 库（本地文件，应用层ClientID过滤实现多网页隔离）-->
+    <script src="js/mqttws31.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- 加载指示器 -->
+        <div id="loadingIndicator" class="loading-indicator" aria-live="polite" aria-label="正在加载">
+            <div class="spinner" role="status">
+                <span class="sr-only">加载中...</span>
+            </div>
+        </div>
+
+        <!-- 原有内容：标题/菜单/数据卡片/图表 -->
+        <div class="title-container" id="titleContainer">
+            <div class="menu-container">
+                <div class="hamburger-menu" id="hamburgerMenu">
+                    <span class="hamburger-line"></span>
+                    <span class="hamburger-line"></span>
+                    <span class="hamburger-line"></span>
+                </div>
+                <ul class="dropdown-menu" id="dropdownMenu">
+                    <li class="dropdown-item" data-action="mqtt-config">用户登录</li>
+                    <li class="dropdown-item" data-action="data-clear">清空历史数据</li>
+                    <li class="dropdown-divider"></li>
+                    <li class="dropdown-item" data-action="chart-setting">图表显示设置</li>
+                    <li class="dropdown-item" data-action="data-export">导出监控数据</li>
+                    <li class="dropdown-divider"></li>
+                    <li class="dropdown-item" data-action="about">关于系统</li>
+                </ul>
+            </div>
+            <div class="title-wrapper">
+                <h1 class="main-title">环境数据</h1>
+            </div>
+            <div class="status disconnected" id="mqtt-status">
+                <span class="status-dot"></span>
+                <span class="status-text">未连接</span>
+            </div>
+        </div>
+        
+        <main class="data-grid" role="main">
+            <article class="data-card temp-card temp-normal" id="temperatureCard" aria-label="温度监测">
+                <div class="temp-header">
+                    <h3>温度</h3>
+                    <span class="temp-icon" id="tempIcon">🌡️</span>
+                </div>
+                
+                <div class="temp-main-display">
+                    <div class="temp-value-wrapper">
+                        <div class="temp-value" id="temperature">0</div>
+                        <span class="temp-unit">℃</span>
+                    </div>
+                    <div class="temp-status">
+                        <span class="temp-level" id="tempLevel">--</span>
+                        <span class="temp-trend" id="tempTrend">→</span>
+                    </div>
+                </div>
+
+                <div class="temp-progress-bar">
+                    <div class="progress-track">
+                        <div class="progress-fill" id="tempProgress" style="width: 50%;"></div>
+                        <div class="progress-marker cold" title="0℃"></div>
+                        <div class="progress-marker normal" title="16℃"></div>
+                        <div class="progress-marker hot" title="32℃"></div>
+                    </div>
+                    <div class="progress-labels">
+                        <span>0</span>
+                        <span>16</span>
+                        <span>32</span>
+                    </div>
+                </div>
+
+                <div class="card-minmax">
+                    <div class="minmax-item">
+                        <span class="minmax-label">最高</span>
+                        <span class="minmax-value" id="tempMax">--</span>
+                    </div>
+                    <div class="minmax-item">
+                        <span class="minmax-label">最低</span>
+                        <span class="minmax-value" id="tempMin">--</span>
+                    </div>
+                </div>
+            </article>
+            <article class="data-card humidity-card" id="humidityCard" aria-label="湿度监测">
+                <div class="card-header">
+                    <h3>湿度</h3>
+                    <span class="card-icon" id="humidityIcon">💧</span>
+                </div>
+                
+                <div class="card-main-display">
+                    <div class="card-value-wrapper">
+                        <div class="card-value" id="humidity">0</div>
+                        <span class="card-unit">%</span>
+                    </div>
+                    <div class="card-status">
+                        <span class="card-level" id="humidityLevel">--</span>
+                        <span class="card-trend" id="humidityTrend">→</span>
+                    </div>
+                </div>
+
+                <div class="card-progress-bar">
+                    <div class="progress-track">
+                        <div class="progress-fill" id="humidityProgress" style="width: 50%;"></div>
+                        <div class="progress-marker" title="0%"></div>
+                        <div class="progress-marker" title="50%"></div>
+                        <div class="progress-marker" title="100%"></div>
+                    </div>
+                    <div class="progress-labels">
+                        <span>0</span>
+                        <span>50</span>
+                        <span>100</span>
+                    </div>
+                </div>
+
+                <div class="card-minmax">
+                    <div class="minmax-item">
+                        <span class="minmax-label">最高</span>
+                        <span class="minmax-value" id="humidityMax">--</span>
+                    </div>
+                    <div class="minmax-item">
+                        <span class="minmax-label">最低</span>
+                        <span class="minmax-value" id="humidityMin">--</span>
+                    </div>
+                </div>
+            </article>
+            <article class="data-card wind-card" id="windSpeedCard" aria-label="风速监测">
+                <div class="card-header">
+                    <h3>风速</h3>
+                    <span class="card-icon" id="windSpeedIcon">💨</span>
+                </div>
+                
+                <div class="card-main-display">
+                    <div class="card-value-wrapper">
+                        <div class="card-value" id="windSpeed">0</div>
+                        <span class="card-unit">m/s</span>
+                    </div>
+                    <div class="card-status">
+                        <span class="card-level" id="windSpeedLevel">--</span>
+                        <span class="card-trend" id="windSpeedTrend">→</span>
+                    </div>
+                </div>
+
+                <div class="card-progress-bar">
+                    <div class="progress-track">
+                        <div class="progress-fill" id="windSpeedProgress" style="width: 50%;"></div>
+                        <div class="progress-marker" title="0m/s"></div>
+                        <div class="progress-marker" title="5m/s"></div>
+                        <div class="progress-marker" title="10m/s"></div>
+                    </div>
+                    <div class="progress-labels">
+                        <span>0</span>
+                        <span>5</span>
+                        <span>10</span>
+                    </div>
+                </div>
+
+                <div class="card-minmax">
+                    <div class="minmax-item">
+                        <span class="minmax-label">最高</span>
+                        <span class="minmax-value" id="windSpeedMax">--</span>
+                    </div>
+                    <div class="minmax-item">
+                        <span class="minmax-label">最低</span>
+                        <span class="minmax-value" id="windSpeedMin">--</span>
+                    </div>
+                </div>
+            </article>
+            <article class="data-card illumination-card" id="illuminationCard" aria-label="光照强度监测">
+                <div class="card-header">
+                    <h3>光照强度</h3>
+                    <span class="card-icon" id="illuminationIcon">☀️</span>
+                </div>
+                
+                <div class="card-main-display">
+                    <div class="card-value-wrapper">
+                        <div class="card-value" id="illumination">0</div>
+                        <span class="card-unit">lux</span>
+                    </div>
+                    <div class="card-status">
+                        <span class="card-level" id="illuminationLevel">--</span>
+                        <span class="card-trend" id="illuminationTrend">→</span>
+                    </div>
+                </div>
+
+                <div class="card-progress-bar">
+                    <div class="progress-track">
+                        <div class="progress-fill" id="illuminationProgress" style="width: 50%;"></div>
+                        <div class="progress-marker" title="0lux"></div>
+                        <div class="progress-marker" title="5000lux"></div>
+                        <div class="progress-marker" title="10000lux"></div>
+                    </div>
+                    <div class="progress-labels">
+                        <span>0</span>
+                        <span>5000</span>
+                        <span>10000</span>
+                    </div>
+                </div>
+
+                <div class="card-minmax">
+                    <div class="minmax-item">
+                        <span class="minmax-label">最高</span>
+                        <span class="minmax-value" id="illuminationMax">--</span>
+                    </div>
+                    <div class="minmax-item">
+                        <span class="minmax-label">最低</span>
+                        <span class="minmax-value" id="illuminationMin">--</span>
+                    </div>
+                </div>
+            </article>
+        </main>
+
+        <section class="charts-container" aria-label="数据图表区域">
+            <figure class="chart-container" id="temp-chart" role="img" aria-label="温度趋势图表"></figure>
+            <figure class="chart-container" id="humidity-chart" role="img" aria-label="湿度趋势图表"></figure>
+            <figure class="chart-container" id="wind-chart" role="img" aria-label="风速趋势图表"></figure>
+            <figure class="chart-container" id="light-chart" role="img" aria-label="光照趋势图表"></figure>
+        </section>
+    </div>
+
+    <!-- 新增：用户登录弹窗 -->
+    <div class="mqtt-config-modal" id="mqttConfigModal">
+        <div class="modal-mask"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">用户登录</h3>
+                <span class="modal-close" id="modalClose">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="mqttConfigForm">
+                    <div class="form-group">
+                        <label for="mqttUsername">用户名</label>
+                        <input type="text" id="mqttUsername" placeholder="请输入用户名" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="mqttPassword">密码</label>
+                        <input type="password" id="mqttPassword" placeholder="请输入密码" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-apply" id="applyConfigBtn">登录 MQTT</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 关于系统弹窗 -->
+    <div class="about-modal" id="aboutModal">
+        <div class="modal-mask"></div>
+        <div class="modal-content">
+            <span class="modal-close" id="aboutModalClose">&times;</span>
+            <div class="modal-body">
+                <div class="about-content">
+                    <div class="system-info">
+                        <h4>环境数据监测系统</h4>
+                        <p class="version">版本：<span id="appVersion">加载中...</span></p>
+                    </div>
+                    
+                    <div class="about-section">
+                        <h5>系统介绍</h5>
+                        <p>一个基于 MQTT over WebSocket 的前端监控页面，用于实时展示温度、湿度、风速和光照等环境数据。通过与物联网传感器网络对接，实时监测校园环境中的关键指标。</p>
+                    </div>
+                    
+                    <div class="about-section">
+                        <h5>核心特性</h5>
+                        <ul class="features-list">
+                            <li>✅ <strong>MQTT 实时连接</strong> - 支持 WebSocket Secure (wss://) 协议</li>
+                            <li>✅ <strong>动态数据图表</strong> - 使用 ECharts 5.4.3 进行实时绘制</li>
+                            <li>✅ <strong>响应式设计</strong> - 完美支持桌面、平板、手机设备</li>
+                            <li>✅ <strong>现代化 UI</strong> - 渐变设计、流畅动画、专业视觉</li>
+                            <li>✅ <strong>AI 智能助手</strong> - 基于大模型的环境数据分析</li>
+                            <li>✅ <strong>安全防护</strong> - 严格的内容安全策略（CSP）</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="about-section">
+                        <h5>V3.6.1 更新内容</h5>
+                        <ul class="features-list">
+                            <li>📱 <strong>AI 弹窗重构</strong> - 居中弹出、渐进缩放，聊天区滚动不再被遮挡</li>
+                            <li>📐 <strong>移动端高度优化</strong> - 使用 <code>svh</code> 限高，自适应内容高度，避免虚拟键盘挤压</li>
+                            <li>🧹 <strong>样式精简</strong> - 移除重复/冲突的 AI 样式，保留单一权威定义</li>
+                            <li>🛡️ <strong>视口安全</strong> - 弹窗打开时锁定背景滚动，安全区内边距适配</li>
+                        </ul>
+                    </div>
+
+                    <div class="about-section">
+                        <h5>V3.5 更新内容</h5>
+                        <ul class="features-list">
+                            <li>🤖 <strong>AI 助手功能</strong> - 集成火山方舟豆包 API，提供智能分析</li>
+                            <li>🔗 <strong>MQTT 获取 API</strong> - 通过 MQTT 话题安全获取 API Key</li>
+                            <li>💬 <strong>对话管理</strong> - 智能对话历史管理，防止内存溢出</li>
+                            <li>🔒 <strong>安全加固</strong> - API Key 密码输入、XSS 防护、JSON 错误处理</li>
+                            <li>🎨 <strong>UI 改进</strong> - 模型选择重新排列，优化按键交互</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="about-section">
+                        <h5>技术架构</h5>
+                        <p>前端采用 HTML5 + CSS3 + JavaScript 原生开发，无外部UI框架依赖。数据通信基于 WebSocket 实现的 MQTT 协议，确保低延迟的实时数据传输。图表可视化采用 ECharts 库提供强大的数据展示能力。AI 分析功能基于火山方舟豆包大模型。</p>
+                    </div>
+                    
+                    <div class="about-section">
+                        <h5>快速开始</h5>
+                        <ul class="features-list">
+                            <li><strong>用户登录</strong><br>打开右上角菜单 → "用户登录"，填入用户名和密码，完成登录。</li>
+                            <li><strong>启用AI助手</strong><br>点击右下角 AI 助手按钮（🤖），在侧边栏中点击设置（⚙️）配置豆包 API，支持通过 MQTT 获取 API Key。配置完成后即可使用 AI 分析功能。</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="about-footer">
+                        <p style="margin: 0; color: #64748b; font-size: 13px;">© 校园环境监测系统 | 基于开源MQTT.js库</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI助手浮动按钮 -->
+    <div class="ai-assistant-btn" id="aiAssistantBtn" title="AI环境分析助手">
+        <span class="ai-icon">🤖</span>
+        <span class="ai-pulse"></span>
+    </div>
+
+    <!-- AI对话侧边栏 -->
+    <div class="ai-sidebar" id="aiSidebar">
+        <div class="ai-sidebar-header">
+            <div class="ai-header-title">
+                <span class="ai-header-icon">🤖</span>
+                <span>AI 环境分析助手</span>
+            </div>
+            <div class="ai-header-actions">
+                <button class="ai-settings-btn" id="aiSettingsBtn" title="API设置">⚙️</button>
+                <button class="ai-close-btn" id="aiCloseBtn">&times;</button>
+            </div>
+        </div>
+        
+        <div class="ai-chat-container" id="aiChatContainer">
+            <div class="ai-welcome-message">
+                <div class="ai-avatar">🤖</div>
+                <div class="ai-message-content">
+                    <p>👋 你好！我是AI环境分析助手。</p>
+                    <p>我可以帮你分析当前环境数据，提供专业建议。</p>
+                    <div class="ai-quick-actions">
+                        <button class="ai-quick-btn" data-action="analyze">📊 分析当前环境</button>
+                        <button class="ai-quick-btn" data-action="comfort">🌡️ 舒适度评估</button>
+                        <button class="ai-quick-btn" data-action="advice">💡 环境建议</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="ai-input-container">
+            <div class="ai-current-data" id="aiCurrentData">
+                <span class="data-tag">🌡️ <span id="aiTemp">--</span>℃</span>
+                <span class="data-tag">💧 <span id="aiHumidity">--</span>%</span>
+                <span class="data-tag">💨 <span id="aiWind">--</span>m/s</span>
+                <span class="data-tag">☀️ <span id="aiLight">--</span>lux</span>
+            </div>
+            <div class="ai-input-wrapper">
+                <textarea id="aiInput" placeholder="输入问题，或点击上方快捷按钮..." rows="1"></textarea>
+                <button class="ai-send-btn" id="aiSendBtn">
+                    <span>发送</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI设置弹窗 -->
+    <div class="ai-config-modal" id="aiConfigModal">
+        <div class="modal-mask"></div>
+        <div class="modal-loading-mask" id="aiConfigLoadingMask" style="display:none;">
+            <div class="modal-loading-spinner"></div>
+        </div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">AI 接口配置</h3>
+                <span class="modal-close" id="aiConfigClose">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="form-group form-group-with-button">
+                    <div class="form-input-wrapper">
+                        <label for="aiModel">模型选择</label>
+                        <select id="aiModel">
+                            <option value="doubao-seed-1-6-flash-250828">豆包-1.6 (推荐) </option>
+                            <option value="doubao-1-5-pro-32k-250115">豆包-1.5  </option>
+                            <option value="doubao-1-5-lite-32k-250115">豆包-1.5-lite</option>
+                            <option value="doubao-seed-1-6-lite-251015">豆包-1.6-lite</option>
+                        </select>
+                    </div>
+                    <button type="button" class="btn btn-api-get" id="aiModalApiBtn" title="向MQTT发送API请求">
+                        <span>🔗 获取API</span>
+                    </button>
+                </div>
+                <div class="form-group">
+                    <label for="aiApiKey">API Key</label>
+                    <input type="password" id="aiApiKey" placeholder="输入火山方舟 API Key">
+                    <p class="form-hint">火山方舟控制台获取：<a href="https://console.volcengine.com/ark/region:ark+cn-beijing/apiKey" target="_blank">console.volcengine.com/ark</a></p>
+                </div>
+                <div class="form-tip">
+                    <p>🔒 API Key 仅存储在本地浏览器，不会上传到服务器</p>
+                    <p>🤖 使用火山方舟豆包大模型提供 AI 服务</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-test" id="aiTestBtn">测试连接</button>
+                <button type="button" class="btn btn-save" id="aiSaveBtn">保存配置</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 自定义提示弹窗 -->
+    <div class="toast-alert-modal" id="toastAlertModal">
+        <div class="modal-mask"></div>
+        <div class="toast-alert-content">
+            <div class="toast-alert-body">
+                <p id="toastAlertMessage"></p>
+            </div>
+            <div class="toast-alert-footer">
+                <button type="button" class="btn btn-save" id="toastAlertBtn">确定</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 引入JS文件 -->
+    <script src="js/toast-alert.js"></script>
+    <script src="js/mqtt-config.js"></script>
+    <script src="js/mqtt-client.js"></script>
+    <script src="js/chart-utils.js"></script>
+    <script src="js/menu-utils.js"></script>
+    <script src="js/main-utils.js"></script>
+    <script src="js/ai-assistant.js"></script>
+
+</body>
+</html>

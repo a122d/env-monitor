@@ -1,0 +1,752 @@
+/* ===== 卡片与数据栅格 ===== */
+.data-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+    gap: clamp(12px, 2vw, 20px);
+    margin: 0 0 clamp(15px, 2vw, 20px) 0;
+    animation: slideInUp 0.6s ease 0.3s backwards;
+}
+
+.data-card {
+    padding: clamp(18px, 3vw, 25px) clamp(14px, 2.5vw, 20px);
+    background: linear-gradient(135deg, var(--color-bg) 0%, var(--color-bg-light) 100%);
+    border-radius: clamp(10px, 1.5vw, 14px);
+    text-align: center;
+    box-shadow: var(--shadow-md), 0 0 20px rgba(37, 99, 235, 0.04);
+    border: 2px solid #f0f2f5;
+    transition: transform var(--transition-normal) var(--ease-bounce),
+                box-shadow var(--transition-normal) var(--ease-smooth),
+                border-color var(--transition-normal) var(--ease-smooth);
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    touch-action: manipulation;
+    will-change: transform;
+    contain: layout style;
+}
+
+.data-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(37, 99, 235, 0.1), transparent);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.data-card:hover {
+    transform: translateY(-8px) scale(1.01);
+    box-shadow: var(--shadow-lg), 0 0 30px rgba(37, 99, 235, 0.15);
+    border-color: var(--color-primary);
+}
+
+.data-card:hover::before {
+    opacity: 1;
+}
+
+.data-card h3 {
+    color: #64748b;
+    margin-bottom: 18px;
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    position: relative;
+    z-index: 1;
+}
+
+.data-value {
+    font-size: 34px;
+    font-weight: bold;
+    color: #1f2937;
+    transition: all 0.8s ease-in-out;
+    display: inline-block;
+    position: relative;
+    z-index: 1;
+}
+
+.data-value.changed {
+    animation: pulse 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.12); color: #2563eb; }
+    100% { transform: scale(1); }
+}
+
+.unit {
+    font-size: 16px;
+    color: #64748b;
+    margin-left: 8px;
+    position: relative;
+    z-index: 1;
+}
+
+/* ===== 温度卡片增强样式 ===== */
+
+/* 温度卡片容器 */
+.temp-card {
+    padding: 28px 24px !important;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+}
+
+.temp-card::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 70%);
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    pointer-events: none;
+}
+
+.temp-card:hover::before {
+    opacity: 1;
+}
+
+/* 温度卡片头部 */
+.temp-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.temp-header h3 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.temp-icon {
+    font-size: 24px;
+    animation: float 3s ease-in-out infinite;
+}
+
+/* 温度主显示 */
+.temp-main-display {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 20px;
+    gap: 16px;
+}
+
+.temp-value-wrapper {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+}
+
+.temp-value {
+    font-size: 48px;
+    font-weight: 700;
+    line-height: 1;
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.temp-unit {
+    font-size: 20px;
+    font-weight: 600;
+    opacity: 0.8;
+}
+
+.temp-value.changed {
+    animation: scaleBounce 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes scaleBounce {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.15); }
+    100% { transform: scale(1); }
+}
+
+/* 温度状态 */
+.temp-status {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+}
+
+.temp-level {
+    font-size: 13px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.6);
+    white-space: nowrap;
+}
+
+.temp-trend {
+    font-size: 20px;
+    transition: transform 0.4s ease;
+    display: inline-block;
+}
+
+.temp-trend.up {
+    color: #e65100;
+    transform: rotate(45deg);
+}
+
+.temp-trend.down {
+    color: #0277bd;
+    transform: rotate(-45deg);
+}
+
+.temp-trend.stable {
+    color: #64748b;
+    transform: rotate(0deg);
+}
+
+/* 温度进度条 */
+.temp-progress-bar {
+    margin: 20px 0;
+}
+
+.progress-track {
+    position: relative;
+    height: 8px;
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 8px;
+}
+
+.progress-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    background: linear-gradient(90deg, #4dd0e1 0%, #2196F3 25%, #FF9800 75%, #f44336 100%);
+}
+
+.progress-marker {
+    position: absolute;
+    top: -2px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid white;
+    background: rgba(0, 0, 0, 0.2);
+    transform: translateX(-50%);
+}
+
+.progress-marker.cold {
+    left: 0%;
+}
+
+.progress-marker.normal {
+    left: 50%;
+}
+
+.progress-marker.hot {
+    left: 100%;
+}
+
+.progress-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: rgba(0, 0, 0, 0.5);
+    font-weight: 600;
+}
+
+/* 温度详细信息 */
+.temp-details {
+    padding: 16px;
+    background: rgba(255, 255, 255, 0.6);
+    border-radius: 12px;
+    backdrop-filter: blur(10px);
+    animation: slideInUp 0.5s ease 0.1s backwards;
+}
+
+.details-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.detail-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.7);
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.detail-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.detail-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: rgba(0, 0, 0, 0.6);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.detail-value {
+    font-size: 18px;
+    font-weight: 700;
+    color: #1f2937;
+}
+
+.detail-change-rate {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 8px;
+    font-size: 12px;
+}
+
+.change-label {
+    font-weight: 600;
+    color: rgba(0, 0, 0, 0.6);
+}
+
+.change-value {
+    font-weight: 700;
+    font-family: 'Monaco', 'Courier New', monospace;
+    color: #2563eb;
+}
+
+/* 温度颜色变化 */
+#temperatureCard.temp-cold {
+    background: linear-gradient(135deg, #e0f2ff 0%, #b3d9ff 100%);
+    box-shadow: 0 10px 30px rgba(77, 208, 225, 0.25), 
+                0 0 40px rgba(77, 208, 225, 0.15);
+}
+
+#temperatureCard.temp-cold .temp-header h3,
+#temperatureCard.temp-cold .temp-level {
+    color: #01579b;
+}
+
+#temperatureCard.temp-cold .temp-value {
+    color: #0277bd;
+}
+
+#temperatureCard.temp-normal {
+    background: linear-gradient(135deg, #e0f7ff 0%, #c8e6f5 100%);
+    box-shadow: 0 10px 30px rgba(148, 187, 233, 0.2), 
+                0 0 40px rgba(148, 187, 233, 0.1);
+}
+
+#temperatureCard.temp-normal .temp-header h3,
+#temperatureCard.temp-normal .temp-level {
+    color: #1565c0;
+}
+
+#temperatureCard.temp-normal .temp-value {
+    color: #1565c0;
+}
+
+#temperatureCard.temp-hot {
+    background: linear-gradient(135deg, #ffe8cc 0%, #ffd699 100%);
+    box-shadow: 0 10px 30px rgba(255, 152, 0, 0.25), 
+                0 0 40px rgba(255, 152, 0, 0.15);
+}
+
+#temperatureCard.temp-hot .temp-header h3,
+#temperatureCard.temp-hot .temp-level {
+    color: #e65100;
+}
+
+#temperatureCard.temp-hot .temp-value {
+    color: #e65100;
+}
+
+/* ===== 其他卡片增强样式 ===== */
+
+/* 通用卡片容器 */
+.humidity-card,
+.wind-card,
+.illumination-card {
+    padding: 28px 24px !important;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+}
+
+.humidity-card::before,
+.wind-card::before,
+.illumination-card::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 70%);
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    pointer-events: none;
+}
+
+.humidity-card:hover::before,
+.wind-card:hover::before,
+.illumination-card:hover::before {
+    opacity: 1;
+}
+
+/* 卡片头部 */
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.card-header h3 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.card-icon {
+    font-size: 24px;
+    animation: float 3s ease-in-out infinite;
+}
+
+/* 卡片主显示 */
+.card-main-display {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 20px;
+    gap: 16px;
+}
+
+.card-value-wrapper {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+}
+
+.card-value {
+    font-size: 48px;
+    font-weight: 700;
+    line-height: 1;
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.card-unit {
+    font-size: 20px;
+    font-weight: 600;
+    opacity: 0.8;
+}
+
+.card-value.changed {
+    animation: scaleBounce 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* 卡片状态 */
+.card-status {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+}
+
+.card-level {
+    font-size: 13px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.6);
+    white-space: nowrap;
+}
+
+.card-trend {
+    font-size: 20px;
+    transition: transform 0.4s ease;
+    display: inline-block;
+}
+
+.card-trend.up {
+    color: #e65100;
+    transform: rotate(45deg);
+}
+
+.card-trend.down {
+    color: #0277bd;
+    transform: rotate(-45deg);
+}
+
+.card-trend.stable {
+    color: #64748b;
+    transform: rotate(0deg);
+}
+
+/* 卡片进度条 */
+.card-progress-bar {
+    margin: 20px 0;
+}
+
+/* 卡片最高最低值显示 */
+.card-minmax {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    margin-top: 16px;
+}
+
+.minmax-item {
+    flex: 1;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 12px;
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 8px;
+    font-size: 13px;
+}
+
+.minmax-label {
+    color: #64748b;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+}
+
+.minmax-value {
+    color: #1f2937;
+    font-weight: 700;
+    font-size: 14px;
+}
+
+/* 卡片详细信息 */
+.card-details {
+    padding: 16px;
+    background: rgba(255, 255, 255, 0.6);
+    border-radius: 12px;
+    backdrop-filter: blur(10px);
+    animation: slideInUp 0.5s ease 0.1s backwards;
+}
+
+/* 湿度卡片颜色 */
+#humidityCard {
+    background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+    box-shadow: 0 10px 30px rgba(76, 175, 80, 0.25), 
+                0 0 40px rgba(76, 175, 80, 0.15);
+}
+
+#humidityCard .card-header h3,
+#humidityCard .card-level {
+    color: #1b5e20;
+}
+
+#humidityCard .card-value {
+    color: #388e3c;
+}
+
+#humidityCard .progress-fill {
+    background: linear-gradient(90deg, #4dd0e1 0%, #2196F3 50%, #4caf50 100%);
+}
+
+/* 风速卡片颜色 */
+#windSpeedCard {
+    background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+    box-shadow: 0 10px 30px rgba(33, 150, 243, 0.25), 
+                0 0 40px rgba(33, 150, 243, 0.15);
+}
+
+#windSpeedCard .card-header h3,
+#windSpeedCard .card-level {
+    color: #0d47a1;
+}
+
+#windSpeedCard .card-value {
+    color: #1976d2;
+}
+
+#windSpeedCard .progress-fill {
+    background: linear-gradient(90deg, #4dd0e1 0%, #2196F3 50%, #bbdefb 100%);
+}
+
+/* 光照强度卡片颜色 */
+#illuminationCard {
+    background: linear-gradient(135deg, #fff8e1 0%, #ffe082 100%);
+    box-shadow: 0 10px 30px rgba(255, 193, 7, 0.25), 
+                0 0 40px rgba(255, 193, 7, 0.15);
+}
+
+#illuminationCard .card-header h3,
+#illuminationCard .card-level {
+    color: #f57f17;
+}
+
+#illuminationCard .card-value {
+    color: #fbc02d;
+}
+
+#illuminationCard .progress-fill {
+    background: linear-gradient(90deg, #ffeb3b 0%, #ffc107 50%, #ff9800 100%);
+}
+
+/* 移动端适配 */
+@media (max-width: 767px) {
+    .temp-card {
+        padding: 18px 14px !important;
+    }
+    
+    .humidity-card,
+    .wind-card,
+    .illumination-card {
+        padding: 18px 14px !important;
+    }
+
+    .temp-value {
+        font-size: clamp(28px, 8vw, 40px);
+    }
+
+    .temp-unit {
+        font-size: 16px;
+    }
+
+    .temp-header {
+        margin-bottom: 10px;
+    }
+    
+    .temp-header h3,
+    .card-header h3 {
+        font-size: 14px;
+    }
+    
+    .temp-icon,
+    .card-icon {
+        font-size: 20px;
+    }
+
+    .temp-main-display,
+    .card-main-display {
+        margin-bottom: 12px;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .card-value {
+        font-size: clamp(28px, 8vw, 40px);
+    }
+
+    .card-unit {
+        font-size: 16px;
+    }
+
+    .card-header {
+        margin-bottom: 10px;
+    }
+
+    .details-grid {
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+
+    .detail-item {
+        padding: 8px;
+    }
+
+    .detail-value {
+        font-size: 16px;
+    }
+    
+    .temp-level,
+    .card-level {
+        font-size: 11px;
+        padding: 3px 8px;
+    }
+    
+    .temp-trend,
+    .card-trend {
+        font-size: 16px;
+    }
+    
+    .temp-progress-bar,
+    .card-progress-bar {
+        margin: 12px 0;
+    }
+    
+    .progress-labels {
+        font-size: 10px;
+    }
+    
+    .card-minmax {
+        gap: 8px;
+        margin-top: 10px;
+    }
+    
+    .minmax-item {
+        padding: 6px 8px;
+        font-size: 11px;
+    }
+    
+    .minmax-value {
+        font-size: 12px;
+    }
+}
+
+/* 小屏手机卡片特别优化 */
+@media (max-width: 480px) {
+    .temp-card,
+    .humidity-card,
+    .wind-card,
+    .illumination-card {
+        padding: 14px 10px !important;
+    }
+    
+    .temp-value,
+    .card-value {
+        font-size: clamp(24px, 7vw, 32px);
+    }
+    
+    .temp-unit,
+    .card-unit {
+        font-size: 14px;
+    }
+    
+    .temp-status,
+    .card-status {
+        gap: 2px;
+    }
+    
+    .minmax-item {
+        padding: 5px 6px;
+        flex-direction: column;
+        gap: 2px;
+        text-align: center;
+    }
+}
+
+/* ===== 数据卡片加载骨架屏 ===== */
+.data-card.loading {
+    background: linear-gradient(90deg, 
+        #f0f4f8 0%, 
+        #f8fafc 50%, 
+        #f0f4f8 100%);
+    background-size: 200% 100%;
+    animation: shimmer 2s infinite;
+}
+
+.data-card.loading .data-value,
+.data-card.loading h3 {
+    color: transparent;
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 4px;
+}

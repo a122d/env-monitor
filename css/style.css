@@ -1,0 +1,11 @@
+/* Entry point for split CSS modules */
+@import url('./variables.css');
+@import url('./animations.css');
+@import url('./base.css');
+@import url('./modals.css');
+@import url('./cards.css');
+@import url('./charts.css');
+@import url('./ai.css');
+@import url('./toast-alert.css');
+@import url('./responsive.css');
+

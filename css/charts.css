@@ -1,0 +1,48 @@
+/* ===== 图表容器 ===== */
+.charts-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 480px), 1fr));
+    gap: clamp(16px, 3vw, 24px);
+    margin: 0 0 clamp(20px, 3vw, 30px) 0;
+    width: 100%;
+    min-width: 0;
+    animation: slideInUp 0.6s ease 0.4s backwards;
+}
+
+.chart-container {
+    width: 100%;
+    aspect-ratio: 4/3;
+    min-height: clamp(280px, 45vw, 550px);
+    max-height: 680px;
+    padding: 0;
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    border-radius: clamp(12px, 2vw, 16px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.06), 
+                0 4px 12px rgba(37, 99, 235, 0.04),
+                inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.chart-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 60px;
+    background: linear-gradient(135deg, rgba(37, 99, 235, 0.03) 0%, rgba(37, 99, 235, 0.01) 100%);
+    border-bottom: 1px solid rgba(226, 232, 240, 0.6);
+    pointer-events: none;
+    z-index: 1;
+}
+
+.chart-container:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 16px 40px rgba(0,0,0,0.1), 
+                0 8px 16px rgba(37, 99, 235, 0.08),
+                inset 0 1px 0 rgba(255, 255, 255, 1);
+    border-color: rgba(37, 99, 235, 0.2);
+}
