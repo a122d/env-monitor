@@ -1,6 +1,6 @@
 // 统一版本号管理
-//const APP_VERSION = 'V3.6.1';
-const APP_VERSION = 'beta-3.6.1-6';
+const APP_VERSION = 'V-3.6.3';
+//const APP_VERSION = 'beta-3.6.2-1';
 window.APP_VERSION = APP_VERSION;
 
 // 将版本写入页面中的 #appVersion 元素（DOM 安全处理）
