@@ -769,7 +769,7 @@
     letter-spacing: 1px;
 }
 #pressureCard .card-icon {
-    font-size: 36px;
+    font-size: 32px;
     color: #00bcd4;
 }
 #pressureCard .card-value-wrapper {
@@ -812,7 +812,7 @@
     letter-spacing: 1px;
 }
 #altitudeCard .card-icon {
-    font-size: 36px;
+    font-size: 32px;
     color: #5c6bc0;
 }
 #altitudeCard .card-value-wrapper {
