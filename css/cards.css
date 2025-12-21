@@ -807,23 +807,27 @@
     .altitude-card {
         padding: 18px 14px !important; 
     }
-    #pressureCard .card-value-wrapper,
-    #altitudeCard .card-value-wrapper {
-        width: 100%;
+    .pressure-card .card-header h3,
+    .altitude-card .card-header h3 {
+        font-size: 14px;
+    }
+    .pressure-card .card-icon,
+    .altitude-card .card-icon {
+        font-size: 20px; 
     }
     #pressureCard .card-value,
     #altitudeCard .card-value {
-        font-size: clamp(20px, 6vw, 28px);
-        margin-top: 10px;
+        font-size: clamp(28px, 8vw, 32px);
+        margin-top: 6px;
     }
     #pressureCard .card-unit {
         font-size: 20px;
-        margin-top: 14px;
+        margin-top: 8px;
         margin-right: 8px;
     }
     #altitudeCard .card-unit {
         font-size: 24px;
-        margin-top: 10px;
+        margin-top: 8px;
         margin-right: 6px;
     }
 }
