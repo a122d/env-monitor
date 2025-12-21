@@ -668,17 +668,18 @@
 }
 #pressureCard .card-value {
     color: #0097a7;
-    font-size: 45px;
+    font-size: 48px;
     font-weight: 800;
     display: block;
     text-align: center;
+    margin-top: 32px;
 }
 #pressureCard .card-unit {
     color: #0c4def;
-    font-size: 24px;
+    font-size: 28px;
     display: block;
     text-align: right;
-    margin-top: 12px;
+    margin-top: 32px;
     margin-right: 10px;
 }
 
@@ -710,22 +711,25 @@
 }
 #altitudeCard .card-value {
     color: #3949ab;
-    font-size: 45px;
+    font-size: 48px;
     font-weight: 800;
     display: block;
     text-align: center;
+    margin-top: 32px;
 }
 #altitudeCard .card-unit {
     color: #854ae4;
-    font-size: 32px;
+    font-size: 36px;
     display: block;
     text-align: right;
-    margin-top: 12px;
+    margin-top: 32px;
     margin-right: 12px;
 }
 
 /* 移动端适配 */
 @media (max-width: 767px) {
+    .asd1-card,
+    .asd2-card,
     .temp-card,
     .humidity-card,
     .wind-card,
@@ -799,31 +803,28 @@
 
 @media (max-width: 767px) {
     /* 设置大气压强 海拔 卡片 */
+    .pressure-card,
+    .altitude-card {
+        padding: 18px 14px !important; 
+    }
     #pressureCard .card-value-wrapper,
     #altitudeCard .card-value-wrapper {
         width: 100%;
-        display: block;
     }
     #pressureCard .card-value,
     #altitudeCard .card-value {
-        font-size: clamp(26px, 8vw, 36px);
-        text-align: center;
-        display: block;
-        word-break: break-all;
+        font-size: clamp(20px, 6vw, 28px);
+        margin-top: 10px;
     }
     #pressureCard .card-unit {
         font-size: 20px;
-        text-align: right;
-        margin-top: 10px;
-        margin-right: 6px;
-        display: block;
+        margin-top: 14px;
+        margin-right: 8px;
     }
     #altitudeCard .card-unit {
-        font-size: 22px;
-        text-align: right;
-        margin-top: 12px;
-        margin-right: 8px;
-        display: block;
+        font-size: 24px;
+        margin-top: 10px;
+        margin-right: 6px;
     }
 }
 
