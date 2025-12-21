@@ -785,7 +785,7 @@
     text-align: left;
 }
 #pressureCard .card-unit {
-    color: #00bcd4;
+    color: #0c4def;
     font-size: 24px;
     display: block;
     text-align: right;
@@ -842,127 +842,94 @@
     .humidity-card,
     .wind-card,
     .illumination-card {
-        padding: 18px 14px !important;
+        padding: 18px 14px !important; 
     }
-
-    .temp-value {
+    .temp-value,
+    .card-value {
         font-size: clamp(28px, 8vw, 40px);
     }
-
-    .temp-unit {
+    .temp-unit,
+    .card-unit {
         font-size: 16px;
     }
-
-    .temp-header {
+    .temp-header,
+    .card-header {
         margin-bottom: 10px;
     }
-    
     .temp-header h3,
     .card-header h3 {
         font-size: 14px;
     }
-    
     .temp-icon,
     .card-icon {
         font-size: 20px;
     }
-
     .temp-main-display,
     .card-main-display {
         margin-bottom: 12px;
         flex-wrap: wrap;
         gap: 8px;
     }
-
-    .card-value {
-        font-size: clamp(28px, 8vw, 40px);
-    }
-
-    .card-unit {
-        font-size: 16px;
-    }
-
-    .card-header {
-        margin-bottom: 10px;
-    }
-
     .details-grid {
         grid-template-columns: 1fr;
         gap: 8px;
     }
-
     .detail-item {
         padding: 8px;
     }
-
     .detail-value {
         font-size: 16px;
     }
-    
     .temp-level,
     .card-level {
         font-size: 11px;
         padding: 3px 8px;
     }
-    
     .temp-trend,
     .card-trend {
         font-size: 16px;
     }
-    
     .temp-progress-bar,
     .card-progress-bar {
         margin: 12px 0;
     }
-    
     .progress-labels {
         font-size: 10px;
     }
-    
     .card-minmax {
         gap: 8px;
         margin-top: 10px;
     }
-    
     .minmax-item {
         padding: 6px 8px;
         font-size: 11px;
     }
-    
     .minmax-value {
         font-size: 12px;
     }
 }
 
-/* 小屏手机卡片特别优化 */
-@media (max-width: 480px) {
-    .temp-card,
-    .humidity-card,
-    .wind-card,
-    .illumination-card {
-        padding: 14px 10px !important;
+@media (max-width: 767px) {
+    /* 设置大气压强 海拔 卡片 */
+    #pressureCard .card-value-wrapper,
+    #altitudeCard .card-value-wrapper {
+        width: 100%;
+        display: block;
     }
-    
-    .temp-value,
-    .card-value {
+    #pressureCard .card-value,
+    #altitudeCard .card-value {
         font-size: clamp(24px, 7vw, 32px);
-    }
-    
-    .temp-unit,
-    .card-unit {
-        font-size: 14px;
-    }
-    
-    .temp-status,
-    .card-status {
-        gap: 2px;
-    }
-    
-    .minmax-item {
-        padding: 5px 6px;
-        flex-direction: column;
-        gap: 2px;
         text-align: center;
+        display: block;
+        word-break: break-all;
+    }
+    #pressureCard .card-unit,
+    #altitudeCard .card-unit {
+        font-size: 18px;
+        text-align: right;
+        margin-top: 4px;
+        margin-right: 6px;
+        display: block;
     }
 }
 
