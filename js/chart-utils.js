@@ -26,8 +26,8 @@ function getResponsiveConfig() {
             tooltip: isMobile ? 12 : 13
         },
         grid: {
-            left: isMobile ? '6%' : '3%',
-            right: isMobile ? '6%' : '8%',
+            left: isMobile ? '4%' : '3%',
+            right: isMobile ? '8%' : '8%',
             bottom: isMobile ? '6%' : '5%',
             top: isMobile ? '24%' : '18%'
         },

@@ -58,7 +58,7 @@
         border-radius: 12px;
     }
     .main-title {
-        font-size: clamp(20px, 5.5vw, 28px);
+        font-size: clamp(20px, 8vw, 28px);
     }
     .data-grid {
         grid-template-columns: repeat(2, 1fr);

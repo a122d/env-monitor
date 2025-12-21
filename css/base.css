@@ -109,7 +109,7 @@ body {
     padding-bottom: clamp(12px, 2vw, 20px);
     border-bottom: 2px solid #f0f2f5;
     position: relative;
-    min-height: clamp(50px, 8vw, 70px);
+    min-height: clamp(50px, 12vw, 70px);
     animation: fadeIn 0.8s ease 0.2s backwards;
 }
 
