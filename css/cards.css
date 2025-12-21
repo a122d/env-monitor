@@ -780,9 +780,8 @@
     color: #0097a7;
     font-size: 40px;
     font-weight: 800;
-    letter-spacing: 1px;
     display: block;
-    text-align: left;
+    text-align: center;
 }
 #pressureCard .card-unit {
     color: #0c4def;
@@ -823,9 +822,8 @@
     color: #3949ab;
     font-size: 40px;
     font-weight: 800;
-    letter-spacing: 1px;
     display: block;
-    text-align: left;
+    text-align: center;
 }
 #altitudeCard .card-unit {
     color: #a873d7;

@@ -193,7 +193,8 @@ function reconnect() {
     }, delay);
 }
 
-// 更新数据卡片（温/湿/风÷10保留1位小数）
+// 更新数据卡片
+// 温/湿/风/海拔÷10保留1位小数  大气压÷10000保留3位小数
 function updateDataCards(data) {
     // 温度：÷10保留1位小数，更新统计信息和颜色
     if (data.temperature !== undefined) {
@@ -219,9 +220,9 @@ function updateDataCards(data) {
         updateIlluminationCard(illuminationValue);
         updateDataValue('illumination', illuminationValue);
     }
-    // 大气压强：÷1000保留2位小数，单位kPa
+    // 大气压强：÷10000保留3位小数，单位KPa
     if (data.pressure !== undefined) {
-        const pressureValue = (parseFloat(data.pressure) / 1000).toFixed(2);
+        const pressureValue = (parseFloat(data.pressure) / 10000).toFixed(3);
         updatePressureCard(pressureValue);
         updateDataValue('pressure', pressureValue);
     }
@@ -508,7 +509,7 @@ function updatePressureCard(pressureValue) {
     // 只更新数值部分
     const valueEl = card.querySelector('.card-value');
     if (valueEl) {
-        valueEl.textContent = pressureNum.toFixed(2);
+        valueEl.textContent = pressureNum.toFixed(3);
     }
 }
 
@@ -699,14 +700,17 @@ window.MQTTApp.init = function(newConfig) {
             }
             
             // 处理环境数据主题消息
-            try {
-                const data = JSON.parse(payload);
-                updateDataCards(data);
-                // 触发图表更新
-                if (window.updateChartData) window.updateChartData(data);
-            } catch (e) {
-                console.error('❌ 消息解析失败：', e);
+            if (topic === mqttConfig.topic) {
+                try {
+                    const data = JSON.parse(payload);
+                    updateDataCards(data);
+                    // 触发图表更新
+                    if (window.updateChartData) window.updateChartData(data);
+                } catch (e) {
+                    console.error('❌ 消息解析失败：', e);
+                }
             }
+            
         };
 
         // 连接配置（仅保留Paho支持的属性）
