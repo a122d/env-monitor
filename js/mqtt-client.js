@@ -508,7 +508,7 @@ function updatePressureCard(pressureValue) {
     // 只更新数值部分
     const valueEl = card.querySelector('.card-value');
     if (valueEl) {
-        valueEl.textContent = pressureNum.toFixed(3);
+        valueEl.textContent = pressureNum.toFixed(2);
     }
 }
 
