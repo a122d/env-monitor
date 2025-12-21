@@ -1,4 +1,4 @@
-/* ===== 卡片标题 ===== */
+/* ===== 卡片标题 ===== 
 .card-text {
     margin: -10px 0 24px 0; 
     text-align: center;
@@ -10,7 +10,7 @@
     color: #3079b5;
     margin-bottom: 8px;
 }
-
+*/
 /* ===== 卡片与数据栅格 ===== */
 .data-grid {
     display: grid;
@@ -836,9 +836,6 @@
 
 /* 移动端适配 */
 @media (max-width: 767px) {
-    .card-text h2 {
-        font-size: clamp(20px, 6vw, 24px);
-    }
     .temp-card,
     .humidity-card,
     .wind-card,
