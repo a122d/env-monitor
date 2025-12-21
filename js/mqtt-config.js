@@ -1,8 +1,11 @@
-// 统一版本号管理
-//const APP_VERSION = '3.6.4';
-const APP_VERSION = '3.6.3-1 beta';
-window.APP_VERSION = APP_VERSION;
+// 提供MQTT连接配置和用户登录弹窗功能
 
+// ============ 应用版本号 ============
+// 统一版本号管理
+const APP_VERSION = 'V3.6.5';// beta';
+
+// 暴露全局版本号
+window.APP_VERSION = APP_VERSION;
 // 将版本写入页面中的 #appVersion 元素（DOM 安全处理）
 (function(){
     function setAppVersion(){
@@ -27,7 +30,7 @@ window.MQTT_DEFAULT_CONFIG = {
     clientId: 'env-monitor-' + Math.random().toString(16).substr(2, 8),
     topic: 'environment/data',
     username: 'WEB',  // 默认用户名
-    password: '',  // ❌ 不再硬编码密码 - 必须由用户在UI中输入
+    password: '',  // 不再硬编码密码 - 必须由用户在UI中输入
     keepalive: 30,
     clean: true,
     

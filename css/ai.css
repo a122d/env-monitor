@@ -132,24 +132,60 @@
 
 .ai-settings-btn,
 .ai-close-btn {
-    width: 36px;
-    height: 36px;
-    border: none;
-    background: rgba(255, 255, 255, 0.2);
-    color: white;
+    width: 40px;
+    height: 40px;
+    border: 2px solid #a18fff;
+    background: linear-gradient(135deg, #8f6fff 60%, #6a5cff 100%);
+    color: #fff;
     border-radius: 50%;
+    box-shadow: 0 2px 8px rgba(106,92,255,0.18);
     cursor: pointer;
-    font-size: 18px;
+    font-size: 22px;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.3s ease;
+    transition: all 0.3s cubic-bezier(.4,2,.3,1);
+}
+/* 设置按钮SVG主色 */
+.ai-settings-btn .ai-settings-icon {
+    color: #00d9ff;
+    fill: none;
+    stroke: #00d9ff;
+    filter: drop-shadow(0 0 0px #00d9ff);
+    transition: filter 0.2s, color 0.2s, stroke 0.2s;
+}
+
+.ai-settings-btn:hover .ai-settings-icon {
+    color: #00d9ff;
+    stroke: #00d9ff;
+    filter: drop-shadow(0 0 8px #00d9ff);
+}
+
+
+/* 关闭按钮SVG红色 */
+.ai-close-btn .ai-close-icon {
+    color: #ff4d4f;
+    fill: none;
+}
+/* 设置齿轮按钮主色 */
+.ai-settings-btn svg,
+.ai-settings-btn i {
+    color: #b05cff !important;
+    fill: #b05cff !important;
+}
+
+/* 关闭按钮红色 */
+.ai-close-btn svg,
+.ai-close-btn i {
+    color: #ff4d4f !important;
+    fill: #ff4d4f !important;
 }
 
 .ai-settings-btn:hover,
 .ai-close-btn:hover {
-    background: rgba(255, 255, 255, 0.3);
-    transform: scale(1.1);
+    background: linear-gradient(135deg, #a18fff 60%, #6a5cff 100%);
+    box-shadow: 0 4px 16px rgba(106,92,255,0.28);
+    transform: scale(1.15);
 }
 
 /* AI聊天容器 */
