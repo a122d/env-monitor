@@ -5,7 +5,7 @@
     left: 0;
     width: 100vw;
     height: 100vh;
-    z-index: 9900;
+    z-index: 100;
     display: none;
 }
 
