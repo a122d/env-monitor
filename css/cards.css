@@ -809,7 +809,7 @@
     }
     .pressure-card .card-header h3,
     .altitude-card .card-header h3 {
-        font-size: 14px;
+        font-size: 16px;
     }
     .pressure-card .card-icon,
     .altitude-card .card-icon {
@@ -822,12 +822,12 @@
     }
     #pressureCard .card-unit {
         font-size: 20px;
-        margin-top: 8px;
+        margin-top: 16px;
         margin-right: 8px;
     }
     #altitudeCard .card-unit {
         font-size: 24px;
-        margin-top: 8px;
+        margin-top: 14px;
         margin-right: 6px;
     }
 }
