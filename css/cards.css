@@ -836,6 +836,9 @@
 
 /* 移动端适配 */
 @media (max-width: 767px) {
+    .card-text h2 {
+        font-size: clamp(20px, 6vw, 24px);
+    }
     .temp-card,
     .humidity-card,
     .wind-card,
