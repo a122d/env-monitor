@@ -72,6 +72,11 @@
             </div>
         </div>
         
+        <!-- 数据卡片区域 -->
+        <section class="card-text" aria-label="数据卡片标题">
+            <h2>数据卡片</h2>
+        </section>
+
         <main class="data-grid" role="main">
             <article class="data-card temp-card temp-normal" id="temperatureCard" aria-label="温度监测">
                 <div class="temp-header">
@@ -241,7 +246,54 @@
                     </div>
                 </div>
             </article>
+        
+            <article class="placeholder-card" id="asd1" aria-label="占位">
+                <div class="card-header">
+                    <h3>占位</h3>
+                    <span class="card-icon" id="pressureIcon">🌳</span>
+                </div>
+
+            </article>
+
+            <article class="placeholder-card" id="asd2" aria-label="占位">
+                <div class="card-header">
+                    <h3>占位</h3>
+                    <span class="card-icon" id="pressureIcon">💬</span>
+                </div>
+
+            </article>
+
+            <article class="data-card pressure-card" id="pressureCard" aria-label="大气压强监测">
+                <div class="card-header">
+                    <h3>大气压强</h3>
+                    <span class="card-icon" id="pressureIcon">⏲️</span>
+                </div>
+                <div class="card-main-display">
+                    <div class="card-value-wrapper">
+                        <span class="card-value" id="pressureValue">--</span>
+                        <span class="card-unit">hPa</span>
+                    </div>
+                </div>
+            </article>
+
+            <article class="data-card altitude-card" id="altitudeCard" aria-label="海拔高度监测">
+                <div class="card-header">
+                    <h3>海拔高度</h3>
+                    <span class="card-icon" id="altitudeIcon">🏔️</span>
+                </div>
+                <div class="card-main-display">
+                    <div class="card-value-wrapper">
+                        <span class="card-value" id="altitudeValue">--</span>
+                        <span class="card-unit">m</span>
+                    </div>
+                </div>
+            </article>
         </main>
+        
+        <!-- 图表区域 -->
+        <section class="chart-text" aria-label="图表标题">
+            <h2>数据趋势图</h2>
+        </section>
 
         <section class="charts-container" aria-label="数据图表区域">
             <figure class="chart-container" id="temp-chart" role="img" aria-label="温度趋势图表"></figure>
@@ -305,23 +357,23 @@
                             <li>✅ <strong>安全防护</strong> - 严格的内容安全策略（CSP）</li>
                         </ul>
                     </div>
-                    
+
+                    <div class="about-section">
+                        <h5>V4.1.0 更新内容</h5>
+                        <ul class="features-list">
+                            <li>🎨 <strong>新增数据卡片</strong> - 新增大气压强与海拔卡片，引入全新数据</li>
+                            <li>📏 <strong>单位显示调整</strong> - 大气压强与海拔单位独占一行，位置更美观，显示更清晰</li>
+                            <li>🛠️ <strong>弹窗与AI助手修复</strong> - 修复主页面AI按钮、弹窗显示异常问题，结构更健壮</li>
+                            <li>⚡ <strong>性能与体验提升</strong> - 优化页面渲染与交互细节，提升整体流畅度</li>
+                        </ul>
+                    </div>
+
                     <div class="about-section">
                         <h5>V3.6.3 更新内容</h5>
                         <ul class="features-list">
                             <li>🛡️ <strong>自定义提示弹窗</strong> - 弹窗z-index提升，确保所有弹窗始终最上层</li>
                             <li>🧩 <strong>统一反馈机制</strong> - 配置保存、API获取等操作全部统一为ToastAlert弹窗反馈</li>
                             <li>⏳ <strong>修复按键闪烁</strong> - 获取API按钮等待期间新增loading遮罩，防止闪烁和误操作</li>                       
-                        </ul>
-                    </div>
-
-                    <div class="about-section">
-                        <h5>V3.6.1 更新内容</h5>
-                        <ul class="features-list">
-                            <li>📱 <strong>AI 弹窗重构</strong> - 居中弹出、渐进缩放，聊天区滚动不再被遮挡</li>
-                            <li>📐 <strong>移动端高度优化</strong> - 使用 <code>svh</code> 限高，自适应内容高度，避免虚拟键盘挤压</li>
-                            <li>🧹 <strong>样式精简</strong> - 移除重复/冲突的 AI 样式，保留单一权威定义</li>
-                            <li>🛡️ <strong>视口安全</strong> - 弹窗打开时锁定背景滚动，安全区内边距适配</li>
                         </ul>
                     </div>
 

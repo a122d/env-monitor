@@ -1,10 +1,23 @@
+/* ===== 卡片标题 ===== */
+.card-text {
+    margin: -10px 0 24px 0; 
+    text-align: center;
+}
+
+.card-text h2 {
+    font-size: clamp(1.5rem, 2.5vw, 2rem);
+    font-weight: 600;
+    color: #3079b5;
+    margin-bottom: 8px;
+}
+
 /* ===== 卡片与数据栅格 ===== */
 .data-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
     gap: clamp(12px, 2vw, 20px);
     margin: 0 0 clamp(15px, 2vw, 20px) 0;
-    animation: slideInUp 0.6s ease 0.3s backwards;
+    animation: slideInUp 0.6s ease 0.3s backwards; 
 }
 
 .data-card {
@@ -71,13 +84,101 @@
     animation: pulse 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-@keyframes pulse {
+@keyframes pulse {   
     0% { transform: scale(1); }
     50% { transform: scale(1.12); color: #2563eb; }
     100% { transform: scale(1); }
 }
 
-.unit {
+.unit {  
+    font-size: 16px;
+    color: #64748b;
+    margin-left: 8px;
+    position: relative;
+    z-index: 1;
+}
+
+/* 占位卡片区域 */
+.placeholder-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+    gap: clamp(12px, 2vw, 20px);
+    margin:  0 0 clamp(15px, 2vw, 20px) 0;
+    animation: slideInUp 0.6s ease 0.3s backwards; 
+}
+
+
+.placeholder-card {
+    padding: clamp(18px, 3vw, 25px) clamp(14px, 2.5vw, 20px);
+    background: linear-gradient(135deg, var(--color-bg) 0%, var(--color-bg-light) 100%);
+    border-radius: clamp(10px, 1.5vw, 14px);
+    text-align: center;
+    box-shadow: var(--shadow-md), 0 0 20px rgba(37, 99, 235, 0.04);
+    border: 2px solid #f0f2f5;
+    transition: transform var(--transition-normal) var(--ease-bounce),
+                box-shadow var(--transition-normal) var(--ease-smooth),
+                border-color var(--transition-normal) var(--ease-smooth);
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    touch-action: manipulation;
+    will-change: transform;
+    contain: layout style;
+}
+
+.placeholder-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(37, 99, 235, 0.1), transparent);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.placeholder-card:hover {
+    transform: translateY(-8px) scale(1.01);
+    box-shadow: var(--shadow-lg), 0 0 30px rgba(37, 99, 235, 0.15);
+    border-color: var(--color-primary);
+}
+
+.placeholder-card:hover::before {
+    opacity: 1;
+}
+
+.placeholder-card h3{
+    color: #64748b;
+    margin-bottom: 18px;
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    position: relative;
+    z-index: 1;
+}
+
+.placeholder-value {
+    font-size: 34px;
+    font-weight: bold;
+    color: #1f2937;
+    transition: all 0.8s ease-in-out;
+    display: inline-block;
+    position: relative;
+    z-index: 1;
+}
+
+.placeholder-value .changed {
+    animation: pulse 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes pulse {   
+    0% { transform: scale(1); }
+    50% { transform: scale(1.12); color: #2563eb; }
+    100% { transform: scale(1); }
+}
+
+.unit {  
     font-size: 16px;
     color: #64748b;
     margin-left: 8px;
@@ -600,13 +701,144 @@
 #illuminationCard .progress-fill {
     background: linear-gradient(90deg, #ffeb3b 0%, #ffc107 50%, #ff9800 100%);
 }
+/*-----------------------------------------------------------*/
+/* ===== 占位卡片样式 ===== */
+#asd1 {
+    padding: 28px 24px !important;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+    background: linear-gradient(135deg, #ffe0f0 0%, #ffb3d9 100%);
+    box-shadow: 0 10px 30px rgba(225, 69, 142, 0.13),
+                0 0 40px rgba(225, 69, 142, 0.08);
+    border-color: #f0f2f5;
+}
+#asd1:hover {
+    border-color: var(--color-primary);
+}
+#asd1 .card-header h3{
+    color: #e1458e;
+    letter-spacing: 1px;
+}
+#asd1 .card-icon {
+    font-size: 32px;
+    color: #ec407a;
+}
+
+
+#asd2 {
+    padding: 28px 24px !important;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+    background: linear-gradient(135deg, #f3e5ff 0%, #d1c4e9 100%);
+    box-shadow: 0 10px 30px rgba(102, 92, 192, 0.13),
+                0 0 40px rgba(102, 92, 192, 0.08);
+    border-color: #f0f2f5;
+}
+#asd2:hover {
+    border-color: var(--color-primary);
+}
+#asd2 .card-header h3{
+    color: #665cc0;
+    letter-spacing: 1px;
+}
+#asd2 .card-icon {
+    font-size: 32px;
+    color: #7e57c2;
+}
+
+
+/* 大气压强卡片：清新蓝绿色调 */
+#pressureCard {
+    padding: 28px 24px !important;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+    background: linear-gradient(135deg, #e0f7fa 0%, #b2ebf2 100%);
+    box-shadow: 0 10px 30px rgba(0, 188, 212, 0.13),
+                0 0 40px rgba(0, 188, 212, 0.08);
+    border-color: #f0f2f5;
+}
+
+#pressureCard:hover {
+    border-color: var(--color-primary);
+}
+#pressureCard .card-header h3 {
+    color: #0097a7;
+    letter-spacing: 1px;
+}
+#pressureCard .card-icon {
+    font-size: 36px;
+    color: #00bcd4;
+}
+#pressureCard .card-value-wrapper {
+    display: block;
+    width: 100%;
+}
+#pressureCard .card-value {
+    color: #0097a7;
+    font-size: 40px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    display: block;
+    text-align: left;
+}
+#pressureCard .card-unit {
+    color: #00bcd4;
+    font-size: 24px;
+    display: block;
+    text-align: right;
+    margin-top: 6px;
+    margin-right: 10px;
+}
+
+/* 海拔高度卡片：清新紫蓝色调 */
+#altitudeCard {
+    padding: 28px 24px !important;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+    background: linear-gradient(135deg, #ede7f6 0%, #b3c6f7 100%);
+    box-shadow: 0 10px 30px rgba(103, 58, 183, 0.13),
+                0 0 40px rgba(33, 150, 243, 0.08);
+    border-color: #f0f2f5;
+}
+#altitudeCard:hover {
+    border-color: var(--color-primary);
+}
+#altitudeCard .card-header h3 {
+    color: #3949ab;
+    letter-spacing: 1px;
+}
+#altitudeCard .card-icon {
+    font-size: 36px;
+    color: #5c6bc0;
+}
+#altitudeCard .card-value-wrapper {
+    display: block;
+    width: 100%;
+}
+#altitudeCard .card-value {
+    color: #3949ab;
+    font-size: 40px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    display: block;
+    text-align: left;
+}
+#altitudeCard .card-unit {
+    color: #a873d7;
+    font-size: 24px;
+    display: block;
+    text-align: right;
+    margin-top: 6px;
+    margin-right: 10px;
+}
 
 /* 移动端适配 */
 @media (max-width: 767px) {
-    .temp-card {
-        padding: 18px 14px !important;
-    }
-    
+    .temp-card,
     .humidity-card,
     .wind-card,
     .illumination-card {
@@ -735,7 +967,7 @@
 }
 
 /* ===== 数据卡片加载骨架屏 ===== */
-.data-card.loading {
+.data-card.loading {  
     background: linear-gradient(90deg, 
         #f0f4f8 0%, 
         #f8fafc 50%, 
@@ -749,4 +981,13 @@
     color: transparent;
     background: rgba(255, 255, 255, 0.5);
     border-radius: 4px;
+}
+
+.pressure-card .card-header h3,
+.pressure-card .card-value {
+    color: #6d4c41;
+}
+.altitude-card .card-header h3,
+.altitude-card .card-value {
+    color: #388e3c;
 }

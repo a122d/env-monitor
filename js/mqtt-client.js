@@ -219,6 +219,18 @@ function updateDataCards(data) {
         updateIlluminationCard(illuminationValue);
         updateDataValue('illumination', illuminationValue);
     }
+    // 大气压强：÷1000保留2位小数，单位kPa
+    if (data.pressure !== undefined) {
+        const pressureValue = (parseFloat(data.pressure) / 1000).toFixed(2);
+        updatePressureCard(pressureValue);
+        updateDataValue('pressure', pressureValue);
+    }
+    // 海拔高度：÷10保留1位小数，单位m
+    if (data.altitude !== undefined) {
+        const altitudeValue = (parseFloat(data.altitude) / 10).toFixed(1);
+        updateAltitudeCard(altitudeValue);
+        updateDataValue('altitude', altitudeValue);
+    }
 }
 
 // 更新温度卡片（增强版）
@@ -486,6 +498,30 @@ function updateIlluminationCard(illuminationValue) {
     
     // 更新详细信息
     updateIlluminationDetails();
+}
+
+// 更新大气压强卡片
+function updatePressureCard(pressureValue) {
+    const pressureNum = parseFloat(pressureValue);
+    const card = document.getElementById('pressureCard');
+    if (!card) return;
+    // 只更新数值部分
+    const valueEl = card.querySelector('.card-value');
+    if (valueEl) {
+        valueEl.textContent = pressureNum.toFixed(2);
+    }
+}
+
+// 更新海拔高度卡片
+function updateAltitudeCard(altitudeValue) {
+    const altitudeNum = parseFloat(altitudeValue);
+    const card = document.getElementById('altitudeCard');
+    if (!card) return;
+    // 只更新数值部分
+    const valueEl = card.querySelector('.card-value');
+    if (valueEl) {
+        valueEl.textContent = altitudeNum.toFixed(1);
+    }
 }
 
 // 通用卡片趋势更新函数
