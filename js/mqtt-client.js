@@ -537,10 +537,13 @@ function updatePM25Card(pm25Value) {
             levelEl.textContent = '良';
         } else if (pm25Num <= 115) {
             levelEl.textContent = '轻度污染';
+            levelEl.classList.add('pollution-level');
         } else if (pm25Num <= 150) {
             levelEl.textContent = '中度污染';
+            levelEl.classList.add('pollution-level');
         } else {
             levelEl.textContent = '重度污染';
+            levelEl.classList.add('pollution-level');
         }
     }
     // 更新进度条
