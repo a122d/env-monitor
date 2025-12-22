@@ -376,6 +376,16 @@ function updateHumidityCard(humidityValue) {
     humidityStats.sum += humidityNum;
     humidityStats.count++;
     
+    // 更新颜色类
+    card.classList.remove('humidity-dry', 'humidity-comfort', 'humidity-wet');
+    if (humidityNum < 30) {
+        card.classList.add('humidity-dry');
+    } else if (humidityNum < 70) {
+        card.classList.add('humidity-comfort');
+    } else {
+        card.classList.add('humidity-wet');
+    }
+    
     // 更新湿度等级标签
     const levelEl = card.querySelector('.card-level');
     if (levelEl) {
@@ -424,6 +434,16 @@ function updateWindSpeedCard(windSpeedValue) {
     }
     windSpeedStats.sum += windNum;
     windSpeedStats.count++;
+    
+    // 更新颜色类
+    card.classList.remove('wind-calm', 'wind-moderate', 'wind-strong');
+    if (windNum < 5.4) {
+        card.classList.add('wind-calm');
+    } else if (windNum < 10.8) {
+        card.classList.add('wind-moderate');
+    } else {
+        card.classList.add('wind-strong');
+    }
     
     // 更新风速等级标签
     const levelEl = card.querySelector('.card-level');
@@ -478,6 +498,16 @@ function updateIlluminationCard(illuminationValue) {
     illuminationStats.sum += illuminationNum;
     illuminationStats.count++;
     
+    // 更新颜色类
+    card.classList.remove('illumination-dim', 'illumination-moderate', 'illumination-bright');
+    if (illuminationNum < 200) {
+        card.classList.add('illumination-dim');
+    } else if (illuminationNum < 500) {
+        card.classList.add('illumination-moderate');
+    } else {
+        card.classList.add('illumination-bright');
+    }
+    
     // 更新光照等级标签
     const levelEl = card.querySelector('.card-level');
     if (levelEl) {
@@ -528,6 +558,21 @@ function updatePM25Card(pm25Value) {
     }
     pm25Stats.sum += pm25Num;
     pm25Stats.count++;
+    
+    // 更新颜色类
+    card.classList.remove('pm25-excellent', 'pm25-good', 'pm25-mild', 'pm25-moderate', 'pm25-heavy');
+    if (pm25Num <= 35) {
+        card.classList.add('pm25-excellent');
+    } else if (pm25Num <= 75) {
+        card.classList.add('pm25-good');
+    } else if (pm25Num <= 115) {
+        card.classList.add('pm25-mild');
+    } else if (pm25Num <= 150) {
+        card.classList.add('pm25-moderate');
+    } else {
+        card.classList.add('pm25-heavy');
+    }
+    
     // 更新PM2.5等级标签
     const levelEl = card.querySelector('.card-level');
     if (levelEl) {
@@ -579,6 +624,19 @@ function updateSunrayCard(sunrayValue) {
     }
     sunrayStats.sum += sunrayNum;
     sunrayStats.count++;
+    
+    // 更新颜色类
+    card.classList.remove('uvi-weak', 'uvi-moderate', 'uvi-strong', 'uvi-very-strong');
+    if (sunrayNum < 3) {
+        card.classList.add('uvi-weak');
+    } else if (sunrayNum < 6) {
+        card.classList.add('uvi-moderate');
+    } else if (sunrayNum < 8) {
+        card.classList.add('uvi-strong');
+    } else {
+        card.classList.add('uvi-very-strong');
+    }
+    
     // 更新紫外线等级标签
     const levelEl = card.querySelector('.card-level');
     if (levelEl) {

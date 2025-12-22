@@ -390,6 +390,281 @@
     color: #e65100;
 }
 
+/* ===== 湿度卡片颜色状态 ===== */
+#humidityCard.humidity-dry {
+    background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+    box-shadow: 0 10px 30px rgba(255, 152, 0, 0.25), 
+                0 0 40px rgba(255, 152, 0, 0.15);
+}
+
+#humidityCard.humidity-dry .card-header h3,
+#humidityCard.humidity-dry .card-level {
+    color: #e65100;
+}
+
+#humidityCard.humidity-dry .card-value {
+    color: #f57c00;
+}
+
+#humidityCard.humidity-comfort {
+    background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+    box-shadow: 0 10px 30px rgba(76, 175, 80, 0.25), 
+                0 0 40px rgba(76, 175, 80, 0.15);
+}
+
+#humidityCard.humidity-comfort .card-header h3,
+#humidityCard.humidity-comfort .card-level {
+    color: #2e7d32;
+}
+
+#humidityCard.humidity-comfort .card-value {
+    color: #388e3c;
+}
+
+#humidityCard.humidity-wet {
+    background: linear-gradient(135deg, #e0f2f1 0%, #b2dfdb 100%);
+    box-shadow: 0 10px 30px rgba(0, 150, 136, 0.25), 
+                0 0 40px rgba(0, 150, 136, 0.15);
+}
+
+#humidityCard.humidity-wet .card-header h3,
+#humidityCard.humidity-wet .card-level {
+    color: #00695c;
+}
+
+#humidityCard.humidity-wet .card-value {
+    color: #00897b;
+}
+
+/* ===== 风速卡片颜色状态 ===== */
+#windSpeedCard.wind-calm {
+    background: linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%);
+    box-shadow: 0 10px 30px rgba(156, 39, 176, 0.25), 
+                0 0 40px rgba(156, 39, 176, 0.15);
+}
+
+#windSpeedCard.wind-calm .card-header h3,
+#windSpeedCard.wind-calm .card-level {
+    color: #6a1b9a;
+}
+
+#windSpeedCard.wind-calm .card-value {
+    color: #7b1fa2;
+}
+
+#windSpeedCard.wind-moderate {
+    background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+    box-shadow: 0 10px 30px rgba(25, 103, 210, 0.25), 
+                0 0 40px rgba(25, 103, 210, 0.15);
+}
+
+#windSpeedCard.wind-moderate .card-header h3,
+#windSpeedCard.wind-moderate .card-level {
+    color: #0d47a1;
+}
+
+#windSpeedCard.wind-moderate .card-value {
+    color: #1565c0;
+}
+
+#windSpeedCard.wind-strong {
+    background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
+    box-shadow: 0 10px 30px rgba(211, 47, 47, 0.25), 
+                0 0 40px rgba(211, 47, 47, 0.15);
+}
+
+#windSpeedCard.wind-strong .card-header h3,
+#windSpeedCard.wind-strong .card-level {
+    color: #b71c1c;
+}
+
+#windSpeedCard.wind-strong .card-value {
+    color: #d32f2f;
+}
+
+/* ===== 光照卡片颜色状态 ===== */
+#illuminationCard.illumination-dim {
+    background: linear-gradient(135deg, #e8e8c8 0%, #d4d4a8 100%);
+    box-shadow: 0 10px 30px rgba(140, 130, 60, 0.25), 
+                0 0 40px rgba(140, 130, 60, 0.15);
+}
+
+#illuminationCard.illumination-dim .card-header h3,
+#illuminationCard.illumination-dim .card-level {
+    color: #7a7a3a;
+}
+
+#illuminationCard.illumination-dim .card-value {
+    color: #909050;
+}
+
+#illuminationCard.illumination-moderate {
+    background: linear-gradient(135deg, #ffe680 0%, #ffd966 100%);
+    box-shadow: 0 10px 30px rgba(255, 180, 0, 0.25), 
+                0 0 40px rgba(255, 180, 0, 0.15);
+}
+
+#illuminationCard.illumination-moderate .card-header h3,
+#illuminationCard.illumination-moderate .card-level {
+    color: #a37a14;
+}
+
+#illuminationCard.illumination-moderate .card-value {
+    color: #e7ab14;
+}
+
+#illuminationCard.illumination-bright {
+    background: linear-gradient(135deg, #ffeb99 0%, #ffd966 100%);
+    box-shadow: 0 10px 30px rgba(255, 193, 7, 0.25), 
+                0 0 40px rgba(255, 193, 7, 0.15);
+}
+
+#illuminationCard.illumination-bright .card-header h3,
+#illuminationCard.illumination-bright .card-level {
+    color: #e65100;
+}
+
+#illuminationCard.illumination-bright .card-value {
+    color: #f57c00;
+}
+
+/* ===== PM2.5卡片颜色状态 ===== */
+#PM2card.pm25-excellent {
+    background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+    box-shadow: 0 10px 30px rgba(76, 175, 80, 0.25), 
+                0 0 40px rgba(76, 175, 80, 0.15);
+}
+
+#PM2card.pm25-excellent .card-header h3,
+#PM2card.pm25-excellent .card-level {
+    color: #2e7d32;
+}
+
+#PM2card.pm25-excellent .card-value {
+    color: #388e3c;
+}
+
+#PM2card.pm25-good {
+    background: linear-gradient(135deg, #fff9c4 0%, #fff176 100%);
+    box-shadow: 0 10px 30px rgba(253, 216, 53, 0.2), 
+                0 0 40px rgba(253, 216, 53, 0.1);
+}
+
+#PM2card.pm25-good .card-header h3,
+#PM2card.pm25-good .card-level {
+    color: #c4a300;
+}
+
+#PM2card.pm25-good .card-value {
+    color: #d4af37;
+}
+
+#PM2card.pm25-mild {
+    background: linear-gradient(135deg, #ffe0b2 0%, #ffcc80 100%);
+    box-shadow: 0 10px 30px rgba(255, 152, 0, 0.25), 
+                0 0 40px rgba(255, 152, 0, 0.15);
+}
+
+#PM2card.pm25-mild .card-header h3,
+#PM2card.pm25-mild .card-level {
+    color: #e65100;
+}
+
+#PM2card.pm25-mild .card-value {
+    color: #f57c00;
+}
+
+#PM2card.pm25-moderate {
+    background: linear-gradient(135deg, #ffcccc 0%, #ffb3b3 100%);
+    box-shadow: 0 10px 30px rgba(244, 67, 54, 0.25), 
+                0 0 40px rgba(244, 67, 54, 0.15);
+}
+
+#PM2card.pm25-moderate .card-header h3,
+#PM2card.pm25-moderate .card-level {
+    color: #c62828;
+}
+
+#PM2card.pm25-moderate .card-value {
+    color: #d32f2f;
+}
+
+#PM2card.pm25-heavy {
+    background: linear-gradient(135deg, #e6d7f0 0%, #d9b3e8 100%);
+    box-shadow: 0 10px 30px rgba(156, 39, 176, 0.25), 
+                0 0 40px rgba(156, 39, 176, 0.15);
+}
+
+#PM2card.pm25-heavy .card-header h3,
+#PM2card.pm25-heavy .card-level {
+    color: #6a1b9a;
+}
+
+#PM2card.pm25-heavy .card-value {
+    color: #7b1fa2;
+}
+
+/* ===== 紫外线卡片颜色状态 ===== */
+#sunrayCard.uvi-weak {
+    background: linear-gradient(135deg, #e0f2f1 0%, #b2dfdb 100%);
+    box-shadow: 0 10px 30px rgba(0, 150, 136, 0.25), 
+                0 0 40px rgba(0, 150, 136, 0.15);
+}
+
+#sunrayCard.uvi-weak .card-header h3,
+#sunrayCard.uvi-weak .card-level {
+    color: #00695c;
+}
+
+#sunrayCard.uvi-weak .card-value {
+    color: #00897b;
+}
+
+#sunrayCard.uvi-moderate {
+    background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+    box-shadow: 0 10px 30px rgba(76, 175, 80, 0.25), 
+                0 0 40px rgba(76, 175, 80, 0.15);
+}
+
+#sunrayCard.uvi-moderate .card-header h3,
+#sunrayCard.uvi-moderate .card-level {
+    color: #2e7d32;
+}
+
+#sunrayCard.uvi-moderate .card-value {
+    color: #388e3c;
+}
+
+#sunrayCard.uvi-strong {
+    background: linear-gradient(135deg, #fff9c4 0%, #fff176 100%);
+    box-shadow: 0 10px 30px rgba(253, 216, 53, 0.2), 
+                0 0 40px rgba(253, 216, 53, 0.1);
+}
+
+#sunrayCard.uvi-strong .card-header h3,
+#sunrayCard.uvi-strong .card-level {
+    color: #c4a300;
+}
+
+#sunrayCard.uvi-strong .card-value {
+    color: #d4af37;
+}
+
+#sunrayCard.uvi-very-strong {
+    background: linear-gradient(135deg, #ffcccc 0%, #ffb3b3 100%);
+    box-shadow: 0 10px 30px rgba(244, 67, 54, 0.25), 
+                0 0 40px rgba(244, 67, 54, 0.15);
+}
+
+#sunrayCard.uvi-very-strong .card-header h3,
+#sunrayCard.uvi-very-strong .card-level {
+    color: #c62828;
+}
+
+#sunrayCard.uvi-very-strong .card-value {
+    color: #d32f2f;
+}
+
 /* ===== 其他卡片增强样式 ===== */
 
 /* 通用卡片容器 */
