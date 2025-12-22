@@ -756,8 +756,8 @@
     .card-unit {
         font-size: 16px;
     }
-    .card-unit.PM2unit {
-        font-size: 10px;
+    .PM2unit {
+        font-size: 13px;
     }
     .temp-header,
     .card-header {
