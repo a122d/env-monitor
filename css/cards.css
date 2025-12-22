@@ -672,7 +672,6 @@
 }
 #pressureCard .card-icon {
     font-size: 32px;
-    color: #00bcd4;
 }
 #pressureCard .card-value-wrapper {
     display: block;
@@ -715,7 +714,6 @@
 }
 #altitudeCard .card-icon {
     font-size: 32px;
-    color: #5c6bc0;
 }
 #altitudeCard .card-value-wrapper {
     display: block;
@@ -758,8 +756,8 @@
     .card-unit {
         font-size: 16px;
     }
-    .PM2unit {
-        font-size: 12px;
+    .card-unit.PM2unit {
+        font-size: 10px;
     }
     .temp-header,
     .card-header {
