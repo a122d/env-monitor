@@ -746,11 +746,11 @@
     .humidity-card,
     .wind-card,
     .illumination-card {
-        padding: 18px 14px !important; 
+        padding: 18px 12px !important; 
     }
     .temp-value,
     .card-value {
-        font-size: clamp(28px, 8vw, 40px);
+        font-size: clamp(24px, 8vw, 32px);
     }
     .temp-unit,
     .card-unit {
