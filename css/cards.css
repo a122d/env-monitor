@@ -758,6 +758,9 @@
     .card-unit {
         font-size: 16px;
     }
+    .PM2unit {
+        font-size: 12px;
+    }
     .temp-header,
     .card-header {
         margin-bottom: 10px;
