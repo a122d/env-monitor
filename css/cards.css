@@ -686,7 +686,6 @@
     margin-top: 32px;
 }
 #pressureCard .card-unit {
-    color: #0c4def;
     font-size: 28px;
     display: block;
     text-align: right;
@@ -728,7 +727,6 @@
     margin-top: 32px;
 }
 #altitudeCard .card-unit {
-    color: #854ae4;
     font-size: 36px;
     display: block;
     text-align: right;
