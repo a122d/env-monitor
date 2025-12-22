@@ -159,17 +159,23 @@ function updateAIDataDisplay() {
     const humidityEl = document.getElementById('aiHumidity');
     const windEl = document.getElementById('aiWind');
     const lightEl = document.getElementById('aiLight');
+    const pm25El = document.getElementById('aiPM25');
+    const uvEl = document.getElementById('aiUV');
 
     // 从页面获取当前数据
     const temp = document.getElementById('temperature')?.textContent || '--';
     const humidity = document.getElementById('humidity')?.textContent || '--';
     const wind = document.getElementById('windSpeed')?.textContent || '--';
     const light = document.getElementById('illumination')?.textContent || '--';
+    const pm25 = document.getElementById('PM2')?.textContent || '--';
+    const uv = document.getElementById('sunray')?.textContent || '--';
 
     if (tempEl) tempEl.textContent = temp;
     if (humidityEl) humidityEl.textContent = humidity;
     if (windEl) windEl.textContent = wind;
     if (lightEl) lightEl.textContent = light;
+    if (pm25El) pm25El.textContent = pm25;
+    if (uvEl) uvEl.textContent = uv;
 }
 
 // 获取当前环境数据
@@ -178,15 +184,21 @@ function getCurrentEnvironmentData() {
     const humidity = document.getElementById('humidity')?.textContent || '未知';
     const wind = document.getElementById('windSpeed')?.textContent || '未知';
     const light = document.getElementById('illumination')?.textContent || '未知';
+    const pm25 = document.getElementById('PM2')?.textContent || '未知';
+    const uv = document.getElementById('sunray')?.textContent || '未知';
     
     const tempMax = document.getElementById('tempMax')?.textContent || '未知';
     const tempMin = document.getElementById('tempMin')?.textContent || '未知';
     const humidityMax = document.getElementById('humidityMax')?.textContent || '未知';
     const humidityMin = document.getElementById('humidityMin')?.textContent || '未知';
+    const pm25Max = document.getElementById('PM2Max')?.textContent || '未知';
+    const pm25Min = document.getElementById('PM2Min')?.textContent || '未知';
+    const uvMax = document.getElementById('sunrayMax')?.textContent || '未知';
+    const uvMin = document.getElementById('sunrayMin')?.textContent || '未知';
 
     return {
-        current: { temp, humidity, wind, light },
-        stats: { tempMax, tempMin, humidityMax, humidityMin },
+        current: { temp, humidity, wind, light, pm25, uv },
+        stats: { tempMax, tempMin, humidityMax, humidityMin, pm25Max, pm25Min, uvMax, uvMin },
         time: new Date().toLocaleString('zh-CN')
     };
 }
@@ -203,6 +215,8 @@ function buildSystemPrompt() {
     - 湿度：${envData.current.humidity}%（最高：${envData.stats.humidityMax}%，最低：${envData.stats.humidityMin}%）
     - 风速：${envData.current.wind} m/s
     - 光照强度：${envData.current.light} lux
+    - PM2.5浓度：${envData.current.pm25} μg/m³（最高：${envData.stats.pm25Max} μg/m³，最低：${envData.stats.pm25Min} μg/m³）
+    - 紫外线强度：${envData.current.uv} UVI（最高：${envData.stats.uvMax} UVI，最低：${envData.stats.uvMin} UVI）
     - 数据时间：${envData.time}
 
     你的职责：
