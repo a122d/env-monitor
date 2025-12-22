@@ -74,14 +74,14 @@ let sunrayStats = {
 
 // 获取温度等级描述
 function getTempLevel(temp) {
-    if (temp < 0) return '❄️严寒';
-    if (temp < 7) return '🥶寒冷';
-    if (temp < 16) return '❄️冷';
-    if (temp < 20) return '🌤️凉爽';
-    if (temp < 25) return '😊舒适';
-    if (temp < 30) return '☀️温暖';
-    if (temp < 35) return '🔥炎热';
-    return '🌋酷热';
+    if (temp < 0) return '严寒';
+    if (temp < 7) return '寒冷';
+    if (temp < 16) return '冷';
+    if (temp < 20) return '凉爽';
+    if (temp < 25) return '舒适';
+    if (temp < 30) return '温暖';
+    if (temp < 35) return '炎热';
+    return '酷热';
 }
 
 // 计算温度变化趋势

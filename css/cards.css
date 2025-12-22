@@ -615,7 +615,7 @@
 #illuminationCard .progress-fill {
     background: linear-gradient(90deg, #ffeb3b 0%, #ffc107 50%, #ff9800 100%);
 }
-/* 占位卡片颜色 */
+/* 卡片颜色 */
 #PM2card {
     background: linear-gradient(135deg, #ffe0f0 0%, #ffb3d9 100%);
     box-shadow: 0 10px 30px rgba(225, 69, 142, 0.13),
@@ -740,7 +740,9 @@
 
 /* 移动端适配 */
 @media (max-width: 767px) {
-    .PM2-card,
+    .PM2-card {
+        padding: 18px 6px !important;
+    }
     .sunray-card,
     .temp-card,
     .humidity-card,
