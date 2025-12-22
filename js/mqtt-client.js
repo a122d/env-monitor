@@ -4,7 +4,7 @@
 let mqttClient = null;
 let reconnectTimer = null;
 const RECONNECT_INTERVAL = 5000;
-let baseClientId = 'env-monitor-' + Math.random().toString(16).substr(2, 8);
+let baseClientId = 'env-monitor-' + Math.random().toString(16);
 
 // 温度统计数据
 let temperatureStats = {
@@ -41,6 +41,28 @@ let windSpeedStats = {
 
 // 光照强度统计数据
 let illuminationStats = {
+    current: 0,
+    max: -Infinity,
+    min: Infinity,
+    sum: 0,
+    count: 0,
+    history: [],
+    lastUpdateTime: null
+};
+
+// PM2.5统计数据
+let pm25Stats = {
+    current: 0,
+    max: -Infinity,
+    min: Infinity,
+    sum: 0,
+    count: 0,
+    history: [],
+    lastUpdateTime: null
+};
+
+// 紫外线强度统计数据
+let sunrayStats = {
     current: 0,
     max: -Infinity,
     min: Infinity,
@@ -207,18 +229,27 @@ function updateDataCards(data) {
         updateIlluminationCard(illuminationValue);
         updateDataValue('illumination', illuminationValue);
     }
-
+    // PM2.5：保持整数
+    if (data.pm25 !== undefined) {
+        const pm25Value = parseInt(data.pm25);
+        updateDataValue('PM2', pm25Value);
+        updatePM25Card(pm25Value);
+    }
+    // 紫外线强度：保持整数
+    if (data.sunray !== undefined) {
+        const sunrayValue = parseInt(data.sunray);
+        updateDataValue('sunray', sunrayValue);
+        updateSunrayCard(sunrayValue);
+    }
     // 大气压强：÷10000保留3位小数，单位KPa
     if (data.pressure !== undefined) {
         const pressureValue = (parseFloat(data.pressure) / 10000).toFixed(3);
         updatePressureCard(pressureValue);
-        updateDataValue('pressure', pressureValue);
     }
     // 海拔高度：÷10保留1位小数，单位m
     if (data.altitude !== undefined) {
         const altitudeValue = (parseFloat(data.altitude) / 10).toFixed(1);
         updateAltitudeCard(altitudeValue);
-        updateDataValue('altitude', altitudeValue);
     }
 }
 
@@ -464,19 +495,112 @@ function updateIlluminationCard(illuminationValue) {
             levelEl.textContent = '强光';
         }
     }
-    
     // 更新进度条
     const progressFill = card.querySelector('.card-progress-bar .progress-fill');
     if (progressFill) {
         const percentage = Math.max(0, Math.min(100, illuminationNum / 10));
         progressFill.style.width = percentage + '%';
     }
-    
     // 更新趋势
     updateCardTrend(card, illuminationStats, '.card-trend');
-    
     // 更新详细信息
     updateIlluminationDetails();
+}
+
+// PM2.5卡片更新
+function updatePM25Card(pm25Value) {
+    const pm25Num = parseInt(pm25Value);
+    const card = document.getElementById('PM2card');
+    if (!card) return;
+    
+    pm25Stats.lastUpdateTime = Date.now();
+    pm25Stats.history.push(pm25Num);
+    if (pm25Stats.history.length > 10) {
+        pm25Stats.history.shift();
+    }
+    pm25Stats.current = pm25Num;
+    if (pm25Stats.count === 0) {
+        pm25Stats.max = pm25Num;
+        pm25Stats.min = pm25Num;
+    } else {
+        pm25Stats.max = Math.max(pm25Stats.max, pm25Num);
+        pm25Stats.min = Math.min(pm25Stats.min, pm25Num);
+    }
+    pm25Stats.sum += pm25Num;
+    pm25Stats.count++;
+    // 更新PM2.5等级标签
+    const levelEl = card.querySelector('.card-level');
+    if (levelEl) {
+        if (pm25Num <= 35) {
+            levelEl.textContent = '优';
+        } else if (pm25Num <= 75) {
+            levelEl.textContent = '良';
+        } else if (pm25Num <= 115) {
+            levelEl.textContent = '轻度污染';
+        } else if (pm25Num <= 150) {
+            levelEl.textContent = '中度污染';
+        } else {
+            levelEl.textContent = '重度污染';
+        }
+    }
+    // 更新进度条
+    const progressFill = card.querySelector('.card-progress-bar .progress-fill');
+    if (progressFill) {
+        const percentage = Math.max(0, Math.min(100, (pm25Num / 3) * 2));
+        progressFill.style.width = percentage + '%';
+    }
+    // 更新趋势
+    updateCardTrend(card, pm25Stats, '.card-trend', true);
+    // 更新详细信息
+    updatePM25Details();
+}
+
+// 更新紫外线强度卡片
+function updateSunrayCard(sunrayValue) {
+    const sunrayNum = parseInt(sunrayValue);
+    const card = document.getElementById('sunrayCard');
+    if (!card) return;
+
+    sunrayStats.lastUpdateTime = Date.now();
+    sunrayStats.history.push(sunrayNum);
+    if (sunrayStats.history.length > 10) {
+        sunrayStats.history.shift();
+    }
+    sunrayStats.current = sunrayNum;
+    if (sunrayStats.count === 0) {
+        sunrayStats.max = sunrayNum;
+        sunrayStats.min = sunrayNum;
+    } else {
+        sunrayStats.max = Math.max(sunrayStats.max, sunrayNum);
+        sunrayStats.min = Math.min(sunrayStats.min, sunrayNum);
+    }
+    sunrayStats.sum += sunrayNum;
+    sunrayStats.count++;
+    // 更新紫外线等级标签
+    const levelEl = card.querySelector('.card-level');
+    if (levelEl) {
+        if (sunrayNum < 3) {
+            levelEl.textContent = '弱';
+        } else if (sunrayNum < 6) {
+            levelEl.textContent = '中等';
+        } else if (sunrayNum < 8) {
+            levelEl.textContent = '强';
+        } else if (sunrayNum < 11) {
+            levelEl.textContent = '很强';
+        } else {
+            levelEl.textContent = '极强';
+        }
+    }
+    // 更新进度条
+    const progressFill = card.querySelector('.card-progress-bar .progress-fill');
+    if (progressFill) {
+        const percentage = Math.max(0, Math.min(100, sunrayNum * 10));
+        progressFill.style.width = percentage + '%';
+    }
+    // 更新趋势
+    updateCardTrend(card, sunrayStats, '.card-trend');
+    // 更新详细信息
+    updateSunrayDetails();
 }
 
 // 更新大气压强卡片
@@ -504,7 +628,7 @@ function updateAltitudeCard(altitudeValue) {
 }
 
 // 通用卡片趋势更新函数
-function updateCardTrend(card, stats, trendSelector) {
+function updateCardTrend(card, stats, trendSelector, invert = false) {
     const history = stats.history;
     if (history.length < 2) return;
     
@@ -513,8 +637,13 @@ function updateCardTrend(card, stats, trendSelector) {
     const change = current - previous;
     
     let trend = '→';
-    if (change > 0.1) trend = '↑';
-    if (change < -0.1) trend = '↓';
+    if (invert) {
+        if (change < 0.1) trend = '↑';
+        if (change > -0.1) trend = '↓';
+    } else {
+        if (change > 0.1) trend = '↑';
+        if (change < -0.1) trend = '↓';
+    }
     
     const trendEl = card.querySelector(trendSelector);
     if (trendEl) {
@@ -563,6 +692,30 @@ function updateIlluminationDetails() {
     if (maxEl) maxEl.textContent = max;
 
     const minEl = document.getElementById('illuminationMin');
+    if (minEl) minEl.textContent = min;
+}
+
+// 更新PM2.5详细信息
+function updatePM25Details() {
+    const max = pm25Stats.max !== -Infinity ? pm25Stats.max.toFixed(1) : '--';
+    const min = pm25Stats.min !== Infinity ? pm25Stats.min.toFixed(1) : '--';
+
+    const maxEl = document.getElementById('PM2Max');
+    if (maxEl) maxEl.textContent = max;
+
+    const minEl = document.getElementById('PM2Min');
+    if (minEl) minEl.textContent = min;
+}
+
+// 更新紫外线强度详细信息
+function updateSunrayDetails() {
+    const max = sunrayStats.max !== -Infinity ? sunrayStats.max.toFixed(1) : '--';
+    const min = sunrayStats.min !== Infinity ? sunrayStats.min.toFixed(1) : '--';
+
+    const maxEl = document.getElementById('sunrayMax');
+    if (maxEl) maxEl.textContent = max;
+
+    const minEl = document.getElementById('sunrayMin');
     if (minEl) minEl.textContent = min;
 }
 
