@@ -93,14 +93,14 @@
                 <div class="temp-progress-bar">
                     <div class="progress-track">
                         <div class="progress-fill" id="tempProgress" style="width: 50%;"></div>
-                        <div class="progress-marker cold" title="0℃"></div>
-                        <div class="progress-marker normal" title="16℃"></div>
-                        <div class="progress-marker hot" title="32℃"></div>
+                        <div class="progress-marker cold" title="-10℃"></div>
+                        <div class="progress-marker normal" title="13℃"></div>
+                        <div class="progress-marker hot" title="36℃"></div>
                     </div>
                     <div class="progress-labels">
-                        <span>0</span>
-                        <span>16</span>
-                        <span>32</span>
+                        <span class="progress-label left">-10</span>
+                        <span class="progress-label center">13</span>
+                        <span class="progress-label right">36</span>
                     </div>
                 </div>
 
@@ -135,14 +135,14 @@
                 <div class="card-progress-bar">
                     <div class="progress-track">
                         <div class="progress-fill" id="humidityProgress" style="width: 50%;"></div>
-                        <div class="progress-marker" title="0%"></div>
-                        <div class="progress-marker" title="50%"></div>
-                        <div class="progress-marker" title="100%"></div>
+                        <div class="progress-marker left" title="0%"></div>
+                        <div class="progress-marker middle" title="50%"></div>
+                        <div class="progress-marker right" title="100%"></div>
                     </div>
                     <div class="progress-labels">
-                        <span>0</span>
-                        <span>50</span>
-                        <span>100</span>
+                        <span class="progress-label left">0</span>
+                        <span class="progress-label center">50</span>
+                        <span class="progress-label right">100</span>
                     </div>
                 </div>
 
@@ -177,14 +177,14 @@
                 <div class="card-progress-bar">
                     <div class="progress-track">
                         <div class="progress-fill" id="windSpeedProgress" style="width: 50%;"></div>
-                        <div class="progress-marker" title="0m/s"></div>
-                        <div class="progress-marker" title="5m/s"></div>
-                        <div class="progress-marker" title="10m/s"></div>
+                        <div class="progress-marker left" title="0m/s"></div>
+                        <div class="progress-marker middle" title="10m/s"></div>
+                        <div class="progress-marker right" title="20m/s"></div>
                     </div>
                     <div class="progress-labels">
-                        <span>0</span>
-                        <span>5</span>
-                        <span>10</span>
+                        <span class="progress-label left">0</span>
+                        <span class="progress-label center">10</span>
+                        <span class="progress-label right">20</span>
                     </div>
                 </div>
 
@@ -220,14 +220,14 @@
                 <div class="card-progress-bar">
                     <div class="progress-track">
                         <div class="progress-fill" id="illuminationProgress" style="width: 50%;"></div>
-                        <div class="progress-marker" title="0lux"></div>
-                        <div class="progress-marker" title="5000lux"></div>
-                        <div class="progress-marker" title="10000lux"></div>
+                        <div class="progress-marker left" title="0lux"></div>
+                        <div class="progress-marker middle" title="500lux"></div>
+                        <div class="progress-marker right" title="1000lux"></div>
                     </div>
                     <div class="progress-labels">
-                        <span>0</span>
-                        <span>5000</span>
-                        <span>10000</span>
+                        <span class="progress-label left">0</span>
+                        <span class="progress-label center">500</span>
+                        <span class="progress-label right">1000</span>
                     </div>
                 </div>
 
@@ -243,89 +243,91 @@
                 </div>
             </article>
         
-            <article class="data-card asd1-card" id="asd1card" aria-label="占位">
+            <!-- PM2.5 数值卡片 -->
+            <article class="data-card PM2-card" id="PM2card" aria-label="PM2.5监测">
                 <div class="card-header">
-                    <h3>占位</h3>
-                    <span class="card-icon" id="asd1Icon">🌳</span>
+                    <h3>PM2.5</h3>
+                    <span class="card-icon" id="PM2Icon">🌳</span>
                 </div>
 
                 <div class="card-main-display">
                     <div class="card-value-wrapper">
-                        <div class="card-value" id="asd1">0</div>
+                        <div class="card-value" id="PM2">0</div>
                         <span class="card-unit">%</span>
                     </div>
                     <div class="card-status">
-                        <span class="card-level" id="asd1Level">--</span>
-                        <span class="card-trend" id="asd1Trend">→</span>
+                        <span class="card-level" id="PM2Level">--</span>
+                        <span class="card-trend" id="PM2Trend">→</span>
                     </div>
                 </div>
 
                 <div class="card-progress-bar">
                     <div class="progress-track">
-                        <div class="progress-fill" id="asd1Progress" style="width: 50%;"></div>
-                        <div class="progress-marker" title="0%"></div>
-                        <div class="progress-marker" title="50%"></div>
-                        <div class="progress-marker" title="100%"></div>
+                        <div class="progress-fill" id="PM2Progress" style="width: 50%;"></div>
+                        <div class="progress-marker left" title="0%"></div>
+                        <div class="progress-marker middle" title="50%"></div>
+                        <div class="progress-marker right" title="100%"></div>
                     </div>
                     <div class="progress-labels">
-                        <span>0</span>
-                        <span>50</span>
-                        <span>100</span>
+                        <span class="progress-label left">0</span>
+                        <span class="progress-label center">50</span>
+                        <span class="progress-label right">100</span>
                     </div>
                 </div>
 
                 <div class="card-minmax">
                     <div class="minmax-item">
                         <span class="minmax-label">最高</span>
-                        <span class="minmax-value" id="asd1Max">--</span>
+                        <span class="minmax-value" id="PM2Max">--</span>
                     </div>
                     <div class="minmax-item">
                         <span class="minmax-label">最低</span>
-                        <span class="minmax-value" id="asd1Min">--</span>
+                        <span class="minmax-value" id="PM2Min">--</span>
                     </div>
                 </div>
 
             </article>
 
-            <article class="data-card asd2-card" id="asd2card" aria-label="占位">
+            <!-- 紫外线强度卡片 -->
+            <article class="data-card sunray-card" id="sunrayCard" aria-label="紫外线强度监测">
                 <div class="card-header">
-                    <h3>占位</h3>
-                    <span class="card-icon" id="asd2Icon">💬</span>
+                    <h3>紫外线强度</h3>
+                    <span class="card-icon" id="sunrayIcon">⛱️</span>
                 </div>
 
                 <div class="card-main-display">
                     <div class="card-value-wrapper">
-                        <div class="card-value" id="asd2">0</div>
+                        <div class="card-value" id="sunray">0</div>
                         <span class="card-unit">%</span>
                     </div>
                     <div class="card-status">
-                        <span class="card-level" id="asd2Level">--</span>
-                        <span class="card-trend" id="asd2Trend">→</span>
+                        <span class="card-level" id="sunrayLevel">--</span>
+                        <span class="card-trend" id="sunrayTrend">→</span>
                     </div>
                 </div>
 
                 <div class="card-progress-bar">
                     <div class="progress-track">
-                        <div class="progress-fill" id="asd1Progress" style="width: 50%;"></div>
-                        <div class="progress-marker" title="0%"></div>
-                        <div class="progress-marker" title="50%"></div>
-                        <div class="progress-marker" title="100%"></div>
+                        <div class="progress-fill" id="sunrayProgress" style="width: 50%;"></div>
+                        <div class="progress-marker left" title="0%"></div>
+                        <div class="progress-marker middle" title="50%"></div>
+                        <div class="progress-marker right" title="100%"></div>
                     </div>
                     <div class="progress-labels">
-                        <span>0</span>
-                        <span>50</span>
-                        <span>100</span>
+                        <span class="progress-label left">0</span>
+                        <span class="progress-label center">50</span>
+                        <span class="progress-label right">100</span>
                     </div>
                 </div>
 
                 <div class="card-minmax">
                     <div class="minmax-item">
                         <span class="minmax-label">最高</span>
-                        <span class="minmax-value" id="asd2Max">--</span>
+                        <span class="minmax-value" id="sunrayMax">--</span>
                     </div>
                     <div class="minmax-item">
                         <span class="minmax-label">最低</span>
-                        <span class="minmax-value" id="asd2Min">--</span>
+                        <span class="minmax-value" id="sunrayMin">--</span>
                     </div>
                 </div>
 
@@ -427,6 +429,15 @@
                     </div>
 
                     <div class="about-section">
+                        <h5>V4.4.1 更新内容</h5>
+                        <ul class="features-list">
+                            <li>🖼️ <strong>引入PM2.5与紫外线监测</strong> - 增加新的数据卡片，引入更多环境信息</li>
+                            <li>⚙️ <strong>修复进度条显示问题</strong> - 修复进度条数字错位显示</li>
+                            <li>🌹 <strong>去除过往残留内容</strong> - 删减无用信息，增强流畅度</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="about-section">
                         <h5>V4.3.1 更新内容</h5>
                         <ul class="features-list">
                             <li> + <strong>增加新的数据卡片</strong> - 优化页面布局，为未来拓展做铺垫</li>
@@ -439,16 +450,6 @@
                         <h5>V4.2.0 更新内容</h5>
                         <ul class="features-list">
                             <li>🌹 <strong>界面美化</strong> - 优化页面美观度，提升用户体验</li>
-                        </ul>
-                    </div>
-
-                    <div class="about-section">
-                        <h5>V4.1.0 更新内容</h5>
-                        <ul class="features-list">
-                            <li>🎨 <strong>新增数据卡片</strong> - 新增大气压强与海拔卡片，引入全新数据</li>
-                            <li>📏 <strong>单位显示调整</strong> - 大气压强与海拔单位独占一行，位置更美观，显示更清晰</li>
-                            <li>🛠️ <strong>弹窗与AI助手修复</strong> - 修复主页面AI按钮、弹窗显示异常问题，结构更健壮</li>
-                            <li>⚡ <strong>性能与体验提升</strong> - 优化页面渲染与交互细节，提升整体流畅度</li>
                         </ul>
                     </div>
 

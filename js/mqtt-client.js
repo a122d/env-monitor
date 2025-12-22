@@ -14,8 +14,7 @@ let temperatureStats = {
     sum: 0,
     count: 0,
     history: [],           // 保存最近10次数据用于趋势计算
-    lastUpdateTime: null,  // 上次更新时间
-    changeRate: 0          // 变化速率
+    lastUpdateTime: null  // 上次更新时间
 };
 
 // 湿度统计数据
@@ -26,8 +25,7 @@ let humidityStats = {
     sum: 0,
     count: 0,
     history: [],
-    lastUpdateTime: null,
-    changeRate: 0
+    lastUpdateTime: null
 };
 
 // 风速统计数据
@@ -38,8 +36,7 @@ let windSpeedStats = {
     sum: 0,
     count: 0,
     history: [],
-    lastUpdateTime: null,
-    changeRate: 0
+    lastUpdateTime: null
 };
 
 // 光照强度统计数据
@@ -50,8 +47,7 @@ let illuminationStats = {
     sum: 0,
     count: 0,
     history: [],
-    lastUpdateTime: null,
-    changeRate: 0
+    lastUpdateTime: null
 };
 
 // 获取温度等级描述
@@ -70,7 +66,7 @@ function getTempLevel(temp) {
 function calculateTempTrend() {
     const history = temperatureStats.history;
     if (history.length < 2) {
-        return { trend: '→', rate: 0 };
+        return { trend: '→'};
     }
     
     // 计算最近变化
@@ -78,20 +74,11 @@ function calculateTempTrend() {
     const previous = history[Math.max(0, history.length - 5)];
     const change = current - previous;
     
-    // 计算变化速率（℃/分钟）
-    let rate = 0;
-    if (temperatureStats.lastUpdateTime) {
-        const timeDiff = (Date.now() - temperatureStats.lastUpdateTime) / 60000; // 转换为分钟
-        if (timeDiff > 0) {
-            rate = (change / timeDiff);
-        }
-    }
-    
     let trend = '→';
     if (change > 0.1) trend = '↑';
     if (change < -0.1) trend = '↓';
     
-    return { trend, rate };
+    return { trend };
 }
 
 // MQTT配置（优先从本地存储加载，否则使用全局默认配置）
@@ -153,7 +140,7 @@ const RECONNECT_CONFIG = {
     baseInterval: 1000,      // 初始延迟 1s
     maxInterval: 30000,      // 最大延迟 30s
     multiplier: 1.5,         // 指数退避系数
-    maxRetries: 5,          // 最大重试 5 次
+    maxRetries: 3,          // 最大重试 3 次
     jitter: 0.1              // 抖动 10%
 };
 
@@ -220,6 +207,7 @@ function updateDataCards(data) {
         updateIlluminationCard(illuminationValue);
         updateDataValue('illumination', illuminationValue);
     }
+
     // 大气压强：÷10000保留3位小数，单位KPa
     if (data.pressure !== undefined) {
         const pressureValue = (parseFloat(data.pressure) / 10000).toFixed(3);
@@ -275,7 +263,7 @@ function updateTemperatureCard(tempValue) {
     const icon = card.querySelector('.temp-icon');
     if (tempNum < 7) {
         icon.textContent = '❄️';
-    } else if (tempNum > 25) {
+    } else if (tempNum > 28) {
         icon.textContent = '🔥';
     } else {
         icon.textContent = '🌡️';
@@ -304,7 +292,6 @@ function updateTemperatureCard(tempValue) {
             trendEl.classList.add('stable');
         }
     }
-    temperatureStats.changeRate = trendData.rate;
     
     // 更新详细信息
     updateTemperatureDetails();
@@ -316,8 +303,8 @@ function updateProgressBar(tempNum) {
     if (!progressFill) return;
     
     // 将温度映射到0-100%
-    // 0℃ = 0%, 32℃ = 100%
-    const percentage = Math.max(0, Math.min(100, (tempNum / 32) * 100));
+    // -10℃ = 0%, 13℃ = 50%, 36℃ = 100%
+    const percentage = Math.max(0, Math.min(100, ((tempNum + 10) / 46) * 100));
     progressFill.style.width = percentage + '%';
 }
 
@@ -333,19 +320,6 @@ function updateTemperatureDetails() {
     
     tempMaxEl.textContent = max;
     tempMinEl.textContent = min;
-    
-    // 更新变化速率
-    const changeRateEl = document.getElementById('tempChangeRate');
-    if (changeRateEl) {
-        if (temperatureStats.changeRate === undefined || isNaN(temperatureStats.changeRate)) {
-            changeRateEl.textContent = '--℃/min';
-        } else {
-            const rateText = temperatureStats.changeRate > 0 
-                ? '+' + temperatureStats.changeRate.toFixed(2) 
-                : temperatureStats.changeRate.toFixed(2);
-            changeRateEl.textContent = rateText + '℃/min';
-        }
-    }
 }
 
 // 更新湿度卡片
@@ -425,19 +399,21 @@ function updateWindSpeedCard(windSpeedValue) {
     if (levelEl) {
         if (windNum < 2) {
             levelEl.textContent = '平静';
-        } else if (windNum < 5) {
+        } else if (windNum < 5.4) {
             levelEl.textContent = '温和';
-        } else if (windNum < 8) {
+        } else if (windNum < 10.8) {
             levelEl.textContent = '较强';
-        } else {
+        } else if (windNum < 17.2) {
             levelEl.textContent = '强风';
+        } else {
+            levelEl.textContent = '狂风';
         }
     }
     
     // 更新进度条
     const progressFill = card.querySelector('.card-progress-bar .progress-fill');
     if (progressFill) {
-        const percentage = Math.max(0, Math.min(100, (windNum / 10) * 100));
+        const percentage = Math.max(0, Math.min(100, windNum * 5));
         progressFill.style.width = percentage + '%';
     }
     
@@ -474,23 +450,25 @@ function updateIlluminationCard(illuminationValue) {
     // 更新光照等级标签
     const levelEl = card.querySelector('.card-level');
     if (levelEl) {
-        if (illuminationNum < 100) {
+        if (illuminationNum < 10) {
             levelEl.textContent = '黑暗';
-        } else if (illuminationNum < 1000) {
+        } else if (illuminationNum < 50) {
             levelEl.textContent = '微弱';
-        } else if (illuminationNum < 5000) {
+        } else if (illuminationNum < 200) {
+            levelEl.textContent = '稍暗';
+        } else if (illuminationNum < 500) {
             levelEl.textContent = '适中';
-        } else if (illuminationNum < 10000) {
+        } else if (illuminationNum < 1000) {
             levelEl.textContent = '明亮';
         } else {
-            levelEl.textContent = '极亮';
+            levelEl.textContent = '强光';
         }
     }
     
     // 更新进度条
     const progressFill = card.querySelector('.card-progress-bar .progress-fill');
     if (progressFill) {
-        const percentage = Math.max(0, Math.min(100, (illuminationNum / 10000) * 100));
+        const percentage = Math.max(0, Math.min(100, illuminationNum / 10));
         progressFill.style.width = percentage + '%';
     }
     
