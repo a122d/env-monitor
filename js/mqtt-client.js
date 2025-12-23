@@ -241,9 +241,9 @@ function updateDataCards(data) {
         updateDataValue('sunray', sunrayValue);
         updateSunrayCard(sunrayValue);
     }
-    // 大气压强：÷10000保留3位小数，单位KPa
+    // 大气压强：÷1000保留3位小数，单位KPa
     if (data.pressure !== undefined) {
-        const pressureValue = (parseFloat(data.pressure) / 10000).toFixed(3);
+        const pressureValue = (parseFloat(data.pressure) / 1000).toFixed(3);
         updatePressureCard(pressureValue);
     }
     // 海拔高度：÷10保留1位小数，单位m
