@@ -4,10 +4,12 @@ window.chartData = {
     temperature: [],
     humidity: [],
     windSpeed: [],
-    illumination: []
+    illumination: [],
+    PM2: [],
+    sunray: []
 };
 
-let tempChart, humidityChart, windChart, lightChart;
+let tempChart, humidityChart, windChart, lightChart, PM2Chart, sunrayChart;
 
 // 获取响应式配置
 function getResponsiveConfig() {
@@ -49,8 +51,10 @@ window.initCharts = function() {
     const humidityDom = document.getElementById('humidity-chart');
     const windDom = document.getElementById('wind-chart');
     const lightDom = document.getElementById('light-chart');
+    const PM2Dom = document.getElementById('pm25-chart');
+    const sunrayDom = document.getElementById('sunray-chart');
 
-    if (!tempDom || !humidityDom || !windDom || !lightDom) {
+    if (!tempDom || !humidityDom || !windDom || !lightDom || !PM2Dom || !sunrayDom) {
         console.error('❌ 图表容器未找到！');
         return;
     }
@@ -485,23 +489,210 @@ window.initCharts = function() {
         }]
     });
 
+    // PM2.5图
+    PM2Chart = echarts.init(PM2Dom);
+    PM2Chart.setOption({
+        title: {
+            text: 'PM2.5趋势 (μg/m³)',
+            left: 'center',
+            top: '3%',
+            textStyle: {
+                color: '#1f2937',
+                fontSize: config.fontSize.title,
+                fontWeight: 700,
+                letterSpacing: 0.5
+            }
+        },
+        tooltip: common.tooltip,
+        grid: common.grid,
+        xAxis: common.xAxis,
+        yAxis: {
+            type: 'value',
+            min: 0,
+            axisLabel: {
+                color: '#64748b',
+                fontSize: config.fontSize.axis,
+                fontWeight: 500,
+                formatter: '{value}'
+            },
+            axisLine: { 
+                lineStyle: { 
+                    color: '#e2e8f0',
+                    width: 1.5
+                } 
+            },
+            splitLine: { 
+                lineStyle: { 
+                    color: '#f1f5f9',
+                    type: 'dashed'
+                } 
+            }
+        },
+        series: [{
+            name: 'PM2.5(μg/m³)',
+            type: 'line',
+            smooth: true,
+            smoothMonotone: 'x',
+            symbol: 'circle',
+            symbolSize: config.symbolSize,
+            data: window.chartData.PM2.length ? window.chartData.PM2 : [0],
+            lineStyle: { 
+                width: config.lineWidth,
+                color: {
+                    type: 'linear',
+                    x: 0, y: 0, x2: 1, y2: 0,
+                    colorStops: [
+                        { offset: 0, color: '#10b981' },
+                        { offset: 0.5, color: '#059669' },
+                        { offset: 1, color: '#047857' }
+                    ]
+                },
+                shadowColor: 'rgba(16, 185, 129, 0.3)',
+                shadowBlur: 8,
+                shadowOffsetY: 3
+            },
+            itemStyle: { 
+                color: '#059669',
+                borderColor: '#fff',
+                borderWidth: 2,
+                shadowColor: 'rgba(16, 185, 129, 0.4)',
+                shadowBlur: 6
+            },
+            areaStyle: { 
+                color: {
+                    type: 'linear',
+                    x: 0, y: 0, x2: 0, y2: 1,
+                    colorStops: [
+                        { offset: 0, color: 'rgba(16, 185, 129, 0.25)' },
+                        { offset: 0.5, color: 'rgba(16, 185, 129, 0.1)' },
+                        { offset: 1, color: 'rgba(16, 185, 129, 0.02)' }
+                    ]
+                }
+            },
+            emphasis: {
+                focus: 'series',
+                itemStyle: {
+                    borderWidth: 3,
+                    shadowBlur: 10,
+                    shadowColor: 'rgba(16, 185, 129, 0.6)'
+                }
+            }
+        }]
+    });
+
+    // 紫外线强度图
+    sunrayChart = echarts.init(sunrayDom);
+    sunrayChart.setOption({
+        title: {
+            text: '紫外线强度趋势 (UVI)',
+            left: 'center',
+            top: '3%',
+            textStyle: {
+                color: '#1f2937',
+                fontSize: config.fontSize.title,
+                fontWeight: 700,
+                letterSpacing: 0.5
+            }
+        },
+        tooltip: common.tooltip,
+        grid: common.grid,
+        xAxis: common.xAxis,
+        yAxis: {
+            type: 'value',
+            min: 0,
+            max: 16,
+            axisLabel: {
+                color: '#64748b',
+                fontSize: config.fontSize.axis,
+                fontWeight: 500,
+                formatter: '{value}'
+            },
+            axisLine: { 
+                lineStyle: { 
+                    color: '#e2e8f0',
+                    width: 1.5
+                } 
+            },
+            splitLine: { 
+                lineStyle: { 
+                    color: '#f1f5f9',
+                    type: 'dashed'
+                } 
+            }
+        },
+        series: [{
+            name: '紫外线(UVI)',
+            type: 'line',
+            smooth: true,
+            smoothMonotone: 'x',
+            symbol: 'circle',
+            symbolSize: config.symbolSize,
+            data: window.chartData.sunray.length ? window.chartData.sunray : [0],
+            lineStyle: { 
+                width: config.lineWidth,
+                color: {
+                    type: 'linear',
+                    x: 0, y: 0, x2: 1, y2: 0,
+                    colorStops: [
+                        { offset: 0, color: '#ec4899' },
+                        { offset: 0.5, color: '#db2777' },
+                        { offset: 1, color: '#be185d' }
+                    ]
+                },
+                shadowColor: 'rgba(236, 72, 153, 0.3)',
+                shadowBlur: 8,
+                shadowOffsetY: 3
+            },
+            itemStyle: { 
+                color: '#db2777',
+                borderColor: '#fff',
+                borderWidth: 2,
+                shadowColor: 'rgba(236, 72, 153, 0.4)',
+                shadowBlur: 6
+            },
+            areaStyle: { 
+                color: {
+                    type: 'linear',
+                    x: 0, y: 0, x2: 0, y2: 1,
+                    colorStops: [
+                        { offset: 0, color: 'rgba(236, 72, 153, 0.25)' },
+                        { offset: 0.5, color: 'rgba(236, 72, 153, 0.1)' },
+                        { offset: 1, color: 'rgba(236, 72, 153, 0.02)' }
+                    ]
+                }
+            },
+            emphasis: {
+                focus: 'series',
+                itemStyle: {
+                    borderWidth: 3,
+                    shadowBlur: 10,
+                    shadowColor: 'rgba(236, 72, 153, 0.6)'
+                }
+            }
+        }]
+    });
+
     window.tempChart = tempChart;
     window.humidityChart = humidityChart;
     window.windChart = windChart;
     window.lightChart = lightChart;
+    window.PM2Chart = PM2Chart;
+    window.sunrayChart = sunrayChart;
 
     setTimeout(() => {
         tempChart.resize();
         humidityChart.resize();
         windChart.resize();
         lightChart.resize();
+        PM2Chart.resize();
+        sunrayChart.resize();
     }, 100);
-    console.log('✅ 四图表初始化完成');
+    console.log('✅ 六图表初始化完成');
 };
 
-// 更新四个图表数据
+// 更新六个图表数据
 window.updateChartData = function(data) {
-    if (!tempChart || !humidityChart || !windChart || !lightChart) {
+    if (!tempChart || !humidityChart || !windChart || !lightChart || !PM2Chart || !sunrayChart) {
         console.warn('⚠️ 图表未初始化，跳过更新');
         return;
     }
@@ -521,11 +712,19 @@ window.updateChartData = function(data) {
     const lightVal = data.illumination !== undefined && data.illumination !== null
         ? parseInt(data.illumination)
         : 0;
+    const PM2Val = data.pm25 !== undefined && data.pm25 !== null
+        ? parseInt(data.pm25)
+        : 0;
+    const sunrayVal = data.sunray !== undefined && data.sunray !== null
+        ? parseInt(data.sunray)
+        : 0;
 
     window.chartData.temperature.push(Number(tempVal));
     window.chartData.humidity.push(Number(humVal));
     window.chartData.windSpeed.push(Number(windVal));
     window.chartData.illumination.push(lightVal);
+    window.chartData.PM2.push(PM2Val);
+    window.chartData.sunray.push(sunrayVal);
 
     // 保留最近20条数据
     const maxLen = 20;
@@ -554,6 +753,16 @@ window.updateChartData = function(data) {
         xAxis: { data: xData },
         series: [{ data: window.chartData.illumination }]
     });
+
+    PM2Chart.setOption({
+        xAxis: { data: xData },
+        series: [{ data: window.chartData.PM2 }]
+    });
+
+    sunrayChart.setOption({
+        xAxis: { data: xData },
+        series: [{ data: window.chartData.sunray }]
+    });
 };
 
 // 清空图表数据
@@ -563,7 +772,9 @@ window.clearChartData = function() {
         temperature: [],
         humidity: [],
         windSpeed: [],
-        illumination: []
+        illumination: [],
+        PM2: [],
+        sunray: []
     };
 
     const emptyXAxis = ['暂无数据'];
@@ -596,10 +807,26 @@ window.clearChartData = function() {
         });
     }
 
+    if (PM2Chart) {
+        PM2Chart.setOption({
+            xAxis: { data: emptyXAxis },
+            series: [{ data: [0] }]
+        });
+    }
+
+    if (sunrayChart) {
+        sunrayChart.setOption({
+            xAxis: { data: emptyXAxis },
+            series: [{ data: [0] }]
+        });
+    }
+
     if (typeof window.updateDataValue === 'function') {
         window.updateDataValue('temperature', 0);
         window.updateDataValue('humidity', 0);
         window.updateDataValue('windSpeed', 0);
         window.updateDataValue('illumination', 0);
+        window.updateDataValue('PM2', 0);
+        window.updateDataValue('sunray', 0);
     }
 };

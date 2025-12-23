@@ -193,6 +193,8 @@ function resizeAllCharts() {
         if (window.humidityChart) window.humidityChart.resize();
         if (window.windChart) window.windChart.resize();
         if (window.lightChart) window.lightChart.resize();
+        if (window.PM2Chart) window.PM2Chart.resize();
+        if (window.sunrayChart) window.sunrayChart.resize();
     });
 }
 
