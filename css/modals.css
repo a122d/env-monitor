@@ -13,6 +13,72 @@
     display: block;
 }
 
+/* 图表设置弹窗样式（采用与 about-modal 相同的布局和交互） */
+.chart-settings-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 9600;
+    display: none;
+}
+
+.chart-settings-modal.show { display: block; }
+
+.chart-settings-modal .modal-content {
+    overflow: hidden;
+    aspect-ratio: auto;
+    max-height: 85vh;
+}
+
+.chart-settings-modal .modal-body {
+    padding: 0;
+    max-height: none;
+    overflow: visible;
+}
+
+.chart-settings-modal .modal-close {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    font-size: 28px;
+    color: #64748b;
+    cursor: pointer;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    z-index: 10;
+}
+
+.chart-settings-modal .modal-close:hover {
+    background: linear-gradient(135deg, #ff6b6b, #ff8e53);
+    color: #ffffff;
+    transform: rotate(90deg) scale(1.02);
+    box-shadow: 0 8px 22px rgba(0,0,0,0.18);
+}
+
+/* 聚焦态可见性支持（键盘访问） */
+.chart-settings-modal .modal-close:focus {
+    outline: 2px solid rgba(37,99,235,0.18);
+    outline-offset: 2px;
+}
+
+/* 强制平滑字体渲染，减少消失或闪烁 */
+.chart-settings-modal .modal-close {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* 按下时做完整旋转动画，增强交互感 */
+.chart-settings-modal .modal-close:active {
+    animation: modal-close-spin 0.6s ease-in-out;
+}
+
 .modal-mask {
     position: absolute;
     top: 0;
@@ -23,6 +89,10 @@
     backdrop-filter: blur(4px);
     animation: fadeIn 0.3s ease;
 }
+
+/* 确保遮罩位于 modal-content 之下，以免覆盖关闭按钮 */
+.mqtt-config-modal .modal-mask { z-index: 1; }
+.mqtt-config-modal .modal-content { z-index: 2; }
 
 .modal-content {
     position: absolute;
@@ -67,6 +137,11 @@
     flex-shrink: 0;
 }
 
+/* 允许 header 溢出（关闭按钮旋转时不被裁剪） */
+.modal-header {
+    overflow: visible;
+}
+
 /* 🔐 登录弹窗 header 缩小 */
 .mqtt-config-modal .modal-header {
     padding: 16px 20px;
@@ -96,16 +171,22 @@
     align-items: center;
     justify-content: center;
     border-radius: 50%;
-    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    transition: background 0.28s ease, color 0.28s ease, box-shadow 0.28s ease, transform 0.36s cubic-bezier(0.22, 1, 0.36, 1);
     position: relative;
     z-index: 10;
     flex-shrink: 0;
+    background: rgba(255,255,255,0.85);
+    color: #334155;
+    will-change: transform, background-color, color;
+    transform-origin: center center;
+    backface-visibility: hidden;
 }
 
 .modal-close:hover {
     background: linear-gradient(135deg, #ff6b6b, #ff8e53);
     color: #ffffff;
-    transform: rotate(90deg);
+    transform: rotate(90deg) scale(1.02);
+    box-shadow: 0 8px 22px rgba(0,0,0,0.18);
 }
 
 .modal-body {
@@ -252,6 +333,14 @@
     transform: translateY(-3px);
 }
 
+/* 确保图表设置弹窗的标题样式优先级高于通用 .modal-title */
+.chart-settings-modal .modal-title {
+    font-size: 20px;
+    color: #0f172a;
+    font-weight: 700;
+    margin: 0;
+}
+
 /* 移动端弹窗适配 */
 @media (max-width: 767px) {
     .mqtt-config-modal .modal-content {
@@ -269,6 +358,24 @@
         background: rgba(255, 255, 255, 0.9);
         touch-action: manipulation;
     }
+}
+
+/* 强制登录弹窗的关闭按钮位于内容层之上，避免被布局或遮罩覆盖 */
+.mqtt-config-modal .modal-close {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    z-index: 50;
+    pointer-events: auto;
+}
+
+/* 强制关闭按钮始终可见，避免被 JS 或其他样式意外隐藏 */
+.mqtt-config-modal .modal-close {
+    opacity: 1 !important;
+    visibility: visible !important;
+    z-index: 9999 !important;
+    background: rgba(255,255,255,0.95) !important;
+    color: #334155 !important;
 }
 
 /* ===== 关于系统弹窗 ===== */
@@ -316,9 +423,33 @@
 }
 
 .about-modal .modal-close:hover {
+    /* 与通用悬停样式保持一致，避免图标消失 */
     background: linear-gradient(135deg, #ff6b6b, #ff8e53);
     color: #ffffff;
-    transform: rotate(90deg);
+    transform: rotate(90deg) scale(1.02);
+    box-shadow: 0 8px 22px rgba(0,0,0,0.18);
+}
+
+/* 聚焦态可见性支持（键盘访问） */
+.modal-close:focus {
+    outline: 2px solid rgba(37,99,235,0.18);
+    outline-offset: 2px;
+}
+
+/* 强制平滑字体渲染，减少消失或闪烁 */
+.modal-close {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* 按下时做完整旋转动画，增强交互感 */
+.modal-close:active {
+    animation: modal-close-spin 0.6s ease-in-out;
+}
+
+@keyframes modal-close-spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
 }
 
 .about-content {
@@ -436,3 +567,298 @@
         max-height: calc(70svh - 60px);
     }
 }
+
+/* ---------- chart-settings-modal: 美观统一覆盖（不修改 about-modal） ---------- */
+/* 放到文件末尾以确保覆盖之前的规则 */
+.chart-settings-modal .modal-content {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: min(760px, 96%);
+    max-width: 760px;
+    border-radius: 14px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(250,252,255,0.98));
+    border: 1px solid rgba(2,6,23,0.06);
+    box-shadow: 0 18px 44px rgba(2,6,23,0.08);
+    display: flex;
+    flex-direction: column;
+    max-height: 85vh;
+    overflow: hidden;
+    z-index: 2500;
+}
+
+.chart-settings-modal .modal-header {
+    padding: 18px 22px;
+    border-bottom: 1px solid rgba(15,23,42,0.04);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.chart-settings-modal .modal-title { font-size: 20px; font-weight: 700; color: #0f172a; margin: 0; }
+
+.chart-settings-modal .modal-close {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #fff;
+    border: 1px solid rgba(15,23,42,0.06);
+    box-shadow: 0 6px 18px rgba(2,6,23,0.06);
+    color: #334155;
+    font-size: 18px;
+}
+.chart-settings-modal .modal-close:hover { transform: scale(1.03); background: linear-gradient(135deg,#ff6b6b,#ff8e53); color:#fff; }
+
+.chart-settings-modal .modal-body {
+    padding: 18px 22px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.chart-settings-modal .form-group { margin-bottom: 14px; }
+.chart-settings-modal label { display:block; margin-bottom:8px; color:#334155; font-weight:600; }
+.chart-settings-modal select,
+.chart-settings-modal input[type="text"],
+.chart-settings-modal input[type="number"] {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid rgba(15,23,42,0.06);
+    border-radius: 8px;
+    background: #fff;
+}
+
+.chart-settings-modal .form-row { display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
+.chart-settings-modal .series-checkbox { margin-right:8px; }
+
+.chart-settings-modal .modal-footer {
+    padding: 16px 20px;
+    border-top: 1px solid rgba(15,23,42,0.04);
+    display:flex;
+    justify-content:center;
+    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.98));
+}
+.chart-settings-modal .btn-save {
+    padding: 10px 24px;
+    border-radius: 999px;
+    background: linear-gradient(135deg,#2563eb,#1d4ed8);
+    color:#fff;
+    box-shadow:0 10px 30px rgba(37,99,235,0.12);
+    font-weight:700;
+    border:none;
+}
+.chart-settings-modal .btn-save:hover { transform: translateY(-2px); box-shadow:0 16px 36px rgba(37,99,235,0.14); }
+
+/* scrollbar styling for modal body */
+.chart-settings-modal .modal-body::-webkit-scrollbar { width:10px; }
+.chart-settings-modal .modal-body::-webkit-scrollbar-thumb { background: rgba(15,23,42,0.06); border-radius:10px; }
+
+@media (max-width: 600px) {
+    .chart-settings-modal .modal-content { width: 94%; max-width: 640px; }
+    .chart-settings-modal .modal-header { padding:14px 16px; }
+    .chart-settings-modal .modal-body { padding:14px 16px; }
+}
+
+/* end chart-settings-modal overrides */
+
+/* ---------- chart-settings-modal: 更丰富的视觉提升（可移除/调整） ---------- */
+.chart-settings-modal .modal-content {
+    background: linear-gradient(180deg, rgba(253,255,255,0.98) 0%, rgba(246,250,255,0.98) 100%);
+    border: 1px solid rgba(15,23,42,0.06);
+    box-shadow: 0 22px 60px rgba(2,6,23,0.12), inset 0 1px 0 rgba(255,255,255,0.5);
+}
+
+.chart-settings-modal .modal-header {
+    background: linear-gradient(90deg, rgba(255,255,255,0.45), rgba(250,252,255,0.6));
+    box-shadow: inset 0 -1px 0 rgba(15,23,42,0.02);
+}
+.chart-settings-modal .modal-title {
+    font-size: 22px;
+    letter-spacing: -0.2px;
+    color: #0b1724;
+}
+
+/* floating circular close with subtle ring */
+.chart-settings-modal .modal-close {
+    background: #fff;
+    box-shadow: 0 8px 20px rgba(11,20,30,0.08);
+    border: 1px solid rgba(15,23,42,0.06);
+}
+.chart-settings-modal .modal-close:focus { box-shadow: 0 0 0 6px rgba(37,99,235,0.06); }
+
+/* Body card feel */
+.chart-settings-modal .modal-body {
+    background: linear-gradient(180deg, rgba(255,255,255,0.0) 0%, rgba(245,249,255,0.3) 100%);
+    padding-bottom: 32px; /* give space above footer */
+}
+
+/* 表单风格：更清晰的控件与分组 */
+.chart-settings-modal .form-group { padding: 8px 0; border-bottom: 1px solid rgba(15,23,42,0.03); }
+.chart-settings-modal .form-group:last-child { border-bottom: none; }
+.chart-settings-modal label { color: #122434; font-weight: 700; }
+.chart-settings-modal select { height: 46px; }
+
+/* 自定义复选框样式（现代风格） */
+.chart-settings-modal input[type="checkbox"] {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    width: 22px;
+    height: 22px;
+    border-radius: 6px;
+    border: 1px solid rgba(15,23,42,0.12);
+    background: linear-gradient(180deg,#ffffff,#f6fbff);
+    display: inline-block;
+    vertical-align: middle;
+    margin-right: 8px;
+    position: relative;
+    transition: all 0.12s ease;
+}
+.chart-settings-modal input[type="checkbox"]:checked {
+    background: linear-gradient(180deg,#2fe6c8,#04c1a3);
+    border-color: rgba(3,129,110,0.9);
+    box-shadow: 0 6px 14px rgba(3,129,110,0.08), inset 0 1px 0 rgba(255,255,255,0.35);
+}
+.chart-settings-modal input[type="checkbox"]:after {
+    content: '';
+    position: absolute;
+    left: 6px;
+    top: 3px;
+    width: 7px;
+    height: 12px;
+    border: 2px solid #fff;
+    border-top: 0;
+    border-left: 0;
+    transform: rotate(45deg) scale(0);
+    transition: transform 0.12s ease;
+}
+.chart-settings-modal input[type="checkbox"]:checked:after { transform: rotate(45deg) scale(1); }
+
+/* 将系列列表调整为两列更整齐 */
+.chart-settings-modal .series-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0,1fr));
+    gap: 8px 24px;
+    padding-top: 6px;
+}
+
+/* 大型保存按钮风格 */
+.chart-settings-modal .btn-save {
+    padding: 12px 36px;
+    border-radius: 28px;
+    background: linear-gradient(135deg,#1773ff,#0b54d6);
+    box-shadow: 0 18px 40px rgba(13,88,255,0.12), 0 6px 18px rgba(13,88,255,0.06);
+    transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+.chart-settings-modal .btn-save:active { transform: translateY(1px); }
+
+/* 调整滚动条与内边距以视觉更统一 */
+.chart-settings-modal .modal-body { padding: 18px 24px 8px 24px; }
+.chart-settings-modal .modal-body::-webkit-scrollbar { width: 10px; }
+.chart-settings-modal .modal-body::-webkit-scrollbar-thumb { background: linear-gradient(180deg, rgba(15,23,42,0.06), rgba(15,23,42,0.03)); border-radius: 10px; }
+
+@media (max-width: 600px) {
+    .chart-settings-modal .series-list { grid-template-columns: 1fr; }
+}
+
+/* 完成增强 */
+
+/* ---------- chart-settings-modal: 统一且精致的最终样式（高优先级覆盖） ---------- */
+/* 目标：与关于弹窗风格保持一致，但保留专属细节；仅作用于图表设置弹窗 */
+
+#chartSettingsModal .modal-content {
+    max-width: 720px;
+    width: calc(100% - 48px);
+    margin: 28px auto;
+    border-radius: 14px;
+    overflow: hidden;
+    background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
+    border: 1px solid rgba(15,23,42,0.04);
+    box-shadow: 0 26px 70px rgba(11,20,30,0.12);
+    padding: 0;
+}
+
+#chartSettingsModal .modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 22px 26px;
+    background: linear-gradient(90deg, rgba(255,255,255,0.8), rgba(248,252,255,0.9));
+    border-bottom: 1px solid rgba(15,23,42,0.04);
+}
+
+#chartSettingsModal .modal-title {
+    margin: 0;
+    font-size: 26px;
+    line-height: 1;
+    font-weight: 800;
+    color: #071426;
+    letter-spacing: -0.4px;
+}
+
+/* 圆形浮动关闭按钮，略高于边角 */
+#chartSettingsModal .modal-close {
+    width:44px; height:44px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    background:#fff; border:1px solid rgba(15,23,42,0.06);
+    box-shadow: 0 10px 24px rgba(11,20,30,0.06);
+}
+
+#chartSettingsModal .modal-body {
+    padding:20px 26px 16px 26px;
+    max-height: 62vh;
+    overflow:auto;
+    background: transparent;
+}
+
+#chartSettingsModal .form-group { padding: 10px 0; }
+#chartSettingsModal .form-group + .form-group { margin-top: 6px; }
+
+#chartSettingsModal label { display:block; margin-bottom:8px; color:#0f2b3a; font-weight:700; }
+#chartSettingsModal select, #chartSettingsModal .select { height:48px; border-radius:10px; }
+
+/* 系列列表整齐两列布局 */
+#chartSettingsModal .series-list {
+    display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap:10px 24px; margin-top:8px;
+}
+
+/* 现代化复选框：圆角方块 + 对勾 */
+#chartSettingsModal input[type="checkbox"] {
+    -webkit-appearance:none; appearance:none; width:22px; height:22px; border-radius:6px;
+    border:1px solid rgba(15,23,42,0.1); background:linear-gradient(180deg,#ffffff,#f6fbff);
+    position:relative; margin-right:10px; vertical-align:middle; box-shadow: inset 0 1px 0 rgba(255,255,255,0.6);
+}
+#chartSettingsModal input[type="checkbox"]:checked {
+    background: linear-gradient(180deg,#24d3a6,#06a07e); border-color: rgba(3,129,110,0.95);
+    box-shadow: 0 10px 28px rgba(3,129,110,0.07), inset 0 1px 0 rgba(255,255,255,0.35);
+}
+#chartSettingsModal input[type="checkbox"]:after {
+    content:''; position:absolute; left:6px; top:3px; width:7px; height:12px; border:2px solid #fff; border-top:0; border-left:0; transform:rotate(45deg) scale(0); transition:transform .12s ease;
+}
+#chartSettingsModal input[type="checkbox"]:checked:after { transform:rotate(45deg) scale(1); }
+
+/* 底部固定保存按钮（仅保存，无取消） */
+#chartSettingsModal .modal-footer {
+    position: sticky; bottom: 0; display:flex; justify-content:center; align-items:center;
+    padding:18px 26px; background: linear-gradient(180deg, rgba(255,255,255,0), rgba(250,252,255,0.9));
+    border-top: 1px solid rgba(15,23,42,0.03);
+}
+
+#chartSettingsModal .btn-save {
+    background: linear-gradient(135deg,#1773ff,#0b54d6); color:#fff; border:none; padding:12px 40px; border-radius:28px; font-weight:700; font-size:15px;
+    box-shadow: 0 18px 48px rgba(11,84,255,0.12);
+}
+
+/* 轻微响应式调整 */
+@media (max-width: 640px) {
+    #chartSettingsModal .modal-content { width: calc(100% - 28px); margin: 12px auto; }
+    #chartSettingsModal .series-list { grid-template-columns: 1fr; }
+    #chartSettingsModal .modal-title { font-size:22px; }
+}
+
+/* 确保视觉覆盖优先级（仅针对该弹窗） */
+#chartSettingsModal .modal-content, #chartSettingsModal .modal-header, #chartSettingsModal .modal-body, #chartSettingsModal .modal-footer { -webkit-font-smoothing:antialiased; }
+
+/* 结束：chart-settings 高级覆盖 */

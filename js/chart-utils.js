@@ -10,6 +10,10 @@ window.chartData = {
 };
 
 let tempChart, humidityChart, windChart, lightChart, PM2Chart, sunrayChart;
+// 全局控制
+window.chartRealtimePaused = false;
+window.CHART_MAX_LEN = 20; // 实时视图默认保留点数
+window.CHART_HISTORY_LEN = 240; // 历史视图保留点数（可切换）
 
 // 获取响应式配置
 function getResponsiveConfig() {
@@ -118,6 +122,22 @@ window.initCharts = function() {
         animationEasing: 'cubicOut'
     };
 
+    // 添加 dataZoom 到 common 配置，方便用户缩放查看历史数据
+    common.dataZoom = [
+        {
+            type: 'slider',
+            show: true,
+            start: 0,
+            end: 100,
+            bottom: config.isMobile ? '0%' : '2%'
+        },
+        {
+            type: 'inside',
+            start: 0,
+            end: 100
+        }
+    ];
+
     // 温度图
     tempChart = echarts.init(tempDom);
     tempChart.setOption({
@@ -213,6 +233,8 @@ window.initCharts = function() {
             }
         }]
     });
+    // 在每个图表选项中启用 dataZoom 支持
+    tempChart.setOption({ dataZoom: common.dataZoom });
 
     // 湿度图
     humidityChart = echarts.init(humidityDom);
@@ -305,6 +327,7 @@ window.initCharts = function() {
             }
         }]
     });
+    humidityChart.setOption({ dataZoom: common.dataZoom });
 
     // 风速图
     windChart = echarts.init(windDom);
@@ -397,6 +420,7 @@ window.initCharts = function() {
             }
         }]
     });
+    windChart.setOption({ dataZoom: common.dataZoom });
 
     // 光照图
     lightChart = echarts.init(lightDom);
@@ -488,6 +512,7 @@ window.initCharts = function() {
             }
         }]
     });
+    lightChart.setOption({ dataZoom: common.dataZoom });
 
     // PM2.5图
     PM2Chart = echarts.init(PM2Dom);
@@ -579,6 +604,7 @@ window.initCharts = function() {
             }
         }]
     });
+    PM2Chart.setOption({ dataZoom: common.dataZoom });
 
     // 紫外线强度图
     sunrayChart = echarts.init(sunrayDom);
@@ -671,6 +697,7 @@ window.initCharts = function() {
             }
         }]
     });
+    sunrayChart.setOption({ dataZoom: common.dataZoom });
 
     window.tempChart = tempChart;
     window.humidityChart = humidityChart;
@@ -725,44 +752,23 @@ window.updateChartData = function(data) {
     window.chartData.illumination.push(lightVal);
     window.chartData.PM2.push(PM2Val);
     window.chartData.sunray.push(sunrayVal);
-
-    // 保留最近20条数据
-    const maxLen = 20;
+    // 根据当前视图长度裁剪数组（实时/历史切换）
+    const maxLen = window.CHART_MAX_LEN || 20;
     if (window.chartData.time.length > maxLen) {
         Object.keys(window.chartData).forEach(key => window.chartData[key].shift());
     }
 
     const xData = window.chartData.time;
 
-    tempChart.setOption({
-        xAxis: { data: xData },
-        series: [{ data: window.chartData.temperature }]
-    });
+    // 如果处于暂停状态，仅更新内部数据，不渲染图表
+    if (window.chartRealtimePaused) return;
 
-    humidityChart.setOption({
-        xAxis: { data: xData },
-        series: [{ data: window.chartData.humidity }]
-    });
-
-    windChart.setOption({
-        xAxis: { data: xData },
-        series: [{ data: window.chartData.windSpeed }]
-    });
-
-    lightChart.setOption({
-        xAxis: { data: xData },
-        series: [{ data: window.chartData.illumination }]
-    });
-
-    PM2Chart.setOption({
-        xAxis: { data: xData },
-        series: [{ data: window.chartData.PM2 }]
-    });
-
-    sunrayChart.setOption({
-        xAxis: { data: xData },
-        series: [{ data: window.chartData.sunray }]
-    });
+    tempChart.setOption({ xAxis: { data: xData }, series: [{ data: window.chartData.temperature }] });
+    humidityChart.setOption({ xAxis: { data: xData }, series: [{ data: window.chartData.humidity }] });
+    windChart.setOption({ xAxis: { data: xData }, series: [{ data: window.chartData.windSpeed }] });
+    lightChart.setOption({ xAxis: { data: xData }, series: [{ data: window.chartData.illumination }] });
+    PM2Chart.setOption({ xAxis: { data: xData }, series: [{ data: window.chartData.PM2 }] });
+    sunrayChart.setOption({ xAxis: { data: xData }, series: [{ data: window.chartData.sunray }] });
 };
 
 // 清空图表数据
@@ -830,3 +836,70 @@ window.clearChartData = function() {
         window.updateDataValue('sunray', 0);
     }
 };
+
+// 切换实时暂停/恢复（暂停时继续缓存数据，不更新图表）
+window.toggleChartRealtime = function() {
+    window.chartRealtimePaused = !window.chartRealtimePaused;
+    const btn = document.getElementById('chartPauseBtn');
+    if (btn) {
+        btn.textContent = window.chartRealtimePaused ? '恢复' : '暂停';
+        btn.setAttribute('aria-pressed', String(window.chartRealtimePaused));
+    }
+    if (!window.chartRealtimePaused) {
+        // 恢复后用当前缓存的数据刷新图表
+        const maxLen = window.CHART_MAX_LEN || 20;
+        const startIndex = Math.max(0, window.chartData.time.length - maxLen);
+        const xData = window.chartData.time.slice(startIndex);
+        tempChart.setOption({ xAxis: { data: xData }, series: [{ data: window.chartData.temperature.slice(startIndex) }] });
+        humidityChart.setOption({ xAxis: { data: xData }, series: [{ data: window.chartData.humidity.slice(startIndex) }] });
+        windChart.setOption({ xAxis: { data: xData }, series: [{ data: window.chartData.windSpeed.slice(startIndex) }] });
+        lightChart.setOption({ xAxis: { data: xData }, series: [{ data: window.chartData.illumination.slice(startIndex) }] });
+        PM2Chart.setOption({ xAxis: { data: xData }, series: [{ data: window.chartData.PM2.slice(startIndex) }] });
+        sunrayChart.setOption({ xAxis: { data: xData }, series: [{ data: window.chartData.sunray.slice(startIndex) }] });
+    }
+};
+
+// 切换历史视图与实时视图
+window.toggleChartHistoryView = function() {
+    const btn = document.getElementById('chartHistoryBtn');
+    const isHistory = window.CHART_MAX_LEN !== (window.CHART_HISTORY_LEN || 240);
+    if (isHistory) {
+        // 切换到历史视图
+        window.CHART_MAX_LEN = window.CHART_HISTORY_LEN || 240;
+        if (btn) { btn.textContent = '实时视图'; btn.setAttribute('aria-pressed', 'true'); }
+    } else {
+        // 切换回实时视图
+        window.CHART_MAX_LEN = 20;
+        if (btn) { btn.textContent = '历史视图'; btn.setAttribute('aria-pressed', 'false'); }
+    }
+    // 刷新图表显示为当前缓存的最后 CHART_MAX_LEN 条
+    const maxLen = window.CHART_MAX_LEN || 20;
+    const startIndex = Math.max(0, window.chartData.time.length - maxLen);
+    const xData = window.chartData.time.slice(startIndex);
+    tempChart.setOption({ xAxis: { data: xData }, series: [{ data: window.chartData.temperature.slice(startIndex) }] });
+    humidityChart.setOption({ xAxis: { data: xData }, series: [{ data: window.chartData.humidity.slice(startIndex) }] });
+    windChart.setOption({ xAxis: { data: xData }, series: [{ data: window.chartData.windSpeed.slice(startIndex) }] });
+    lightChart.setOption({ xAxis: { data: xData }, series: [{ data: window.chartData.illumination.slice(startIndex) }] });
+    PM2Chart.setOption({ xAxis: { data: xData }, series: [{ data: window.chartData.PM2.slice(startIndex) }] });
+    sunrayChart.setOption({ xAxis: { data: xData }, series: [{ data: window.chartData.sunray.slice(startIndex) }] });
+};
+
+// 重置所有图表的缩放
+window.resetAllChartZoom = function() {
+    if (tempChart) tempChart.dispatchAction({ type: 'dataZoom', start: 0, end: 100 });
+    if (humidityChart) humidityChart.dispatchAction({ type: 'dataZoom', start: 0, end: 100 });
+    if (windChart) windChart.dispatchAction({ type: 'dataZoom', start: 0, end: 100 });
+    if (lightChart) lightChart.dispatchAction({ type: 'dataZoom', start: 0, end: 100 });
+    if (PM2Chart) PM2Chart.dispatchAction({ type: 'dataZoom', start: 0, end: 100 });
+    if (sunrayChart) sunrayChart.dispatchAction({ type: 'dataZoom', start: 0, end: 100 });
+};
+
+// 绑定页面控件事件（如果存在）
+document.addEventListener('DOMContentLoaded', () => {
+    const pauseBtn = document.getElementById('chartPauseBtn');
+    const histBtn = document.getElementById('chartHistoryBtn');
+    const resetZoomBtn = document.getElementById('chartResetZoomBtn');
+    if (pauseBtn) pauseBtn.addEventListener('click', window.toggleChartRealtime);
+    if (histBtn) histBtn.addEventListener('click', window.toggleChartHistoryView);
+    if (resetZoomBtn) resetZoomBtn.addEventListener('click', window.resetAllChartZoom);
+});

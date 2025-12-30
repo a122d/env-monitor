@@ -166,37 +166,42 @@ const RECONNECT_CONFIG = {
     jitter: 0.1              // 抖动 10%
 };
 
-let reconnectCount = 0;
+let totalAttempts = 0; // 包含首次连接在内的总尝试次数
 
 // 计算退避延迟
 function getReconnectDelay() {
-    if (reconnectCount >= RECONNECT_CONFIG.maxRetries) {
+    // 如果已达到最大尝试次数（包含首次连接），停止重连
+    if (totalAttempts >= RECONNECT_CONFIG.maxRetries) {
         return null;
     }
-    
-    let delay = RECONNECT_CONFIG.baseInterval * 
-        Math.pow(RECONNECT_CONFIG.multiplier, reconnectCount);
+
+    // 使用指数退避，基于已完成的尝试次数计算下一次延迟
+    // 注意：此处使用 totalAttempts 作为指数基数（首次失败后 totalAttempts>=1）
+    let delay = RECONNECT_CONFIG.baseInterval * Math.pow(RECONNECT_CONFIG.multiplier, Math.max(0, totalAttempts));
     delay = Math.min(delay, RECONNECT_CONFIG.maxInterval);
-    
-    // 加入抖动，避免同时重连
+
+    // 加入抖动
     const jitterRange = delay * RECONNECT_CONFIG.jitter;
     delay += Math.random() * jitterRange;
-    
+
     return delay;
 }
 
 // 手动重连（全覆盖逻辑）
 function reconnect() {
-    if (reconnectTimer || (mqttClient && mqttClient.isConnected())) return;
-    
+    if (reconnectTimer || (mqttClient && mqttClient.isConnected && mqttClient.isConnected())) return;
+
     const delay = getReconnectDelay();
     if (delay === null) {
         updateMQTTStatus('failed');
+        if (typeof ToastAlert !== 'undefined' && ToastAlert.show) {
+            ToastAlert.show('已达到最大重连次数，停止尝试连接。');
+        }
         return;
     }
-    
-    reconnectCount++;
+
     reconnectTimer = setTimeout(() => {
+        // 发起下一次连接（init 会增加 totalAttempts）
         initMQTTClient();
         reconnectTimer = null;
     }, delay);
@@ -821,6 +826,18 @@ window.MQTTApp = window.MQTTApp || {};
 window.MQTTApp.init = function(newConfig) {
     mqttConfig = newConfig || mqttConfig;
     
+    // 检查是否已达到最大尝试次数（包含首次连接）
+    if (totalAttempts >= RECONNECT_CONFIG.maxRetries) {
+        updateMQTTStatus('failed');
+        if (typeof ToastAlert !== 'undefined' && ToastAlert.show) {
+            ToastAlert.show('已达到最大重连次数，停止尝试连接。');
+        }
+        return;
+    }
+
+    // 增加总尝试计数（首次调用 init 也计为一次尝试）
+    totalAttempts++;
+
     // 清理旧连接和定时器
     if (mqttClient) {
         try {
@@ -915,7 +932,8 @@ window.MQTTApp.init = function(newConfig) {
             cleanSession: true,
             onSuccess: function() {
                 updateMQTTStatus('success');
-                reconnectCount = 0;
+                // 连接成功后重置尝试计数
+                totalAttempts = 0;
 
                 // 订阅环境数据主题
                 client.subscribe(mqttConfig.topic, {

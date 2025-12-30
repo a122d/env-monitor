@@ -46,6 +46,85 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // 图表设置弹窗交互绑定
+    const chartSettingsModal = document.getElementById('chartSettingsModal');
+    if (chartSettingsModal) {
+    const chartSettingsClose = document.getElementById('chartSettingsClose');
+    const chartSettingsSaveBtn = document.getElementById('chartSettingsSaveBtn');
+    const chartResetDefaultsBtn = document.getElementById('chartResetDefaultsBtn');
+
+        function loadChartSettings() {
+            try {
+                const raw = localStorage.getItem('chartSettings');
+                if (!raw) return;
+                const cfg = JSON.parse(raw);
+                const sel = document.getElementById('chartTimeRangeSelect');
+                if (sel && cfg.timeRange) sel.value = cfg.timeRange;
+                const hist = document.getElementById('chartHistoryMode');
+                if (hist) hist.checked = !!cfg.historyMode;
+                const smooth = document.getElementById('chartSmoothToggle');
+                if (smooth) smooth.checked = !!cfg.smooth;
+                const markers = document.getElementById('chartMarkersToggle');
+                if (markers) markers.checked = !!cfg.markers;
+                const seriesChecks = document.querySelectorAll('.series-checkbox');
+                seriesChecks.forEach(cb => {
+                    const name = cb.dataset.series;
+                    cb.checked = !(cfg.series && cfg.series[name] === false);
+                });
+            } catch (e) { console.warn('加载图表设置失败', e); }
+        }
+
+        function gatherChartSettings() {
+            const sel = document.getElementById('chartTimeRangeSelect');
+            const hist = document.getElementById('chartHistoryMode');
+            const smooth = document.getElementById('chartSmoothToggle');
+            const markers = document.getElementById('chartMarkersToggle');
+            const seriesChecks = document.querySelectorAll('.series-checkbox');
+            const series = {};
+            seriesChecks.forEach(cb => { series[cb.dataset.series] = !!cb.checked; });
+            return {
+                timeRange: sel ? sel.value : '5m',
+                historyMode: hist ? !!hist.checked : false,
+                smooth: smooth ? !!smooth.checked : false,
+                markers: markers ? !!markers.checked : false,
+                series
+            };
+        }
+
+        if (chartSettingsClose) chartSettingsClose.addEventListener('click', () => { chartSettingsModal.classList.remove('show'); ScrollLock.unlock(); });
+
+        if (chartSettingsSaveBtn) chartSettingsSaveBtn.addEventListener('click', () => {
+            const settings = gatherChartSettings();
+            try { localStorage.setItem('chartSettings', JSON.stringify(settings)); } catch (e) { console.warn('保存图表设置失败', e); }
+            if (window.applyChartSettings && typeof window.applyChartSettings === 'function') {
+                try { window.applyChartSettings(settings); } catch (e) { console.warn('applyChartSettings 调用失败', e); }
+            }
+            chartSettingsModal.classList.remove('show');
+            ScrollLock.unlock();
+        });
+
+        if (chartResetDefaultsBtn) chartResetDefaultsBtn.addEventListener('click', () => {
+            // 清除 localStorage 中的设置并重置表单为默认
+            try { localStorage.removeItem('chartSettings'); } catch (e) { console.warn('重置默认失败', e); }
+            // 恢复表单默认值
+            const sel = document.getElementById('chartTimeRangeSelect'); if (sel) sel.value = '5m';
+            const hist = document.getElementById('chartHistoryMode'); if (hist) hist.checked = false;
+            const smooth = document.getElementById('chartSmoothToggle'); if (smooth) smooth.checked = false;
+            const markers = document.getElementById('chartMarkersToggle'); if (markers) markers.checked = false;
+            const seriesChecks = document.querySelectorAll('.series-checkbox');
+            seriesChecks.forEach(cb => cb.checked = true);
+            ToastAlert.show('已重置为默认设置');
+        });
+
+        // 点击遮罩关闭
+        const chartSettingsContent = chartSettingsModal.querySelector('.modal-content');
+        chartSettingsModal.addEventListener('click', () => { chartSettingsModal.classList.remove('show'); ScrollLock.unlock(); });
+        if (chartSettingsContent) chartSettingsContent.addEventListener('click', (e) => e.stopPropagation());
+
+        // 初始化时填充表单
+        loadChartSettings();
+    }
+
     // 点击背景关闭弹窗
     if (aboutModal) {
         aboutModal.addEventListener('click', () => {
@@ -90,7 +169,17 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                     break;
                 case 'chart-setting':
-                    ToastAlert.show('即将打开图表显示设置界面（即将开发）');
+                    // 打开图表显示设置弹窗
+                    const chartSettingsModal = document.getElementById('chartSettingsModal');
+                    if (chartSettingsModal) {
+                        chartSettingsModal.classList.add('show');
+                        ScrollLock.lock();
+                    } else {
+                        ToastAlert.show('图表显示设置尚未就绪');
+                    }
+                    // 关闭汉堡菜单
+                    hamburgerMenu.classList.remove('active');
+                    dropdownMenu.classList.remove('show');
                     break;
                 case 'data-export':
                     ToastAlert.show('即将导出监控数据为Excel（暂定）');
