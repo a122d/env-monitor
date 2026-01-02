@@ -342,12 +342,12 @@
     text-align: center;
 }
 
-/* 图表设置弹窗专用样式 - 仿照图片设计 */
+/* 图表设置弹窗专用样式 */
 .chart-settings-modal .modal-content {
     background: linear-gradient(180deg, #e0f2fe 0%, #f0f9ff 100%);
     border-radius: 24px;
-    width: 90%;
-    max-width: 480px;
+    width: 60%;
+    max-width: 360px;
 }
 
 .chart-settings-modal .modal-header {
@@ -398,6 +398,8 @@
 .settings-control {
     display: flex;
     align-items: center;
+    justify-content: center;
+    min-width: 140px;
 }
 
 /* 自定义下拉选择器样式 */
@@ -406,16 +408,17 @@
     background: white;
     border: 2px solid #e2e8f0;
     border-radius: 12px;
-    padding: 10px 40px 10px 16px;
+    padding: 10px 40px 10px 20px;
     font-size: 15px;
     color: #475569;
     font-weight: 500;
     cursor: pointer;
     min-width: 140px;
+    text-align: center;
     transition: all 0.3s ease;
     background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L6 6L11 1' stroke='%23475569' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
-    background-position: right 16px center;
+    background-position: calc(100% - 16px) center;
 }
 
 .custom-select:hover {
@@ -544,6 +547,65 @@
         font-size: 32px;
         background: rgba(255, 255, 255, 0.9);
         touch-action: manipulation;
+    }
+    
+    /* 图表设置弹窗移动端样式 */
+    .chart-settings-modal .modal-content {
+        width: 72%;
+        max-width: 72%;
+        border-radius: 16px;
+    }
+    
+    .chart-settings-modal .modal-header {
+        padding: 24px 20px 20px;
+    }
+    
+    .chart-settings-modal .modal-title {
+        font-size: 20px;
+    }
+    
+    .chart-settings-modal .modal-body {
+        padding: 0 20px 20px;
+    }
+    
+    .chart-settings-modal .modal-footer {
+        padding: 16px 20px 24px;
+    }
+    
+    .settings-row {
+        padding: 16px 20px;
+        margin-bottom: 12px;
+    }
+    
+    .settings-label {
+        font-size: 15px;
+    }
+    
+    .custom-select {
+        min-width: 120px;
+        padding: 8px 36px 8px 14px;
+        font-size: 14px;
+    }
+    
+    .toggle-switch {
+        width: 54px;
+        height: 28px;
+    }
+    
+    .toggle-slider::before {
+        height: 22px;
+        width: 22px;
+    }
+    
+    .toggle-switch input:checked + .toggle-slider::before {
+        transform: translateX(26px);
+    }
+    
+    .chart-settings-modal .btn-reset,
+    .chart-settings-modal .btn-save {
+        padding: 10px 24px;
+        font-size: 14px;
+        min-width: 100px;
     }
 }
 
@@ -756,17 +818,13 @@
 }
 
 /* ========== CHART SETTINGS MODAL - 完整美观设计 ========== */
+/* 注意：基础的宽度样式已在前面定义，此处不重复设置 width 和 max-width */
 .chart-settings-modal .modal-content {
     position: fixed;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: calc(100% - 40px);
-    max-width: 760px;
-    border-radius: 16px;
-    background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
-    border: 1px solid rgba(8,24,41,0.05);
-    box-shadow: 0 16px 48px rgba(11,20,30,0.08), 0 0 40px rgba(37,99,235,0.04);
+    /* width 和 max-width 已在第346行定义 */
     display: flex;
     flex-direction: column;
     max-height: 85vh;
@@ -965,10 +1023,10 @@
 }
 
 /* ========== 图表设置弹窗 - 响应式适配 ========== */
+/* 此部分已被移动到主响应式区域 @media (max-width: 767px) 统一管理 */
 @media (max-width: 640px) {
     .chart-settings-modal .modal-content {
-        width: calc(100% - 32px);
-        max-width: 100%;
+        /* width 已在 @media (max-width: 767px) 中定义 */
         max-height: 90vh;
     }
     
