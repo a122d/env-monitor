@@ -51,7 +51,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (chartSettingsModal) {
     const chartSettingsClose = document.getElementById('chartSettingsClose');
     const chartSettingsSaveBtn = document.getElementById('chartSettingsSaveBtn');
-    const chartResetDefaultsBtn = document.getElementById('chartResetDefaultsBtn');
 
         function loadChartSettings() {
             try {
@@ -111,22 +110,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             chartSettingsModal.classList.remove('show');
             ScrollLock.unlock();
-        });
-
-        if (chartResetDefaultsBtn) chartResetDefaultsBtn.addEventListener('click', () => {
-            // 清除 localStorage 中的设置并重置表单为默认
-            try { localStorage.removeItem('chartSettings'); } catch (e) { console.warn('重置默认失败', e); }
-            // 恢复表单默认值：折线图 + 平滑曲线
-            const typeSelect = document.getElementById('chartTypeSelect'); if (typeSelect) typeSelect.value = 'line';
-            const smooth = document.getElementById('chartSmoothToggle'); if (smooth) smooth.checked = true;
-            // 更新平滑曲线选项的可用性
-            updateSmoothOptionVisibility();
-            // 应用默认设置
-            const defaultSettings = { chartType: 'line', smooth: true };
-            if (window.applyChartSettings && typeof window.applyChartSettings === 'function') {
-                try { window.applyChartSettings(defaultSettings); } catch (e) { console.warn('applyChartSettings 调用失败', e); }
-            }
-            ToastAlert.show('已重置为默认设置');
         });
 
         // 点击遮罩关闭

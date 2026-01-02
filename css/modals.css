@@ -6,13 +6,19 @@
     width: 100vw;
     height: 100vh;
     z-index: 9600;
-    display: none;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateZ(0);
+    transition: opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+                visibility 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     /* 性能优化 */
     contain: layout style paint;
+    will-change: opacity, visibility;
 }
 
 .mqtt-config-modal.show {
-    display: block;
+    opacity: 1;
+    visibility: visible;
 }
 
 /* 图表设置弹窗样式（采用与 about-modal 相同的布局和交互） */
@@ -23,12 +29,20 @@
     width: 100vw;
     height: 100vh;
     z-index: 9600;
-    display: none;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateZ(0);
+    transition: opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+                visibility 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     /* 性能优化 */
     contain: layout style paint;
+    will-change: opacity, visibility;
 }
 
-.chart-settings-modal.show { display: block; }
+.chart-settings-modal.show { 
+    opacity: 1;
+    visibility: visible;
+}
 
 .chart-settings-modal .modal-content {
     overflow: hidden;
@@ -94,10 +108,19 @@
     height: 100%;
     background: rgba(0,0,0,0.5);
     backdrop-filter: blur(4px);
-    animation: fadeIn 0.3s ease;
     /* 性能优化 */
     will-change: opacity;
     transform: translateZ(0);
+    opacity: 0;
+    transition: opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 当弹窗显示时，遮罩层渐入 */
+.mqtt-config-modal.show .modal-mask,
+.chart-settings-modal.show .modal-mask,
+.about-modal.show .modal-mask,
+.ai-config-modal.show .modal-mask {
+    opacity: 1;
 }
 
 /* 确保遮罩位于 modal-content 之下，以免覆盖关闭按钮 */
@@ -109,9 +132,8 @@
     top: 50%;
     left: 50%;
     /* 性能优化：使用transform3d启用GPU加速 */
-    transform: translate3d(-50%, -50%, 0);
+    transform: translate3d(-50%, -50%, 0) scale(0.95);
     will-change: transform, opacity;
-    transform: translate(-50%, -50%);
     width: 90%;
     max-width: 900px;
     max-height: 90vh;
@@ -122,15 +144,25 @@
                 0 0 40px rgba(37, 99, 235, 0.08);
     border: 1px solid rgba(255,255,255,0.8);
     overflow: hidden;
-    animation: bounceInCenter 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
     display: flex;
     flex-direction: column;
+    opacity: 0;
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+                opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 当弹窗显示时，modal-content动画 */
+.mqtt-config-modal.show .modal-content,
+.chart-settings-modal.show .modal-content,
+.about-modal.show .modal-content,
+.ai-config-modal.show .modal-content {
+    transform: translate3d(-50%, -50%, 0) scale(1);
+    opacity: 1;
 }
 
 .modal-content:hover {
     box-shadow: 0 20px 60px rgba(0,0,0,0.15), 
                 0 0 40px rgba(37, 99, 235, 0.08);
-    transform: translate(-50%, -50%);
 }
 
 /* 🔐 登录弹窗特殊样式 - 紧凑型 */
@@ -769,22 +801,27 @@ select:not(.custom-select) option {
 }
 
 .chart-settings-modal .btn-save {
-    background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
+    background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
     color: white;
     border: none;
-    padding: 12px 32px;
+    padding: 14px 48px;
     border-radius: 16px;
-    font-size: 15px;
+    font-size: 16px;
     font-weight: 600;
-    min-width: 120px;
-    box-shadow: 0 4px 12px rgba(30, 64, 175, 0.3);
-    transition: all 0.3s ease;
+    min-width: 200px;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .chart-settings-modal .btn-save:hover {
-    background: linear-gradient(135deg, #1e3a8a 0%, #1e293b 100%);
-    box-shadow: 0 6px 20px rgba(30, 64, 175, 0.4);
-    transform: translateY(-3px);
+    background: linear-gradient(135deg, #1d4ed8 0%, #1e3a8a 100%);
+    box-shadow: 0 8px 24px rgba(37, 99, 235, 0.45);
+    transform: translateY(-3px) scale(1.02);
+}
+
+.chart-settings-modal .btn-save:active {
+    transform: translateY(-1px) scale(0.98);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
 }
 
 /* 移动端弹窗适配 */
@@ -891,11 +928,18 @@ select:not(.custom-select) option {
     width: 100vw;
     height: 100vh;
     z-index: 9600;
-    display: none;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateZ(0);
+    transition: opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+                visibility 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    contain: layout style paint;
+    will-change: opacity, visibility;
 }
 
 .about-modal.show {
-    display: block;
+    opacity: 1;
+    visibility: visible;
 }
 
 .about-modal .modal-content {
