@@ -41,19 +41,20 @@
     cursor: pointer;
     box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4),
                 0 4px 10px rgba(0, 0, 0, 0.1);
-    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     z-index: 100;
     border: 3px solid rgba(255, 255, 255, 0.3);
 }
 
 .ai-assistant-btn:hover {
-    transform: scale(1.1) translateY(-5px);
+    transform: scale(1.15) translateY(-5px);
     box-shadow: 0 12px 35px rgba(99, 102, 241, 0.5),
                 0 6px 15px rgba(0, 0, 0, 0.15);
 }
 
 .ai-assistant-btn:active {
-    transform: scale(0.95);
+    transform: scale(1.05) translateY(-3px);
+    transition: all 0.1s ease;
 }
 
 .ai-icon {
@@ -95,7 +96,7 @@
     z-index: 9999;
     display: flex;
     flex-direction: column;
-    transition: right 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    transition: right 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 .ai-sidebar.show {
@@ -144,7 +145,19 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.3s cubic-bezier(.4,2,.3,1);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.ai-settings-btn:hover,
+.ai-close-btn:hover {
+    transform: scale(1.15) rotate(90deg);
+    box-shadow: 0 4px 16px rgba(106,92,255,0.35);
+}
+
+.ai-settings-btn:active,
+.ai-close-btn:active {
+    transform: scale(1.05) rotate(90deg);
+    transition: all 0.1s ease;
 }
 /* 设置按钮SVG主色 */
 .ai-settings-btn .ai-settings-icon {
@@ -548,8 +561,8 @@
     opacity: 0;
     visibility: hidden;
     transform: translateZ(0);
-    transition: opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1),
-                visibility 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                visibility 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     contain: layout style paint;
     will-change: opacity, visibility;
 }
@@ -589,7 +602,9 @@
     border: 2px solid #e2e8f0;
     border-radius: 12px;
     font-size: 15px;
-    transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
+    transition: border-color 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275), 
+                box-shadow 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275), 
+                transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     background: #f8fafc;
 }
 
@@ -599,6 +614,7 @@
     border-color: #6366f1;
     background: #fff;
     box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+    transform: scale(1.005);
 }
 
 .ai-config-modal .form-group select {
@@ -610,9 +626,9 @@
     font-weight: 600;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04),
                 inset 0 1px 0 rgba(255, 255, 255, 0.9);
-    transition: border-color 0.35s cubic-bezier(0.34, 1.56, 0.64, 1),
-                box-shadow 0.35s cubic-bezier(0.34, 1.56, 0.64, 1),
-                transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    transition: border-color 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275),
+                box-shadow 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275),
+                transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     /* 多重背景：箭头 + 渐变 */
     background-image: 
         url("data:image/svg+xml,%3Csvg width='14' height='9' viewBox='0 0 14 9' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L7 7L13 1' stroke='%236366f1' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"),
@@ -633,7 +649,7 @@
     background-size: 14px auto, 100% 100%;
     box-shadow: 0 4px 14px rgba(139, 92, 246, 0.15),
                 0 0 0 3px rgba(139, 92, 246, 0.08);
-    transform: translateY(-1px) scale(1.01);
+    transform: translateY(-1px) scale(1.005);
 }
 
 .ai-config-modal .form-group select:focus {
@@ -737,7 +753,7 @@
         border-radius: 16px;
         opacity: 0;
         visibility: hidden;
-        transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         display: flex;
         flex-direction: column;
         overflow: hidden;

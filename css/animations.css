@@ -55,6 +55,43 @@
     }
 }
 
+/* 弹窗淡入缩放动画 */
+@keyframes modalFadeInScale {
+    0% {
+        opacity: 0;
+        transform: translate3d(-50%, -50%, 0) scale(0.9);
+    }
+    100% {
+        opacity: 1;
+        transform: translate3d(-50%, -50%, 0) scale(1);
+    }
+}
+
+/* 按钮点击波纹效果 */
+@keyframes buttonRipple {
+    0% {
+        transform: scale(0);
+        opacity: 0.6;
+    }
+    100% {
+        transform: scale(2.5);
+        opacity: 0;
+    }
+}
+
+/* 关闭按钮旋转动画 */
+@keyframes modalCloseRotate {
+    0% {
+        transform: rotate(0deg) scale(1);
+    }
+    50% {
+        transform: rotate(180deg) scale(1.1);
+    }
+    100% {
+        transform: rotate(360deg) scale(1);
+    }
+}
+
 /* 减少动效偏好支持 - 无障碍优化 */
 @media (prefers-reduced-motion: reduce) {
     *,
