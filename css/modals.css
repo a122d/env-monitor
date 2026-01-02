@@ -420,7 +420,6 @@
     appearance: none;
     -webkit-appearance: none;
     -moz-appearance: none;
-    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
     border: 2px solid #e2e8f0;
     border-radius: 14px;
     padding: 12px 45px 12px 22px;
@@ -430,22 +429,33 @@
     cursor: pointer;
     min-width: 150px;
     text-align: center;
-    transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    transition: border-color 0.35s cubic-bezier(0.34, 1.56, 0.64, 1),
+                box-shadow 0.35s cubic-bezier(0.34, 1.56, 0.64, 1),
+                transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1),
+                color 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04),
                 inset 0 1px 0 rgba(255, 255, 255, 0.9);
     position: relative;
-    /* 自定义箭头图标 - 更优雅的样式 */
-    background-image: url("data:image/svg+xml,%3Csvg width='14' height='9' viewBox='0 0 14 9' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L7 7L13 1' stroke='%233b82f6' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: calc(100% - 18px) center;
-    background-size: 14px;
+    /* 多重背景：箭头图标 + 渐变（箭头必须在前确保显示） */
+    background-image: 
+        url("data:image/svg+xml,%3Csvg width='14' height='9' viewBox='0 0 14 9' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L7 7L13 1' stroke='%233b82f6' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"),
+        linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    background-repeat: no-repeat, no-repeat;
+    background-position: calc(100% - 18px) center, 0 0;
+    background-size: 14px auto, 100% 100%;
+    background-color: #ffffff !important;
     transform: translateZ(0);
     will-change: transform, box-shadow;
 }
 
 .custom-select:hover {
     border-color: #60a5fa;
-    background: linear-gradient(135deg, #ffffff 0%, #eff6ff 100%);
+    background-image: 
+        url("data:image/svg+xml,%3Csvg width='14' height='9' viewBox='0 0 14 9' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L7 7L13 1' stroke='%233b82f6' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"),
+        linear-gradient(135deg, #ffffff 0%, #eff6ff 100%);
+    background-repeat: no-repeat, no-repeat;
+    background-position: calc(100% - 18px) center, 0 0;
+    background-size: 14px auto, 100% 100%;
     box-shadow: 0 4px 14px rgba(59, 130, 246, 0.15),
                 0 0 0 3px rgba(59, 130, 246, 0.08),
                 inset 0 1px 0 rgba(255, 255, 255, 1);
@@ -456,7 +466,12 @@
 .custom-select:focus {
     outline: none;
     border-color: #3b82f6;
-    background: linear-gradient(135deg, #ffffff 0%, #dbeafe 100%);
+    background-image: 
+        url("data:image/svg+xml,%3Csvg width='14' height='9' viewBox='0 0 14 9' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L7 7L13 1' stroke='%233b82f6' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"),
+        linear-gradient(135deg, #ffffff 0%, #dbeafe 100%);
+    background-repeat: no-repeat, no-repeat;
+    background-position: calc(100% - 18px) center, 0 0;
+    background-size: 14px auto, 100% 100%;
     box-shadow: 0 6px 20px rgba(59, 130, 246, 0.2),
                 0 0 0 4px rgba(59, 130, 246, 0.12),
                 inset 0 1px 0 rgba(255, 255, 255, 1);
@@ -475,7 +490,6 @@
     appearance: none;
     -webkit-appearance: none;
     -moz-appearance: none;
-    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
     border: 2px solid #e2e8f0;
     border-radius: 14px;
     padding: 12px 45px 12px 22px;
@@ -484,20 +498,32 @@
     font-weight: 600;
     cursor: pointer;
     min-width: 150px;
-    transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    transition: border-color 0.35s cubic-bezier(0.34, 1.56, 0.64, 1),
+                box-shadow 0.35s cubic-bezier(0.34, 1.56, 0.64, 1),
+                transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1),
+                color 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04),
                 inset 0 1px 0 rgba(255, 255, 255, 0.9);
-    background-image: url("data:image/svg+xml,%3Csvg width='14' height='9' viewBox='0 0 14 9' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L7 7L13 1' stroke='%233b82f6' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: calc(100% - 18px) center;
-    background-size: 14px;
+    /* 多重背景：箭头图标 + 渐变（箭头必须在前确保显示） */
+    background-image: 
+        url("data:image/svg+xml,%3Csvg width='14' height='9' viewBox='0 0 14 9' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L7 7L13 1' stroke='%233b82f6' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"),
+        linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    background-repeat: no-repeat, no-repeat;
+    background-position: calc(100% - 18px) center, 0 0;
+    background-size: 14px auto, 100% 100%;
+    background-color: #ffffff !important;
     transform: translateZ(0);
     will-change: transform, box-shadow;
 }
 
 .enhanced-select:hover {
     border-color: #60a5fa;
-    background: linear-gradient(135deg, #ffffff 0%, #eff6ff 100%);
+    background-image: 
+        url("data:image/svg+xml,%3Csvg width='14' height='9' viewBox='0 0 14 9' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L7 7L13 1' stroke='%233b82f6' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"),
+        linear-gradient(135deg, #ffffff 0%, #eff6ff 100%);
+    background-repeat: no-repeat, no-repeat;
+    background-position: calc(100% - 18px) center, 0 0;
+    background-size: 14px auto, 100% 100%;
     box-shadow: 0 4px 14px rgba(59, 130, 246, 0.15),
                 0 0 0 3px rgba(59, 130, 246, 0.08),
                 inset 0 1px 0 rgba(255, 255, 255, 1);
@@ -508,7 +534,12 @@
 .enhanced-select:focus {
     outline: none;
     border-color: #3b82f6;
-    background: linear-gradient(135deg, #ffffff 0%, #dbeafe 100%);
+    background-image: 
+        url("data:image/svg+xml,%3Csvg width='14' height='9' viewBox='0 0 14 9' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L7 7L13 1' stroke='%233b82f6' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"),
+        linear-gradient(135deg, #ffffff 0%, #dbeafe 100%);
+    background-repeat: no-repeat, no-repeat;
+    background-position: calc(100% - 18px) center, 0 0;
+    background-size: 14px auto, 100% 100%;
     box-shadow: 0 6px 20px rgba(59, 130, 246, 0.2),
                 0 0 0 4px rgba(59, 130, 246, 0.12),
                 inset 0 1px 0 rgba(255, 255, 255, 1);
@@ -518,6 +549,34 @@
 
 .enhanced-select:active {
     transform: translateY(0) scale(0.99) translateZ(0);
+}
+
+/* 专门修复图表类型选择器箭头显示 */
+#chartTypeSelect {
+    background-image: 
+        url("data:image/svg+xml,%3Csvg width='14' height='9' viewBox='0 0 14 9' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L7 7L13 1' stroke='%233b82f6' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"),
+        linear-gradient(135deg, #ffffff 0%, #f8fafc 100%) !important;
+    background-repeat: no-repeat, no-repeat !important;
+    background-position: calc(100% - 18px) center, 0 0 !important;
+    background-size: 14px auto, 100% 100% !important;
+}
+
+#chartTypeSelect:hover {
+    background-image: 
+        url("data:image/svg+xml,%3Csvg width='14' height='9' viewBox='0 0 14 9' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L7 7L13 1' stroke='%233b82f6' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"),
+        linear-gradient(135deg, #ffffff 0%, #eff6ff 100%) !important;
+    background-repeat: no-repeat, no-repeat !important;
+    background-position: calc(100% - 18px) center, 0 0 !important;
+    background-size: 14px auto, 100% 100% !important;
+}
+
+#chartTypeSelect:focus {
+    background-image: 
+        url("data:image/svg+xml,%3Csvg width='14' height='9' viewBox='0 0 14 9' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L7 7L13 1' stroke='%233b82f6' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"),
+        linear-gradient(135deg, #ffffff 0%, #dbeafe 100%) !important;
+    background-repeat: no-repeat, no-repeat !important;
+    background-position: calc(100% - 18px) center, 0 0 !important;
+    background-size: 14px auto, 100% 100% !important;
 }
 
 /* 优化option选项样式（通用） */
