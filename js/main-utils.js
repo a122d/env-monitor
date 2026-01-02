@@ -68,19 +68,27 @@ function setStatusDotPosition() {
     status.style.opacity = 1;
 }
 
-// MQTT状态更新逻辑 - 增强动画效果
+// 缓存上次MQTT状态，避免重复动画
+let lastMQTTStatus = null;
+
+// MQTT状态更新逻辑 - 性能优化版
 function updateMQTTStatus(statusType) {
     const statusElement = document.getElementById('mqtt-status');
     const statusText = statusElement.querySelector('.status-text');
     if (!statusElement || !statusText) return;
     
+    // 如果状态没有变化，跳过更新（避免重复动画）
+    if (lastMQTTStatus === statusType) return;
+    
+    lastMQTTStatus = statusType;
+    
     statusElement.classList.remove('connecting', 'connected', 'failed', 'disconnected');
     
-    // 添加反弹动画
+    // 只在状态改变时添加一次动画
     statusElement.style.animation = 'none';
-    setTimeout(() => {
+    requestAnimationFrame(() => {
         statusElement.style.animation = 'float 0.6s ease-in-out';
-    }, 10);
+    });
     
     switch(statusType) {
         case 'connecting':

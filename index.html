@@ -495,9 +495,9 @@
                     <div class="settings-row">
                         <label class="settings-label">图表类型</label>
                         <div class="settings-control">
-                            <select id="chartTypeSelect" class="custom-select" aria-label="选择图表类型">
-                                <option value="line" selected>折线图</option>
-                                <option value="bar">柱状图</option>
+                            <select id="chartTypeSelect" class="custom-select enhanced-select" aria-label="选择图表类型">
+                                <option value="line" selected data-icon="📊">📊 折线图</option>
+                                <option value="bar" data-icon="📊">📊 柱状图</option>
                             </select>
                         </div>
                     </div>
@@ -613,11 +613,11 @@
                 <div class="form-group form-group-with-button">
                     <div class="form-input-wrapper">
                         <label for="aiModel">模型选择</label>
-                        <select id="aiModel">
-                            <option value="doubao-seed-1-6-flash-250828">豆包-1.6 (推荐) </option>
-                            <option value="doubao-1-5-pro-32k-250115">豆包-1.5  </option>
-                            <option value="doubao-1-5-lite-32k-250115">豆包-1.5-lite</option>
-                            <option value="doubao-seed-1-6-lite-251015">豆包-1.6-lite</option>
+                        <select id="aiModel" class="enhanced-select">
+                            <option value="doubao-seed-1-6-flash-250828" data-icon="⚡">⚡ 豆包-1.6 Flash (推荐)</option>
+                            <option value="doubao-1-5-pro-32k-250115" data-icon="🚀">🚀 豆包-1.5 Pro</option>
+                            <option value="doubao-1-5-lite-32k-250115" data-icon="🌱">🌱 豆包-1.5 Lite</option>
+                            <option value="doubao-seed-1-6-lite-251015" data-icon="🌟">🌟 豆包-1.6 Lite</option>
                         </select>
                     </div>
                     <button type="button" class="btn btn-api-get" id="aiModalApiBtn" title="向MQTT发送API请求">

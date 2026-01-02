@@ -21,8 +21,9 @@
     position: relative;
     overflow: hidden;
     touch-action: manipulation;
-    will-change: transform;
-    contain: layout style;
+    /* 性能优化：默认不使用will-change，只在hover时启用 */
+    transform: translateZ(0); /* 启用硬件加速 */
+    contain: layout style paint;
 }
 
 .data-card::before {
@@ -35,12 +36,14 @@
     background: linear-gradient(135deg, rgba(37, 99, 235, 0.1), transparent);
     opacity: 0;
     transition: opacity 0.3s ease;
+    will-change: opacity;
 }
 
 .data-card:hover {
-    transform: translateY(-8px) scale(1.01);
+    transform: translateY(-8px) scale(1.01) translateZ(0);
     box-shadow: var(--shadow-lg), 0 0 30px rgba(37, 99, 235, 0.15);
     border-color: var(--color-primary);
+    will-change: transform; /* 仅在hover时提示浏览器 */
 }
 
 .data-card:hover::before {
@@ -61,20 +64,21 @@
     font-size: 34px;
     font-weight: bold;
     color: #1f2937;
-    transition: all 0.8s ease-in-out;
+    transition: transform 0.3s ease, color 0.3s ease; /* 减少transition时间 */
     display: inline-block;
     position: relative;
     z-index: 1;
+    transform: translateZ(0);
 }
 
 .data-value.changed {
-    animation: pulse 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+    animation: pulse 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); /* 缩短动画时间 */
 }
 
 @keyframes pulse {   
-    0% { transform: scale(1); }
-    50% { transform: scale(1.12); color: #2563eb; }
-    100% { transform: scale(1); }
+    0% { transform: scale(1) translateZ(0); }
+    50% { transform: scale(1.08) translateZ(0); color: #2563eb; } /* 减小缩放幅度 */
+    100% { transform: scale(1) translateZ(0); }
 }
 
 .unit {  
@@ -92,7 +96,7 @@
     padding: 28px 24px !important;
     position: relative;
     overflow: hidden;
-    transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) !important; /* 缩短过渡时间 */
 }
 
 .temp-card::before {

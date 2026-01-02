@@ -2,7 +2,7 @@
 
 // ============ 应用版本号 ============
 // 统一版本号管理
-const APP_VERSION = 'V5.2.2';
+const APP_VERSION = 'V5.2.5';
 
 // 暴露全局版本号
 window.APP_VERSION = APP_VERSION;
@@ -156,24 +156,18 @@ document.addEventListener('DOMContentLoaded', () => {
         mqttPassword.value = '';
     }
 
-    // 事件绑定
+    // 事件绑定（优化版 - 减少监听器数量）
     function bindEvents() {
         // 关闭按钮
-        modalClose.addEventListener('click', closeModal);
+        modalClose.addEventListener('click', closeModal, { passive: true });
         
-        // 点击空白区域（modal-mask）关闭弹窗
-        const modalMask = document.querySelector('.modal-mask');
-        if (modalMask) {
-            modalMask.addEventListener('click', closeModal);
-        }
-        
-        // 防止点击弹窗内容时关闭
-        const modalContent = document.querySelector('.modal-content');
-        if (modalContent) {
-            modalContent.addEventListener('click', (e) => {
-                e.stopPropagation();
-            });
-        }
+        // 使用事件委托处理弹窗点击
+        mqttConfigModal.addEventListener('click', (e) => {
+            // 点击空白区域（modal-mask）关闭弹窗
+            if (e.target.classList.contains('modal-mask')) {
+                closeModal();
+            }
+        }, { passive: true });
         
         // 按 Escape 键关闭弹窗
         document.addEventListener('keydown', (e) => {
@@ -185,6 +179,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // 回车登录
         mqttPassword.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') {
+                e.preventDefault();
                 loginMQTT();
             }
         });

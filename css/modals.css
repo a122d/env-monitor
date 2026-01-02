@@ -7,6 +7,8 @@
     height: 100vh;
     z-index: 9600;
     display: none;
+    /* 性能优化 */
+    contain: layout style paint;
 }
 
 .mqtt-config-modal.show {
@@ -22,6 +24,8 @@
     height: 100vh;
     z-index: 9600;
     display: none;
+    /* 性能优化 */
+    contain: layout style paint;
 }
 
 .chart-settings-modal.show { display: block; }
@@ -53,12 +57,15 @@
     border-radius: 50%;
     transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
     z-index: 10;
+    /* 性能优化 */
+    will-change: transform, background;
+    transform: translateZ(0); /* 启用硬件加速 */
 }
 
 .chart-settings-modal .modal-close:hover {
     background: linear-gradient(135deg, #ff6b6b, #ff8e53);
     color: #ffffff;
-    transform: rotate(90deg) scale(1.02);
+    transform: rotate(90deg) scale(1.02) translateZ(0);
     box-shadow: 0 8px 22px rgba(0,0,0,0.18);
 }
 
@@ -88,6 +95,9 @@
     background: rgba(0,0,0,0.5);
     backdrop-filter: blur(4px);
     animation: fadeIn 0.3s ease;
+    /* 性能优化 */
+    will-change: opacity;
+    transform: translateZ(0);
 }
 
 /* 确保遮罩位于 modal-content 之下，以免覆盖关闭按钮 */
@@ -98,6 +108,9 @@
     position: absolute;
     top: 50%;
     left: 50%;
+    /* 性能优化：使用transform3d启用GPU加速 */
+    transform: translate3d(-50%, -50%, 0);
+    will-change: transform, opacity;
     transform: translate(-50%, -50%);
     width: 90%;
     max-width: 900px;
@@ -402,34 +415,218 @@
     min-width: 140px;
 }
 
-/* 自定义下拉选择器样式 */
+/* 自定义下拉选择器样式（增强版） */
 .custom-select {
     appearance: none;
-    background: white;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
     border: 2px solid #e2e8f0;
-    border-radius: 12px;
-    padding: 10px 40px 10px 20px;
+    border-radius: 14px;
+    padding: 12px 45px 12px 22px;
     font-size: 15px;
-    color: #475569;
-    font-weight: 500;
+    color: #1e293b;
+    font-weight: 600;
     cursor: pointer;
-    min-width: 140px;
+    min-width: 150px;
     text-align: center;
-    transition: all 0.3s ease;
-    background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L6 6L11 1' stroke='%23475569' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");
+    transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04),
+                inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    position: relative;
+    /* 自定义箭头图标 - 更优雅的样式 */
+    background-image: url("data:image/svg+xml,%3Csvg width='14' height='9' viewBox='0 0 14 9' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L7 7L13 1' stroke='%233b82f6' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
-    background-position: calc(100% - 16px) center;
+    background-position: calc(100% - 18px) center;
+    background-size: 14px;
+    transform: translateZ(0);
+    will-change: transform, box-shadow;
 }
 
 .custom-select:hover {
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    border-color: #60a5fa;
+    background: linear-gradient(135deg, #ffffff 0%, #eff6ff 100%);
+    box-shadow: 0 4px 14px rgba(59, 130, 246, 0.15),
+                0 0 0 3px rgba(59, 130, 246, 0.08),
+                inset 0 1px 0 rgba(255, 255, 255, 1);
+    transform: translateY(-1px) scale(1.01) translateZ(0);
+    color: #1e40af;
 }
 
 .custom-select:focus {
     outline: none;
     border-color: #3b82f6;
-    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
+    background: linear-gradient(135deg, #ffffff 0%, #dbeafe 100%);
+    box-shadow: 0 6px 20px rgba(59, 130, 246, 0.2),
+                0 0 0 4px rgba(59, 130, 246, 0.12),
+                inset 0 1px 0 rgba(255, 255, 255, 1);
+    transform: translateY(-2px) scale(1.02) translateZ(0);
+    color: #1e40af;
+}
+
+.custom-select:active {
+    transform: translateY(0) scale(0.99) translateZ(0);
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.15),
+                inset 0 2px 4px rgba(59, 130, 246, 0.1);
+}
+
+/* 增强型选择器统一样式 */
+.enhanced-select {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    border: 2px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 12px 45px 12px 22px;
+    font-size: 15px;
+    color: #1e293b;
+    font-weight: 600;
+    cursor: pointer;
+    min-width: 150px;
+    transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04),
+                inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    background-image: url("data:image/svg+xml,%3Csvg width='14' height='9' viewBox='0 0 14 9' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L7 7L13 1' stroke='%233b82f6' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: calc(100% - 18px) center;
+    background-size: 14px;
+    transform: translateZ(0);
+    will-change: transform, box-shadow;
+}
+
+.enhanced-select:hover {
+    border-color: #60a5fa;
+    background: linear-gradient(135deg, #ffffff 0%, #eff6ff 100%);
+    box-shadow: 0 4px 14px rgba(59, 130, 246, 0.15),
+                0 0 0 3px rgba(59, 130, 246, 0.08),
+                inset 0 1px 0 rgba(255, 255, 255, 1);
+    transform: translateY(-1px) scale(1.01) translateZ(0);
+    color: #1e40af;
+}
+
+.enhanced-select:focus {
+    outline: none;
+    border-color: #3b82f6;
+    background: linear-gradient(135deg, #ffffff 0%, #dbeafe 100%);
+    box-shadow: 0 6px 20px rgba(59, 130, 246, 0.2),
+                0 0 0 4px rgba(59, 130, 246, 0.12),
+                inset 0 1px 0 rgba(255, 255, 255, 1);
+    transform: translateY(-2px) scale(1.02) translateZ(0);
+    color: #1e40af;
+}
+
+.enhanced-select:active {
+    transform: translateY(0) scale(0.99) translateZ(0);
+}
+
+/* 优化option选项样式（通用） */
+.custom-select option,
+.enhanced-select option {
+    padding: 14px 20px;
+    background: #ffffff;
+    color: #334155;
+    font-weight: 500;
+    font-size: 15px;
+    line-height: 1.6;
+    transition: all 0.2s ease;
+}
+
+/* 选中状态 */
+.custom-select option:checked,
+.enhanced-select option:checked {
+    background: linear-gradient(135deg, #dbeafe 0%, #eff6ff 100%);
+    color: #1e40af;
+    font-weight: 700;
+    position: relative;
+}
+
+/* hover状态（部分浏览器支持） */
+.custom-select option:hover,
+.enhanced-select option:hover {
+    background: linear-gradient(135deg, #eff6ff 0%, #f0f9ff 100%);
+    color: #2563eb;
+    font-weight: 600;
+}
+
+/* Firefox 专用优化 */
+@-moz-document url-prefix() {
+    .custom-select,
+    .enhanced-select {
+        padding-right: 50px;
+    }
+    
+    .custom-select option,
+    .enhanced-select option {
+        padding: 12px 16px;
+    }
+}
+
+/* WebKit/Blink 浏览器优化 */
+@supports (-webkit-appearance: none) {
+    .custom-select option:checked,
+    .enhanced-select option:checked {
+        background: linear-gradient(to right, #3b82f6 0%, #60a5fa 100%);
+        color: #ffffff;
+        font-weight: 700;
+    }
+}
+
+/* 优化option选项样式 */
+.custom-select option {
+    padding: 12px 16px;
+    background: #ffffff;
+    color: #334155;
+    font-weight: 500;
+}
+
+.custom-select option:hover,
+.custom-select option:checked {
+    background: linear-gradient(135deg, #dbeafe 0%, #eff6ff 100%);
+    color: #1e40af;
+    font-weight: 600;
+}
+
+/* 为普通select元素也添加美化 */
+select:not(.custom-select) {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 11px 40px 11px 18px;
+    font-size: 14px;
+    color: #1e293b;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+    background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L6 6L11 1' stroke='%233b82f6' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: calc(100% - 14px) center;
+    background-size: 12px;
+}
+
+select:not(.custom-select):hover {
+    border-color: #60a5fa;
+    box-shadow: 0 3px 10px rgba(59, 130, 246, 0.12),
+                0 0 0 3px rgba(59, 130, 246, 0.06);
+    transform: translateY(-1px);
+}
+
+select:not(.custom-select):focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 4px 14px rgba(59, 130, 246, 0.18),
+                0 0 0 4px rgba(59, 130, 246, 0.1);
+    transform: translateY(-2px);
+}
+
+select:not(.custom-select) option {
+    padding: 10px 14px;
+    background: #ffffff;
+    color: #334155;
 }
 
 /* 开关切换样式 */

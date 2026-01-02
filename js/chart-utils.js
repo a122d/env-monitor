@@ -717,7 +717,57 @@ window.initCharts = function() {
     console.log('✅ 六图表初始化完成');
 };
 
-// 更新六个图表数据
+// 图表更新队列和RAF优化
+let chartUpdatePending = false;
+let lastChartUpdate = 0;
+const CHART_UPDATE_THROTTLE = 500; // 限制更新频率为500ms一次
+
+// 批量更新所有图表（使用RAF优化）
+function batchUpdateCharts() {
+    if (!tempChart || !humidityChart || !windChart || !lightChart || !PM2Chart || !sunrayChart) {
+        return;
+    }
+    
+    const xData = window.chartData.time;
+    
+    // 使用requestAnimationFrame确保在下一帧渲染
+    requestAnimationFrame(() => {
+        // 批量更新，使用notMerge: false实现增量更新，提高性能
+        tempChart.setOption({
+            xAxis: { data: xData },
+            series: [{ data: window.chartData.temperature }]
+        }, { notMerge: false, lazyUpdate: true });
+        
+        humidityChart.setOption({
+            xAxis: { data: xData },
+            series: [{ data: window.chartData.humidity }]
+        }, { notMerge: false, lazyUpdate: true });
+        
+        windChart.setOption({
+            xAxis: { data: xData },
+            series: [{ data: window.chartData.windSpeed }]
+        }, { notMerge: false, lazyUpdate: true });
+        
+        lightChart.setOption({
+            xAxis: { data: xData },
+            series: [{ data: window.chartData.illumination }]
+        }, { notMerge: false, lazyUpdate: true });
+        
+        PM2Chart.setOption({
+            xAxis: { data: xData },
+            series: [{ data: window.chartData.PM2 }]
+        }, { notMerge: false, lazyUpdate: true });
+        
+        sunrayChart.setOption({
+            xAxis: { data: xData },
+            series: [{ data: window.chartData.sunray }]
+        }, { notMerge: false, lazyUpdate: true });
+        
+        chartUpdatePending = false;
+    });
+}
+
+// 更新六个图表数据（节流优化版）
 window.updateChartData = function(data) {
     if (!tempChart || !humidityChart || !windChart || !lightChart || !PM2Chart || !sunrayChart) {
         console.warn('⚠️ 图表未初始化，跳过更新');
@@ -752,23 +802,34 @@ window.updateChartData = function(data) {
     window.chartData.illumination.push(lightVal);
     window.chartData.PM2.push(PM2Val);
     window.chartData.sunray.push(sunrayVal);
+    
     // 根据当前视图长度裁剪数组（实时/历史切换）
     const maxLen = window.CHART_MAX_LEN || 20;
     if (window.chartData.time.length > maxLen) {
         Object.keys(window.chartData).forEach(key => window.chartData[key].shift());
     }
 
-    const xData = window.chartData.time;
-
     // 如果处于暂停状态，仅更新内部数据，不渲染图表
     if (window.chartRealtimePaused) return;
 
-    tempChart.setOption({ xAxis: { data: xData }, series: [{ data: window.chartData.temperature }] });
-    humidityChart.setOption({ xAxis: { data: xData }, series: [{ data: window.chartData.humidity }] });
-    windChart.setOption({ xAxis: { data: xData }, series: [{ data: window.chartData.windSpeed }] });
-    lightChart.setOption({ xAxis: { data: xData }, series: [{ data: window.chartData.illumination }] });
-    PM2Chart.setOption({ xAxis: { data: xData }, series: [{ data: window.chartData.PM2 }] });
-    sunrayChart.setOption({ xAxis: { data: xData }, series: [{ data: window.chartData.sunray }] });
+    // 节流控制：限制图表更新频率
+    const currentTime = Date.now();
+    if (currentTime - lastChartUpdate < CHART_UPDATE_THROTTLE) {
+        // 如果还没有pending的更新，标记一个延迟更新
+        if (!chartUpdatePending) {
+            chartUpdatePending = true;
+            setTimeout(() => {
+                if (chartUpdatePending) {
+                    lastChartUpdate = Date.now();
+                    batchUpdateCharts();
+                }
+            }, CHART_UPDATE_THROTTLE - (currentTime - lastChartUpdate));
+        }
+        return;
+    }
+    
+    lastChartUpdate = currentTime;
+    batchUpdateCharts();
 };
 
 // 清空图表数据

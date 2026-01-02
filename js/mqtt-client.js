@@ -207,6 +207,16 @@ function reconnect() {
     }, delay);
 }
 
+// 缓存上次状态避免重复更新
+let lastCardStates = {
+    temperature: null,
+    humidity: null,
+    windSpeed: null,
+    illumination: null,
+    pm25: null,
+    sunray: null
+};
+
 // 更新数据卡片
 // 温/湿/风/海拔÷10保留1位小数  大气压÷10000保留3位小数
 function updateDataCards(data) {
@@ -258,7 +268,7 @@ function updateDataCards(data) {
     }
 }
 
-// 更新温度卡片（增强版）
+// 更新温度卡片（增强版 + 性能优化）
 function updateTemperatureCard(tempValue) {
     const tempNum = parseFloat(tempValue);
     const card = document.getElementById('temperatureCard');
@@ -285,52 +295,65 @@ function updateTemperatureCard(tempValue) {
     temperatureStats.sum += tempNum;
     temperatureStats.count++;
     
-    // 更新颜色类
-    card.classList.remove('temp-cold', 'temp-normal', 'temp-hot');
+    // 确定新状态
+    let newState;
     if (tempNum < 7) {
-        card.classList.add('temp-cold');
+        newState = 'temp-cold';
     } else if (tempNum > 25) {
-        card.classList.add('temp-hot');
+        newState = 'temp-hot';
     } else {
-        card.classList.add('temp-normal');
+        newState = 'temp-normal';
     }
     
-    // 更新温度图标和等级
-    const icon = card.querySelector('.temp-icon');
-    if (tempNum < 7) {
-        icon.textContent = '❄️';
-    } else if (tempNum > 28) {
-        icon.textContent = '🔥';
-    } else {
-        icon.textContent = '🌡️';
-    }
-    
-    // 更新温度等级标签
-    const levelEl = card.querySelector('.temp-level');
-    if (levelEl) {
-        levelEl.textContent = getTempLevel(tempNum);
-    }
-    
-    // 更新温度进度条
-    updateProgressBar(tempNum);
-    
-    // 更新趋势显示
-    const trendData = calculateTempTrend();
-    const trendEl = card.querySelector('.temp-trend');
-    if (trendEl) {
-        trendEl.textContent = trendData.trend;
-        trendEl.classList.remove('up', 'down', 'stable');
-        if (trendData.trend === '↑') {
-            trendEl.classList.add('up');
-        } else if (trendData.trend === '↓') {
-            trendEl.classList.add('down');
-        } else {
-            trendEl.classList.add('stable');
+    // 使用RAF批量更新DOM，避免多次重排
+    requestAnimationFrame(() => {
+        // 只在状态变化时才更新类名
+        if (lastCardStates.temperature !== newState) {
+            card.classList.remove('temp-cold', 'temp-normal', 'temp-hot');
+            card.classList.add(newState);
+            lastCardStates.temperature = newState;
         }
-    }
-    
-    // 更新详细信息
-    updateTemperatureDetails();
+        
+        // 缓存DOM元素引用
+        const icon = card.querySelector('.temp-icon');
+        const levelEl = card.querySelector('.temp-level');
+        const trendEl = card.querySelector('.temp-trend');
+        
+        // 更新温度图标和等级
+        if (icon) {
+            if (tempNum < 7) {
+                icon.textContent = '❄️';
+            } else if (tempNum > 28) {
+                icon.textContent = '🔥';
+            } else {
+                icon.textContent = '🌡️';
+            }
+        }
+        
+        if (levelEl) {
+            levelEl.textContent = getTempLevel(tempNum);
+        }
+        
+        // 更新进度条
+        updateProgressBar(tempNum);
+        
+        // 更新趋势显示
+        if (trendEl) {
+            const trendData = calculateTempTrend();
+            trendEl.textContent = trendData.trend;
+            trendEl.classList.remove('up', 'down', 'stable');
+            if (trendData.trend === '↑') {
+                trendEl.classList.add('up');
+            } else if (trendData.trend === '↓') {
+                trendEl.classList.add('down');
+            } else {
+                trendEl.classList.add('stable');
+            }
+        }
+        
+        // 更新详细信息
+        updateTemperatureDetails();
+    });
 }
 
 // 更新进度条位置
