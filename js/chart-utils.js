@@ -894,6 +894,278 @@ window.resetAllChartZoom = function() {
     if (sunrayChart) sunrayChart.dispatchAction({ type: 'dataZoom', start: 0, end: 100 });
 };
 
+// 应用图表设置（由菜单设置弹窗调用）
+window.applyChartSettings = function(settings) {
+    if (!settings) return;
+    
+    // 获取图表类型和样式设置
+    const chartType = settings.chartType || 'line';
+    const isSmooth = settings.smooth && chartType === 'line';
+    const showMarkers = true; // 始终显示数据点标记
+    
+    // 定义通用的系列配置更新函数
+    const updateSeriesConfig = (chart, seriesConfig) => {
+        if (!chart) return;
+        
+        const updatedConfig = {
+            type: chartType,
+            smooth: isSmooth,
+            smoothMonotone: isSmooth ? 'x' : undefined,
+            symbol: showMarkers ? 'circle' : 'none',
+            symbolSize: showMarkers ? 6 : 0,
+            ...seriesConfig
+        };
+        
+        // 如果是柱状图，移除某些仅适用于折线图的属性
+        if (chartType === 'bar') {
+            delete updatedConfig.smooth;
+            delete updatedConfig.smoothMonotone;
+            delete updatedConfig.areaStyle;
+        }
+        
+        chart.setOption({
+            series: [updatedConfig]
+        });
+    };
+    
+    // 更新每个图表的系列配置
+    if (tempChart) {
+        updateSeriesConfig(tempChart, {
+            name: '温度(℃)',
+            lineStyle: chartType === 'line' ? {
+                width: 3,
+                color: {
+                    type: 'linear',
+                    x: 0, y: 0, x2: 1, y2: 0,
+                    colorStops: [
+                        { offset: 0, color: '#f97316' },
+                        { offset: 0.5, color: '#ef4444' },
+                        { offset: 1, color: '#dc2626' }
+                    ]
+                },
+                shadowColor: 'rgba(239, 68, 68, 0.3)',
+                shadowBlur: 8,
+                shadowOffsetY: 3
+            } : undefined,
+            itemStyle: {
+                color: '#ef4444',
+                borderColor: '#fff',
+                borderWidth: chartType === 'bar' ? 0 : 2
+            },
+            areaStyle: chartType === 'line' ? {
+                color: {
+                    type: 'linear',
+                    x: 0, y: 0, x2: 0, y2: 1,
+                    colorStops: [
+                        { offset: 0, color: 'rgba(239, 68, 68, 0.25)' },
+                        { offset: 0.5, color: 'rgba(239, 68, 68, 0.1)' },
+                        { offset: 1, color: 'rgba(239, 68, 68, 0.02)' }
+                    ]
+                }
+            } : undefined
+        });
+    }
+    
+    if (humidityChart) {
+        updateSeriesConfig(humidityChart, {
+            name: '湿度(%)',
+            lineStyle: chartType === 'line' ? {
+                width: 3,
+                color: {
+                    type: 'linear',
+                    x: 0, y: 0, x2: 1, y2: 0,
+                    colorStops: [
+                        { offset: 0, color: '#06b6d4' },
+                        { offset: 0.5, color: '#0891b2' },
+                        { offset: 1, color: '#0e7490' }
+                    ]
+                },
+                shadowColor: 'rgba(8, 145, 178, 0.3)',
+                shadowBlur: 8,
+                shadowOffsetY: 3
+            } : undefined,
+            itemStyle: {
+                color: '#0891b2',
+                borderColor: '#fff',
+                borderWidth: chartType === 'bar' ? 0 : 2
+            },
+            areaStyle: chartType === 'line' ? {
+                color: {
+                    type: 'linear',
+                    x: 0, y: 0, x2: 0, y2: 1,
+                    colorStops: [
+                        { offset: 0, color: 'rgba(8, 145, 178, 0.25)' },
+                        { offset: 0.5, color: 'rgba(8, 145, 178, 0.1)' },
+                        { offset: 1, color: 'rgba(8, 145, 178, 0.02)' }
+                    ]
+                }
+            } : undefined
+        });
+    }
+    
+    if (windChart) {
+        updateSeriesConfig(windChart, {
+            name: '风速(m/s)',
+            lineStyle: chartType === 'line' ? {
+                width: 3,
+                color: {
+                    type: 'linear',
+                    x: 0, y: 0, x2: 1, y2: 0,
+                    colorStops: [
+                        { offset: 0, color: '#10b981' },
+                        { offset: 0.5, color: '#059669' },
+                        { offset: 1, color: '#047857' }
+                    ]
+                },
+                shadowColor: 'rgba(5, 150, 105, 0.3)',
+                shadowBlur: 8,
+                shadowOffsetY: 3
+            } : undefined,
+            itemStyle: {
+                color: '#059669',
+                borderColor: '#fff',
+                borderWidth: chartType === 'bar' ? 0 : 2
+            },
+            areaStyle: chartType === 'line' ? {
+                color: {
+                    type: 'linear',
+                    x: 0, y: 0, x2: 0, y2: 1,
+                    colorStops: [
+                        { offset: 0, color: 'rgba(5, 150, 105, 0.25)' },
+                        { offset: 0.5, color: 'rgba(5, 150, 105, 0.1)' },
+                        { offset: 1, color: 'rgba(5, 150, 105, 0.02)' }
+                    ]
+                }
+            } : undefined
+        });
+    }
+    
+    if (lightChart) {
+        updateSeriesConfig(lightChart, {
+            name: '光照(lx)',
+            lineStyle: chartType === 'line' ? {
+                width: 3,
+                color: {
+                    type: 'linear',
+                    x: 0, y: 0, x2: 1, y2: 0,
+                    colorStops: [
+                        { offset: 0, color: '#f59e0b' },
+                        { offset: 0.5, color: '#d97706' },
+                        { offset: 1, color: '#b45309' }
+                    ]
+                },
+                shadowColor: 'rgba(217, 119, 6, 0.3)',
+                shadowBlur: 8,
+                shadowOffsetY: 3
+            } : undefined,
+            itemStyle: {
+                color: '#d97706',
+                borderColor: '#fff',
+                borderWidth: chartType === 'bar' ? 0 : 2
+            },
+            areaStyle: chartType === 'line' ? {
+                color: {
+                    type: 'linear',
+                    x: 0, y: 0, x2: 0, y2: 1,
+                    colorStops: [
+                        { offset: 0, color: 'rgba(217, 119, 6, 0.25)' },
+                        { offset: 0.5, color: 'rgba(217, 119, 6, 0.1)' },
+                        { offset: 1, color: 'rgba(217, 119, 6, 0.02)' }
+                    ]
+                }
+            } : undefined
+        });
+    }
+    
+    if (PM2Chart) {
+        updateSeriesConfig(PM2Chart, {
+            name: 'PM2.5(μg/m³)',
+            lineStyle: chartType === 'line' ? {
+                width: 3,
+                color: {
+                    type: 'linear',
+                    x: 0, y: 0, x2: 1, y2: 0,
+                    colorStops: [
+                        { offset: 0, color: '#8b5cf6' },
+                        { offset: 0.5, color: '#7c3aed' },
+                        { offset: 1, color: '#6d28d9' }
+                    ]
+                },
+                shadowColor: 'rgba(124, 58, 237, 0.3)',
+                shadowBlur: 8,
+                shadowOffsetY: 3
+            } : undefined,
+            itemStyle: {
+                color: '#7c3aed',
+                borderColor: '#fff',
+                borderWidth: chartType === 'bar' ? 0 : 2
+            },
+            areaStyle: chartType === 'line' ? {
+                color: {
+                    type: 'linear',
+                    x: 0, y: 0, x2: 0, y2: 1,
+                    colorStops: [
+                        { offset: 0, color: 'rgba(124, 58, 237, 0.25)' },
+                        { offset: 0.5, color: 'rgba(124, 58, 237, 0.1)' },
+                        { offset: 1, color: 'rgba(124, 58, 237, 0.02)' }
+                    ]
+                }
+            } : undefined
+        });
+    }
+    
+    if (sunrayChart) {
+        updateSeriesConfig(sunrayChart, {
+            name: '紫外线强度',
+            lineStyle: chartType === 'line' ? {
+                width: 3,
+                color: {
+                    type: 'linear',
+                    x: 0, y: 0, x2: 1, y2: 0,
+                    colorStops: [
+                        { offset: 0, color: '#ec4899' },
+                        { offset: 0.5, color: '#db2777' },
+                        { offset: 1, color: '#be185d' }
+                    ]
+                },
+                shadowColor: 'rgba(219, 39, 119, 0.3)',
+                shadowBlur: 8,
+                shadowOffsetY: 3
+            } : undefined,
+            itemStyle: {
+                color: '#db2777',
+                borderColor: '#fff',
+                borderWidth: chartType === 'bar' ? 0 : 2
+            },
+            areaStyle: chartType === 'line' ? {
+                color: {
+                    type: 'linear',
+                    x: 0, y: 0, x2: 0, y2: 1,
+                    colorStops: [
+                        { offset: 0, color: 'rgba(219, 39, 119, 0.25)' },
+                        { offset: 0.5, color: 'rgba(219, 39, 119, 0.1)' },
+                        { offset: 1, color: 'rgba(219, 39, 119, 0.02)' }
+                    ]
+                }
+            } : undefined
+        });
+    }
+    
+    // 刷新图表显示
+    const maxLen = window.CHART_MAX_LEN || 20;
+    const startIndex = Math.max(0, window.chartData.time.length - maxLen);
+    const xData = window.chartData.time.slice(startIndex);
+    
+    if (tempChart) tempChart.setOption({ xAxis: { data: xData }, series: [{ data: window.chartData.temperature.slice(startIndex) }] });
+    if (humidityChart) humidityChart.setOption({ xAxis: { data: xData }, series: [{ data: window.chartData.humidity.slice(startIndex) }] });
+    if (windChart) windChart.setOption({ xAxis: { data: xData }, series: [{ data: window.chartData.windSpeed.slice(startIndex) }] });
+    if (lightChart) lightChart.setOption({ xAxis: { data: xData }, series: [{ data: window.chartData.illumination.slice(startIndex) }] });
+    if (PM2Chart) PM2Chart.setOption({ xAxis: { data: xData }, series: [{ data: window.chartData.PM2.slice(startIndex) }] });
+    if (sunrayChart) sunrayChart.setOption({ xAxis: { data: xData }, series: [{ data: window.chartData.sunray.slice(startIndex) }] });
+    
+    console.log('✅ 图表设置已应用:', settings);
+};
+
 // 绑定页面控件事件（如果存在）
 document.addEventListener('DOMContentLoaded', () => {
     const pauseBtn = document.getElementById('chartPauseBtn');
@@ -902,4 +1174,29 @@ document.addEventListener('DOMContentLoaded', () => {
     if (pauseBtn) pauseBtn.addEventListener('click', window.toggleChartRealtime);
     if (histBtn) histBtn.addEventListener('click', window.toggleChartHistoryView);
     if (resetZoomBtn) resetZoomBtn.addEventListener('click', window.resetAllChartZoom);
+    
+    // 应用默认图表设置（折线图 + 平滑曲线）
+    setTimeout(() => {
+        const savedSettings = localStorage.getItem('chartSettings');
+        let settings;
+        if (savedSettings) {
+            try {
+                settings = JSON.parse(savedSettings);
+            } catch (e) {
+                settings = { chartType: 'line', smooth: true };
+            }
+        } else {
+            // 默认设置
+            settings = { chartType: 'line', smooth: true };
+            try {
+                localStorage.setItem('chartSettings', JSON.stringify(settings));
+            } catch (e) {
+                console.warn('保存默认设置失败', e);
+            }
+        }
+        
+        if (window.applyChartSettings && typeof window.applyChartSettings === 'function') {
+            window.applyChartSettings(settings);
+        }
+    }, 500); // 延迟确保图表已初始化
 });

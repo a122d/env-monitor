@@ -484,60 +484,39 @@
     <!-- 图表显示设置弹窗 -->
     <div class="chart-settings-modal" id="chartSettingsModal">
         <div class="modal-mask"></div>
-        <div class="modal-content" role="dialog" aria-modal="true">
+        <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="chartSettingsTitle">
             <div class="modal-header">
-                <h3 class="modal-title">图表显示设置</h3>
-                <button type="button" class="modal-close" id="chartSettingsClose" aria-label="关闭">×</button>
+                <h3 class="modal-title" id="chartSettingsTitle">设置图表显示</h3>
+                <button type="button" class="modal-close" id="chartSettingsClose" aria-label="关闭对话框">×</button>
             </div>
             <div class="modal-body">
                 <form id="chartSettingsForm">
-                    <div class="form-group">
-                        <label for="chartTimeRangeSelect">可视时间窗</label>
-                        <select id="chartTimeRangeSelect">
-                            <option value="1m">1 分钟</option>
-                            <option value="5m" selected>5 分钟</option>
-                            <option value="15m">15 分钟</option>
-                            <option value="1h">1 小时</option>
-                            <option value="24h">24 小时</option>
-                            <option value="all">全部</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label>视图模式</label>
-                        <div>
-                            <label><input type="checkbox" id="chartHistoryMode"> 启用历史模式（保留更多历史点）</label>
+                    <!-- 图表类型 -->
+                    <div class="settings-row">
+                        <label class="settings-label">图表类型</label>
+                        <div class="settings-control">
+                            <select id="chartTypeSelect" class="custom-select" aria-label="选择图表类型">
+                                <option value="line" selected>折线图</option>
+                                <option value="bar">柱状图</option>
+                            </select>
                         </div>
                     </div>
 
-                    <div class="form-group">
-                        <label>系列与样式</label>
-                        <div>
-                            <label><input type="checkbox" class="series-checkbox" data-series="temperature" checked> 温度</label>
-                            <label><input type="checkbox" class="series-checkbox" data-series="humidity" checked> 湿度</label>
-                            <label><input type="checkbox" class="series-checkbox" data-series="wind" checked> 风速</label>
-                            <label><input type="checkbox" class="series-checkbox" data-series="light" checked> 光照</label>
-                            <label><input type="checkbox" class="series-checkbox" data-series="pm25" checked> PM2.5</label>
-                            <label><input type="checkbox" class="series-checkbox" data-series="sunray" checked> 紫外线</label>
-                        </div>
-                        <div style="margin-top:8px;">
-                            <label><input type="checkbox" id="chartSmoothToggle"> 平滑曲线</label>
-                            <label style="margin-left:12px;"><input type="checkbox" id="chartMarkersToggle"> 显示数据点标记</label>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label>重置</label>
-                        <div>
-                            <button type="button" class="btn btn-test" id="chartResetDefaultsBtn">重置为默认</button>
+                    <!-- 平滑曲线开关 -->
+                    <div class="settings-row">
+                        <label class="settings-label">平滑曲线</label>
+                        <div class="settings-control">
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="chartSmoothToggle" checked aria-label="启用平滑曲线">
+                                <span class="toggle-slider"></span>
+                            </label>
                         </div>
                     </div>
                 </form>
             </div>
             <div class="modal-footer">
-                <div style="width:100%; display:flex; justify-content:center;">
-                    <button type="button" class="btn btn-save" id="chartSettingsSaveBtn">保存并应用</button>
-                </div>
+                <button type="button" class="btn btn-reset" id="chartResetDefaultsBtn" title="恢复默认设置">重置</button>
+                <button type="button" class="btn btn-save" id="chartSettingsSaveBtn" title="保存并立即应用设置">保存</button>
             </div>
         </div>
     </div>

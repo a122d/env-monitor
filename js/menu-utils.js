@@ -56,39 +56,49 @@ document.addEventListener('DOMContentLoaded', () => {
         function loadChartSettings() {
             try {
                 const raw = localStorage.getItem('chartSettings');
-                if (!raw) return;
-                const cfg = JSON.parse(raw);
-                const sel = document.getElementById('chartTimeRangeSelect');
-                if (sel && cfg.timeRange) sel.value = cfg.timeRange;
-                const hist = document.getElementById('chartHistoryMode');
-                if (hist) hist.checked = !!cfg.historyMode;
+                let cfg = null;
+                if (raw) {
+                    cfg = JSON.parse(raw);
+                } else {
+                    // 默认设置：折线图 + 平滑曲线
+                    cfg = { chartType: 'line', smooth: true };
+                }
+                const typeSelect = document.getElementById('chartTypeSelect');
+                if (typeSelect) typeSelect.value = cfg.chartType || 'line';
                 const smooth = document.getElementById('chartSmoothToggle');
-                if (smooth) smooth.checked = !!cfg.smooth;
-                const markers = document.getElementById('chartMarkersToggle');
-                if (markers) markers.checked = !!cfg.markers;
-                const seriesChecks = document.querySelectorAll('.series-checkbox');
-                seriesChecks.forEach(cb => {
-                    const name = cb.dataset.series;
-                    cb.checked = !(cfg.series && cfg.series[name] === false);
-                });
+                if (smooth) smooth.checked = cfg.smooth !== false; // 默认为true
+                // 更新平滑曲线选项的可用性
+                updateSmoothOptionVisibility();
             } catch (e) { console.warn('加载图表设置失败', e); }
         }
 
         function gatherChartSettings() {
-            const sel = document.getElementById('chartTimeRangeSelect');
-            const hist = document.getElementById('chartHistoryMode');
+            const typeSelect = document.getElementById('chartTypeSelect');
             const smooth = document.getElementById('chartSmoothToggle');
-            const markers = document.getElementById('chartMarkersToggle');
-            const seriesChecks = document.querySelectorAll('.series-checkbox');
-            const series = {};
-            seriesChecks.forEach(cb => { series[cb.dataset.series] = !!cb.checked; });
             return {
-                timeRange: sel ? sel.value : '5m',
-                historyMode: hist ? !!hist.checked : false,
-                smooth: smooth ? !!smooth.checked : false,
-                markers: markers ? !!markers.checked : false,
-                series
+                chartType: typeSelect ? typeSelect.value : 'line',
+                smooth: smooth ? !!smooth.checked : false
             };
+        }
+
+        // 更新平滑曲线选项的可用性
+        function updateSmoothOptionVisibility() {
+            const typeSelect = document.getElementById('chartTypeSelect');
+            const smoothToggle = document.getElementById('chartSmoothToggle');
+            const smoothLabel = smoothToggle ? smoothToggle.closest('label') : null;
+            
+            if (typeSelect && smoothToggle) {
+                const isLine = typeSelect.value === 'line';
+                smoothToggle.disabled = !isLine;
+                if (smoothLabel) {
+                    smoothLabel.style.opacity = isLine ? '1' : '0.5';
+                    smoothLabel.style.cursor = isLine ? 'pointer' : 'not-allowed';
+                }
+                // 如果切换到柱状图，取消平滑曲线选项
+                if (!isLine) {
+                    smoothToggle.checked = false;
+                }
+            }
         }
 
         if (chartSettingsClose) chartSettingsClose.addEventListener('click', () => { chartSettingsModal.classList.remove('show'); ScrollLock.unlock(); });
@@ -106,13 +116,16 @@ document.addEventListener('DOMContentLoaded', () => {
         if (chartResetDefaultsBtn) chartResetDefaultsBtn.addEventListener('click', () => {
             // 清除 localStorage 中的设置并重置表单为默认
             try { localStorage.removeItem('chartSettings'); } catch (e) { console.warn('重置默认失败', e); }
-            // 恢复表单默认值
-            const sel = document.getElementById('chartTimeRangeSelect'); if (sel) sel.value = '5m';
-            const hist = document.getElementById('chartHistoryMode'); if (hist) hist.checked = false;
-            const smooth = document.getElementById('chartSmoothToggle'); if (smooth) smooth.checked = false;
-            const markers = document.getElementById('chartMarkersToggle'); if (markers) markers.checked = false;
-            const seriesChecks = document.querySelectorAll('.series-checkbox');
-            seriesChecks.forEach(cb => cb.checked = true);
+            // 恢复表单默认值：折线图 + 平滑曲线
+            const typeSelect = document.getElementById('chartTypeSelect'); if (typeSelect) typeSelect.value = 'line';
+            const smooth = document.getElementById('chartSmoothToggle'); if (smooth) smooth.checked = true;
+            // 更新平滑曲线选项的可用性
+            updateSmoothOptionVisibility();
+            // 应用默认设置
+            const defaultSettings = { chartType: 'line', smooth: true };
+            if (window.applyChartSettings && typeof window.applyChartSettings === 'function') {
+                try { window.applyChartSettings(defaultSettings); } catch (e) { console.warn('applyChartSettings 调用失败', e); }
+            }
             ToastAlert.show('已重置为默认设置');
         });
 
@@ -120,6 +133,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const chartSettingsContent = chartSettingsModal.querySelector('.modal-content');
         chartSettingsModal.addEventListener('click', () => { chartSettingsModal.classList.remove('show'); ScrollLock.unlock(); });
         if (chartSettingsContent) chartSettingsContent.addEventListener('click', (e) => e.stopPropagation());
+
+        // 监听图表类型变化
+        const chartTypeSelect = document.getElementById('chartTypeSelect');
+        if (chartTypeSelect) {
+            chartTypeSelect.addEventListener('change', updateSmoothOptionVisibility);
+        }
 
         // 初始化时填充表单
         loadChartSettings();
