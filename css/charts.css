@@ -1,14 +1,102 @@
-/* ===== 图表标题 ===== */
-.chart-text {
-    margin: 32px 0 24px 0; 
-    text-align: center;
+/* ===== 图例区域 ===== */
+.chart-legend-section {
+    margin: 24px 0 16px 0;
+    animation: slideInUp 0.5s ease 0.3s backwards;
 }
-.chart-text h2 {
-    font-size: clamp(24px, 5vw, 28px);
+
+.chart-legend-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    padding: 16px;
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    border: 1px solid rgba(226, 232, 240, 0.8);
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background: transparent;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 14px;
+    font-weight: 500;
+    color: #64748b;
+}
+
+.legend-item:hover {
+    background: rgba(37, 99, 235, 0.06);
+    transform: translateY(-1px);
+}
+
+.legend-item.inactive {
+    opacity: 0.4;
+}
+
+.legend-item.inactive .legend-marker {
+    background-color: #cbd5e1 !important;
+}
+
+.legend-marker {
+    width: 16px;
+    height: 16px;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+}
+
+.legend-content {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    align-items: center;
+}
+
+.legend-text {
+    user-select: none;
+    font-size: 14px;
     font-weight: 600;
-    color: #3079b5;
-    margin-bottom: 8px;
+    color: #475569;
 }
+
+.legend-range {
+    user-select: none;
+    font-size: 11px;
+    font-weight: 400;
+    color: #94a3b8;
+    white-space: nowrap;
+}
+
+@media (max-width: 767px) {
+    .chart-legend-container {
+        gap: 12px;
+        padding: 12px;
+    }
+    
+    .legend-item {
+        flex: 0 0 calc(33.333% - 8px);
+        justify-content: center;
+        padding: 10px 8px;
+        font-size: 13px;
+    }
+    
+    .legend-text {
+        font-size: 13px;
+    }
+    
+    .legend-range {
+        font-size: 10px;
+    }
+}
+
 /* ===== 图表容器 ===== */
 .charts-container {
     display: grid;
@@ -23,8 +111,8 @@
 .chart-container {
     width: 100%;
     aspect-ratio: 4/3;
-    min-height: clamp(280px, 45vw, 550px);
-    max-height: 680px;
+    min-height: clamp(350px, 50vw, 520px);
+    max-height: 480px;
     padding: 0;
     background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
     border-radius: clamp(12px, 2vw, 16px);
@@ -37,29 +125,13 @@
     overflow: hidden;
 }
 
-.chart-container::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 60px;
-    background: linear-gradient(135deg, rgba(37, 99, 235, 0.03) 0%, rgba(37, 99, 235, 0.01) 100%);
-    border-bottom: 1px solid rgba(226, 232, 240, 0.6);
-    pointer-events: none;
-    z-index: 1;
-}
-
-.chart-container:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 16px 40px rgba(0,0,0,0.1), 
-                0 8px 16px rgba(37, 99, 235, 0.08),
-                inset 0 1px 0 rgba(255, 255, 255, 1);
-    border-color: rgba(37, 99, 235, 0.2);
-}
-
 @media (max-width: 767px) {
-    .chart-text h2 {
-        font-size: clamp(20px, 6vw, 24px);
+    .chart-container {
+        aspect-ratio: unset !important;
+        min-height: 450px !important;
+        max-height: 500px !important;
+        height: 450px;
     }
 }
+
+

@@ -217,6 +217,77 @@ let lastCardStates = {
     sunray: null
 };
 
+// 重置所有数据卡片为未连接状态（显示--）
+function resetAllDataCards() {
+    // 重置温度
+    const tempEl = document.getElementById('temperature');
+    if (tempEl) tempEl.textContent = '--';
+    const tempLevelEl = document.getElementById('tempLevel');
+    if (tempLevelEl) tempLevelEl.textContent = '--';
+    const tempTrendEl = document.getElementById('tempTrend');
+    if (tempTrendEl) tempTrendEl.textContent = '→';
+    const tempProgress = document.getElementById('tempProgress');
+    if (tempProgress) tempProgress.style.width = '0%';
+    
+    // 重置湿度
+    const humidityEl = document.getElementById('humidity');
+    if (humidityEl) humidityEl.textContent = '--';
+    const humidityLevelEl = document.getElementById('humidityLevel');
+    if (humidityLevelEl) humidityLevelEl.textContent = '--';
+    const humidityTrendEl = document.getElementById('humidityTrend');
+    if (humidityTrendEl) humidityTrendEl.textContent = '→';
+    const humidityProgress = document.getElementById('humidityProgress');
+    if (humidityProgress) humidityProgress.style.width = '0%';
+    
+    // 重置风速
+    const windSpeedEl = document.getElementById('windSpeed');
+    if (windSpeedEl) windSpeedEl.textContent = '--';
+    const windSpeedLevelEl = document.getElementById('windSpeedLevel');
+    if (windSpeedLevelEl) windSpeedLevelEl.textContent = '--';
+    const windSpeedTrendEl = document.getElementById('windSpeedTrend');
+    if (windSpeedTrendEl) windSpeedTrendEl.textContent = '→';
+    const windSpeedProgress = document.getElementById('windSpeedProgress');
+    if (windSpeedProgress) windSpeedProgress.style.width = '0%';
+    
+    // 重置光照
+    const illuminationEl = document.getElementById('illumination');
+    if (illuminationEl) illuminationEl.textContent = '--';
+    const illuminationLevelEl = document.getElementById('illuminationLevel');
+    if (illuminationLevelEl) illuminationLevelEl.textContent = '--';
+    const illuminationTrendEl = document.getElementById('illuminationTrend');
+    if (illuminationTrendEl) illuminationTrendEl.textContent = '→';
+    const illuminationProgress = document.getElementById('illuminationProgress');
+    if (illuminationProgress) illuminationProgress.style.width = '0%';
+    
+    // 重置PM2.5
+    const pm2El = document.getElementById('PM2');
+    if (pm2El) pm2El.textContent = '--';
+    const pm2LevelEl = document.getElementById('PM2Level');
+    if (pm2LevelEl) pm2LevelEl.textContent = '--';
+    const pm2TrendEl = document.getElementById('PM2Trend');
+    if (pm2TrendEl) pm2TrendEl.textContent = '→';
+    const pm2Progress = document.getElementById('PM2Progress');
+    if (pm2Progress) pm2Progress.style.width = '0%';
+    
+    // 重置紫外线
+    const sunrayEl = document.getElementById('sunray');
+    if (sunrayEl) sunrayEl.textContent = '--';
+    const sunrayLevelEl = document.getElementById('sunrayLevel');
+    if (sunrayLevelEl) sunrayLevelEl.textContent = '--';
+    const sunrayTrendEl = document.getElementById('sunrayTrend');
+    if (sunrayTrendEl) sunrayTrendEl.textContent = '→';
+    const sunrayProgress = document.getElementById('sunrayProgress');
+    if (sunrayProgress) sunrayProgress.style.width = '0%';
+    
+    // 重置大气压强
+    const pressureEl = document.getElementById('pressure');
+    if (pressureEl) pressureEl.textContent = '--';
+    
+    // 重置海拔高度
+    const altitudeEl = document.getElementById('altitude');
+    if (altitudeEl) altitudeEl.textContent = '--';
+}
+
 // 更新数据卡片
 // 温/湿/风/海拔÷10保留1位小数  大气压÷10000保留3位小数
 function updateDataCards(data) {
@@ -896,6 +967,7 @@ window.MQTTApp.init = function(newConfig) {
             const errMsg = responseObject.errorMessage || '无错误信息';
             console.error(`🔌 MQTT连接断开 [${responseObject.errorCode}]：${errMsg}`);
             updateMQTTStatus('failed');
+            resetAllDataCards(); // 重置所有数据显示为--
             reconnect(); // 无论是否有错误码，都重连
         };
 

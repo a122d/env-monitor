@@ -13,7 +13,7 @@
     border-radius: clamp(10px, 1.5vw, 14px);
     text-align: center;
     box-shadow: var(--shadow-md), 0 0 20px rgba(37, 99, 235, 0.04);
-    border: 2px solid #f0f2f5;
+    border: 2px solid rgba(255, 255, 255, 0.85);
     transition: transform var(--transition-normal) var(--ease-bounce),
                 box-shadow var(--transition-normal) var(--ease-smooth),
                 border-color var(--transition-normal) var(--ease-smooth);
@@ -939,12 +939,9 @@
     background: linear-gradient(135deg, #e0f7fa 0%, #b2ebf2 100%);
     box-shadow: 0 10px 30px rgba(0, 188, 212, 0.13),
                 0 0 40px rgba(0, 188, 212, 0.08);
-    border-color: #f0f2f5;
+    border: 2px solid rgba(255, 255, 255, 0.85) !important;
 }
 
-#pressureCard:hover {
-    border-color: var(--color-primary);
-}
 #pressureCard .card-header h3 {
     color: #0097a7;
     letter-spacing: 1px;
@@ -981,10 +978,7 @@
     background: linear-gradient(135deg, #ede7f6 0%, #b3c6f7 100%);
     box-shadow: 0 10px 30px rgba(103, 58, 183, 0.13),
                 0 0 40px rgba(33, 150, 243, 0.08);
-    border-color: #f0f2f5;
-}
-#altitudeCard:hover {
-    border-color: var(--color-primary);
+    border: 2px solid rgba(255, 255, 255, 0.85) !important;
 }
 #altitudeCard .card-header h3 {
     color: #3949ab;

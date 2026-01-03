@@ -59,45 +59,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (raw) {
                     cfg = JSON.parse(raw);
                 } else {
-                    // 默认设置：折线图 + 平滑曲线
-                    cfg = { chartType: 'line', smooth: true };
+                    // 默认设置：平滑曲线
+                    cfg = { smooth: true };
                 }
-                const typeSelect = document.getElementById('chartTypeSelect');
-                if (typeSelect) typeSelect.value = cfg.chartType || 'line';
                 const smooth = document.getElementById('chartSmoothToggle');
                 if (smooth) smooth.checked = cfg.smooth !== false; // 默认为true
-                // 更新平滑曲线选项的可用性
-                updateSmoothOptionVisibility();
             } catch (e) { console.warn('加载图表设置失败', e); }
         }
 
         function gatherChartSettings() {
-            const typeSelect = document.getElementById('chartTypeSelect');
             const smooth = document.getElementById('chartSmoothToggle');
             return {
-                chartType: typeSelect ? typeSelect.value : 'line',
+                chartType: 'line',
                 smooth: smooth ? !!smooth.checked : false
             };
-        }
-
-        // 更新平滑曲线选项的可用性
-        function updateSmoothOptionVisibility() {
-            const typeSelect = document.getElementById('chartTypeSelect');
-            const smoothToggle = document.getElementById('chartSmoothToggle');
-            const smoothLabel = smoothToggle ? smoothToggle.closest('label') : null;
-            
-            if (typeSelect && smoothToggle) {
-                const isLine = typeSelect.value === 'line';
-                smoothToggle.disabled = !isLine;
-                if (smoothLabel) {
-                    smoothLabel.style.opacity = isLine ? '1' : '0.5';
-                    smoothLabel.style.cursor = isLine ? 'pointer' : 'not-allowed';
-                }
-                // 如果切换到柱状图，取消平滑曲线选项
-                if (!isLine) {
-                    smoothToggle.checked = false;
-                }
-            }
         }
 
         if (chartSettingsClose) chartSettingsClose.addEventListener('click', () => { chartSettingsModal.classList.remove('show'); ScrollLock.unlock(); });
@@ -116,12 +91,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const chartSettingsContent = chartSettingsModal.querySelector('.modal-content');
         chartSettingsModal.addEventListener('click', () => { chartSettingsModal.classList.remove('show'); ScrollLock.unlock(); });
         if (chartSettingsContent) chartSettingsContent.addEventListener('click', (e) => e.stopPropagation());
-
-        // 监听图表类型变化
-        const chartTypeSelect = document.getElementById('chartTypeSelect');
-        if (chartTypeSelect) {
-            chartTypeSelect.addEventListener('change', updateSmoothOptionVisibility);
-        }
 
         // 初始化时填充表单
         loadChartSettings();

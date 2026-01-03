@@ -9,11 +9,9 @@ window.chartData = {
     sunray: []
 };
 
-let tempChart, humidityChart, windChart, lightChart, PM2Chart, sunrayChart;
+let combinedChart;
 // 全局控制
-window.chartRealtimePaused = false;
 window.CHART_MAX_LEN = 20; // 实时视图默认保留点数
-window.CHART_HISTORY_LEN = 240; // 历史视图保留点数（可切换）
 
 // 获取响应式配置
 function getResponsiveConfig() {
@@ -34,7 +32,7 @@ function getResponsiveConfig() {
         grid: {
             left: isMobile ? '4%' : '3%',
             right: isMobile ? '8%' : '8%',
-            bottom: isMobile ? '6%' : '5%',
+            bottom: isMobile ? '12%' : '10%',
             top: isMobile ? '24%' : '18%'
         },
         symbolSize: isMobile ? 4 : 6,
@@ -43,7 +41,7 @@ function getResponsiveConfig() {
     };
 }
 
-// 初始化四个独立图表
+// 初始化合并图表
 window.initCharts = function() {
     if (typeof echarts === 'undefined') {
         console.error('❌ ECharts 库未加载！');
@@ -51,21 +49,20 @@ window.initCharts = function() {
         return;
     }
 
-    const tempDom = document.getElementById('temp-chart');
-    const humidityDom = document.getElementById('humidity-chart');
-    const windDom = document.getElementById('wind-chart');
-    const lightDom = document.getElementById('light-chart');
-    const PM2Dom = document.getElementById('pm25-chart');
-    const sunrayDom = document.getElementById('sunray-chart');
+    const chartDom = document.getElementById('combined-chart');
 
-    if (!tempDom || !humidityDom || !windDom || !lightDom || !PM2Dom || !sunrayDom) {
+    if (!chartDom) {
         console.error('❌ 图表容器未找到！');
         return;
     }
 
     const config = getResponsiveConfig();
 
-    const common = {
+    // 初始化图表
+    combinedChart = echarts.init(chartDom);
+    
+    // 配置选项
+    const option = {
         tooltip: {
             trigger: 'axis',
             backgroundColor: 'rgba(255, 255, 255, 0.96)',
@@ -82,13 +79,57 @@ window.initCharts = function() {
             shadowOffsetX: 0,
             shadowOffsetY: 2,
             extraCssText: 'border-radius: 8px; backdrop-filter: blur(10px);',
-            confine: true
+            confine: true,
+            formatter: function(params) {
+                if (!params || params.length === 0) return '';
+                
+                let result = params[0].axisValue + '<br/>';
+                params.forEach(param => {
+                    const index = param.dataIndex;
+                    let originalValue = '';
+                    let unit = '';
+                    
+                    // 根据系列名称获取原始数据和单位
+                    switch(param.seriesName) {
+                        case '温度':
+                            originalValue = window.chartData.temperature[index];
+                            unit = '°C';
+                            break;
+                        case '湿度':
+                            originalValue = window.chartData.humidity[index];
+                            unit = '%';
+                            break;
+                        case '风速':
+                            originalValue = window.chartData.windSpeed[index];
+                            unit = 'm/s';
+                            break;
+                        case '光照':
+                            originalValue = window.chartData.illumination[index];
+                            unit = 'lux';
+                            break;
+                        case 'PM2.5':
+                            originalValue = window.chartData.PM2[index];
+                            unit = 'μg/m³';
+                            break;
+                        case '紫外线':
+                            originalValue = window.chartData.sunray[index];
+                            unit = 'UVI';
+                            break;
+                    }
+                    
+                    result += param.marker + param.seriesName + ': ' + originalValue + unit + '<br/>';
+                });
+                return result;
+            }
+        },
+        legend: {
+            show: false
         },
         grid: {
             left: config.grid.left,
             right: config.grid.right,
             bottom: config.grid.bottom,
-            top: config.grid.top,
+            top: config.isMobile ? '5%' : '5%',
             containLabel: true
         },
         xAxis: {
@@ -118,603 +159,180 @@ window.initCharts = function() {
                 show: false
             }
         },
-        animationDuration: 800,
-        animationEasing: 'cubicOut'
-    };
-
-    // 添加 dataZoom 到 common 配置，方便用户缩放查看历史数据
-    common.dataZoom = [
-        {
-            type: 'slider',
-            show: true,
-            start: 0,
-            end: 100,
-            bottom: config.isMobile ? '0%' : '2%'
-        },
-        {
-            type: 'inside',
-            start: 0,
-            end: 100
-        }
-    ];
-
-    // 温度图
-    tempChart = echarts.init(tempDom);
-    tempChart.setOption({
-        title: {
-            text: '温度趋势 (℃)',
-            left: 'center',
-            top: '3%',
-            textStyle: {
-                color: '#1f2937',
-                fontSize: config.fontSize.title,
-                fontWeight: 700,
-                letterSpacing: 0.5
-            },
-            subtextStyle: {
-                color: '#64748b',
-                fontSize: 12
-            }
-        },
-        tooltip: common.tooltip,
-        grid: common.grid,
-        xAxis: common.xAxis,
-        yAxis: {
-            type: 'value',
-            min: -10,
-            max: 50,
-            axisLabel: {
-                color: '#64748b',
-                fontSize: config.fontSize.axis,
-                fontWeight: 500,
-                formatter: '{value}°'
-            },
-            axisLine: { 
-                lineStyle: { 
-                    color: '#e2e8f0',
-                    width: 1.5
-                } 
-            },
-            splitLine: { 
-                lineStyle: { 
-                    color: '#f1f5f9',
-                    type: 'dashed'
-                } 
-            }
-        },
-        series: [{
-            name: '温度(℃)',
-            type: 'line',
-            smooth: true,
-            smoothMonotone: 'x',
-            symbol: 'circle',
-            symbolSize: config.symbolSize,
-            data: window.chartData.temperature.length ? window.chartData.temperature : [0],
-            lineStyle: { 
-                width: config.lineWidth,
-                color: {
-                    type: 'linear',
-                    x: 0, y: 0, x2: 1, y2: 0,
-                    colorStops: [
-                        { offset: 0, color: '#f97316' },
-                        { offset: 0.5, color: '#ef4444' },
-                        { offset: 1, color: '#dc2626' }
-                    ]
-                },
-                shadowColor: 'rgba(239, 68, 68, 0.3)',
-                shadowBlur: 8,
-                shadowOffsetY: 3
-            },
-            itemStyle: { 
-                color: '#ef4444',
-                borderColor: '#fff',
-                borderWidth: 2,
-                shadowColor: 'rgba(239, 68, 68, 0.4)',
-                shadowBlur: 6
-            },
-            areaStyle: { 
-                color: {
-                    type: 'linear',
-                    x: 0, y: 0, x2: 0, y2: 1,
-                    colorStops: [
-                        { offset: 0, color: 'rgba(239, 68, 68, 0.25)' },
-                        { offset: 0.5, color: 'rgba(239, 68, 68, 0.1)' },
-                        { offset: 1, color: 'rgba(239, 68, 68, 0.02)' }
-                    ]
-                }
-            },
-            emphasis: {
-                focus: 'series',
-                itemStyle: {
-                    borderWidth: 3,
-                    shadowBlur: 10,
-                    shadowColor: 'rgba(239, 68, 68, 0.6)'
-                }
-            }
-        }]
-    });
-    // 在每个图表选项中启用 dataZoom 支持
-    tempChart.setOption({ dataZoom: common.dataZoom });
-
-    // 湿度图
-    humidityChart = echarts.init(humidityDom);
-    humidityChart.setOption({
-        title: {
-            text: '湿度趋势 (%)',
-            left: 'center',
-            top: '3%',
-            textStyle: {
-                color: '#1f2937',
-                fontSize: config.fontSize.title,
-                fontWeight: 700,
-                letterSpacing: 0.5
-            }
-        },
-        tooltip: common.tooltip,
-        grid: common.grid,
-        xAxis: common.xAxis,
         yAxis: {
             type: 'value',
             min: 0,
             max: 100,
+            interval: 20,
+            splitNumber: 5,
             axisLabel: {
                 color: '#64748b',
                 fontSize: config.fontSize.axis,
                 fontWeight: 500,
-                formatter: '{value}%'
+                formatter: '{value}%',
+                margin: 12
             },
             axisLine: { 
+                show: true,
                 lineStyle: { 
-                    color: '#e2e8f0',
-                    width: 1.5
+                    color: '#cbd5e1',
+                    width: 2
                 } 
+            },
+            axisTick: {
+                show: true,
+                length: 5,
+                lineStyle: {
+                    color: '#cbd5e1'
+                }
             },
             splitLine: { 
-                lineStyle: { 
-                    color: '#f1f5f9',
-                    type: 'dashed'
-                } 
-            }
-        },
-        series: [{
-            name: '湿度(%)',
-            type: 'line',
-            smooth: true,
-            smoothMonotone: 'x',
-            symbol: 'circle',
-            symbolSize: config.symbolSize,
-            data: window.chartData.humidity.length ? window.chartData.humidity : [0],
-            lineStyle: { 
-                width: config.lineWidth,
-                color: {
-                    type: 'linear',
-                    x: 0, y: 0, x2: 1, y2: 0,
-                    colorStops: [
-                        { offset: 0, color: '#06b6d4' },
-                        { offset: 0.5, color: '#0891b2' },
-                        { offset: 1, color: '#0e7490' }
-                    ]
-                },
-                shadowColor: 'rgba(8, 145, 178, 0.3)',
-                shadowBlur: 8,
-                shadowOffsetY: 3
-            },
-            itemStyle: { 
-                color: '#0891b2',
-                borderColor: '#fff',
-                borderWidth: 2,
-                shadowColor: 'rgba(8, 145, 178, 0.4)',
-                shadowBlur: 6
-            },
-            areaStyle: { 
-                color: {
-                    type: 'linear',
-                    x: 0, y: 0, x2: 0, y2: 1,
-                    colorStops: [
-                        { offset: 0, color: 'rgba(6, 182, 212, 0.25)' },
-                        { offset: 0.5, color: 'rgba(6, 182, 212, 0.1)' },
-                        { offset: 1, color: 'rgba(6, 182, 212, 0.02)' }
-                    ]
-                }
-            },
-            emphasis: {
-                focus: 'series',
-                itemStyle: {
-                    borderWidth: 3,
-                    shadowBlur: 10,
-                    shadowColor: 'rgba(8, 145, 178, 0.6)'
-                }
-            }
-        }]
-    });
-    humidityChart.setOption({ dataZoom: common.dataZoom });
-
-    // 风速图
-    windChart = echarts.init(windDom);
-    windChart.setOption({
-        title: {
-            text: '风速趋势 (m/s)',
-            left: 'center',
-            top: '3%',
-            textStyle: {
-                color: '#1f2937',
-                fontSize: config.fontSize.title,
-                fontWeight: 700,
-                letterSpacing: 0.5
-            }
-        },
-        tooltip: common.tooltip,
-        grid: common.grid,
-        xAxis: common.xAxis,
-        yAxis: {
-            type: 'value',
-            min: 0,
-            max: 20,
-            axisLabel: {
-                color: '#64748b',
-                fontSize: config.fontSize.axis,
-                fontWeight: 500,
-                formatter: '{value}m/s'
-            },
-            axisLine: { 
+                show: true,
                 lineStyle: { 
                     color: '#e2e8f0',
-                    width: 1.5
-                } 
-            },
-            splitLine: { 
-                lineStyle: { 
-                    color: '#f1f5f9',
-                    type: 'dashed'
+                    type: 'dashed',
+                    width: 1
                 } 
             }
         },
-        series: [{
-            name: '风速(m/s)',
-            type: 'line',
-            smooth: true,
-            smoothMonotone: 'x',
-            symbol: 'circle',
-            symbolSize: config.symbolSize,
-            data: window.chartData.windSpeed.length ? window.chartData.windSpeed : [0],
-            lineStyle: { 
-                width: config.lineWidth,
-                color: {
-                    type: 'linear',
-                    x: 0, y: 0, x2: 1, y2: 0,
-                    colorStops: [
-                        { offset: 0, color: '#a78bfa' },
-                        { offset: 0.5, color: '#8b5cf6' },
-                        { offset: 1, color: '#7c3aed' }
-                    ]
+        dataZoom: [
+            {
+                type: 'slider',
+                show: true,
+                start: 0,
+                end: 100,
+                bottom: config.isMobile ? '0%' : '2%'
+            },
+            {
+                type: 'inside',
+                start: 0,
+                end: 100
+            }
+        ],
+        series: [
+            {
+                name: '温度',
+                type: 'line',
+                smooth: true,
+                smoothMonotone: 'x',
+                symbol: 'circle',
+                symbolSize: config.symbolSize,
+                data: [],
+                lineStyle: { 
+                    width: config.lineWidth,
+                    color: '#ef4444'
                 },
-                shadowColor: 'rgba(139, 92, 246, 0.3)',
-                shadowBlur: 8,
-                shadowOffsetY: 3
-            },
-            itemStyle: { 
-                color: '#8b5cf6',
-                borderColor: '#fff',
-                borderWidth: 2,
-                shadowColor: 'rgba(139, 92, 246, 0.4)',
-                shadowBlur: 6
-            },
-            areaStyle: { 
-                color: {
-                    type: 'linear',
-                    x: 0, y: 0, x2: 0, y2: 1,
-                    colorStops: [
-                        { offset: 0, color: 'rgba(139, 92, 246, 0.25)' },
-                        { offset: 0.5, color: 'rgba(139, 92, 246, 0.1)' },
-                        { offset: 1, color: 'rgba(139, 92, 246, 0.02)' }
-                    ]
+                itemStyle: { 
+                    color: '#ef4444',
+                    borderColor: '#fff',
+                    borderWidth: 2
                 }
             },
-            emphasis: {
-                focus: 'series',
-                itemStyle: {
-                    borderWidth: 3,
-                    shadowBlur: 10,
-                    shadowColor: 'rgba(139, 92, 246, 0.6)'
-                }
-            }
-        }]
-    });
-    windChart.setOption({ dataZoom: common.dataZoom });
-
-    // 光照图
-    lightChart = echarts.init(lightDom);
-    lightChart.setOption({
-        title: {
-            text: '光照强度趋势 (lux)',
-            left: 'center',
-            top: '3%',
-            textStyle: {
-                color: '#1f2937',
-                fontSize: config.fontSize.title,
-                fontWeight: 700,
-                letterSpacing: 0.5
-            }
-        },
-        tooltip: common.tooltip,
-        grid: common.grid,
-        xAxis: common.xAxis,
-        yAxis: {
-            type: 'value',
-            min: 0,
-            axisLabel: {
-                color: '#64748b',
-                fontSize: config.fontSize.axis,
-                fontWeight: 500,
-                formatter: '{value}'
-            },
-            axisLine: { 
+            {
+                name: '湿度',
+                type: 'line',
+                smooth: true,
+                smoothMonotone: 'x',
+                symbol: 'circle',
+                symbolSize: config.symbolSize,
+                data: [],
                 lineStyle: { 
-                    color: '#e2e8f0',
-                    width: 1.5
-                } 
-            },
-            splitLine: { 
-                lineStyle: { 
-                    color: '#f1f5f9',
-                    type: 'dashed'
-                } 
-            }
-        },
-        series: [{
-            name: '光照(lux)',
-            type: 'line',
-            smooth: true,
-            smoothMonotone: 'x',
-            symbol: 'circle',
-            symbolSize: config.symbolSize,
-            data: window.chartData.illumination.length ? window.chartData.illumination : [0],
-            lineStyle: { 
-                width: config.lineWidth,
-                color: {
-                    type: 'linear',
-                    x: 0, y: 0, x2: 1, y2: 0,
-                    colorStops: [
-                        { offset: 0, color: '#fbbf24' },
-                        { offset: 0.5, color: '#f59e0b' },
-                        { offset: 1, color: '#d97706' }
-                    ]
+                    width: config.lineWidth,
+                    color: '#0891b2'
                 },
-                shadowColor: 'rgba(245, 158, 11, 0.3)',
-                shadowBlur: 8,
-                shadowOffsetY: 3
-            },
-            itemStyle: { 
-                color: '#f59e0b',
-                borderColor: '#fff',
-                borderWidth: 2,
-                shadowColor: 'rgba(245, 158, 11, 0.4)',
-                shadowBlur: 6
-            },
-            areaStyle: { 
-                color: {
-                    type: 'linear',
-                    x: 0, y: 0, x2: 0, y2: 1,
-                    colorStops: [
-                        { offset: 0, color: 'rgba(251, 191, 36, 0.25)' },
-                        { offset: 0.5, color: 'rgba(251, 191, 36, 0.1)' },
-                        { offset: 1, color: 'rgba(251, 191, 36, 0.02)' }
-                    ]
+                itemStyle: { 
+                    color: '#0891b2',
+                    borderColor: '#fff',
+                    borderWidth: 2
                 }
             },
-            emphasis: {
-                focus: 'series',
-                itemStyle: {
-                    borderWidth: 3,
-                    shadowBlur: 10,
-                    shadowColor: 'rgba(245, 158, 11, 0.6)'
-                }
-            }
-        }]
-    });
-    lightChart.setOption({ dataZoom: common.dataZoom });
-
-    // PM2.5图
-    PM2Chart = echarts.init(PM2Dom);
-    PM2Chart.setOption({
-        title: {
-            text: 'PM2.5趋势 (μg/m³)',
-            left: 'center',
-            top: '3%',
-            textStyle: {
-                color: '#1f2937',
-                fontSize: config.fontSize.title,
-                fontWeight: 700,
-                letterSpacing: 0.5
-            }
-        },
-        tooltip: common.tooltip,
-        grid: common.grid,
-        xAxis: common.xAxis,
-        yAxis: {
-            type: 'value',
-            min: 0,
-            axisLabel: {
-                color: '#64748b',
-                fontSize: config.fontSize.axis,
-                fontWeight: 500,
-                formatter: '{value}'
-            },
-            axisLine: { 
+            {
+                name: '风速',
+                type: 'line',
+                smooth: true,
+                smoothMonotone: 'x',
+                symbol: 'circle',
+                symbolSize: config.symbolSize,
+                data: [],
                 lineStyle: { 
-                    color: '#e2e8f0',
-                    width: 1.5
-                } 
-            },
-            splitLine: { 
-                lineStyle: { 
-                    color: '#f1f5f9',
-                    type: 'dashed'
-                } 
-            }
-        },
-        series: [{
-            name: 'PM2.5(μg/m³)',
-            type: 'line',
-            smooth: true,
-            smoothMonotone: 'x',
-            symbol: 'circle',
-            symbolSize: config.symbolSize,
-            data: window.chartData.PM2.length ? window.chartData.PM2 : [0],
-            lineStyle: { 
-                width: config.lineWidth,
-                color: {
-                    type: 'linear',
-                    x: 0, y: 0, x2: 1, y2: 0,
-                    colorStops: [
-                        { offset: 0, color: '#10b981' },
-                        { offset: 0.5, color: '#059669' },
-                        { offset: 1, color: '#047857' }
-                    ]
+                    width: config.lineWidth,
+                    color: '#8b5cf6'
                 },
-                shadowColor: 'rgba(16, 185, 129, 0.3)',
-                shadowBlur: 8,
-                shadowOffsetY: 3
-            },
-            itemStyle: { 
-                color: '#059669',
-                borderColor: '#fff',
-                borderWidth: 2,
-                shadowColor: 'rgba(16, 185, 129, 0.4)',
-                shadowBlur: 6
-            },
-            areaStyle: { 
-                color: {
-                    type: 'linear',
-                    x: 0, y: 0, x2: 0, y2: 1,
-                    colorStops: [
-                        { offset: 0, color: 'rgba(16, 185, 129, 0.25)' },
-                        { offset: 0.5, color: 'rgba(16, 185, 129, 0.1)' },
-                        { offset: 1, color: 'rgba(16, 185, 129, 0.02)' }
-                    ]
+                itemStyle: { 
+                    color: '#8b5cf6',
+                    borderColor: '#fff',
+                    borderWidth: 2
                 }
             },
-            emphasis: {
-                focus: 'series',
-                itemStyle: {
-                    borderWidth: 3,
-                    shadowBlur: 10,
-                    shadowColor: 'rgba(16, 185, 129, 0.6)'
-                }
-            }
-        }]
-    });
-    PM2Chart.setOption({ dataZoom: common.dataZoom });
-
-    // 紫外线强度图
-    sunrayChart = echarts.init(sunrayDom);
-    sunrayChart.setOption({
-        title: {
-            text: '紫外线强度趋势 (UVI)',
-            left: 'center',
-            top: '3%',
-            textStyle: {
-                color: '#1f2937',
-                fontSize: config.fontSize.title,
-                fontWeight: 700,
-                letterSpacing: 0.5
-            }
-        },
-        tooltip: common.tooltip,
-        grid: common.grid,
-        xAxis: common.xAxis,
-        yAxis: {
-            type: 'value',
-            min: 0,
-            max: 16,
-            axisLabel: {
-                color: '#64748b',
-                fontSize: config.fontSize.axis,
-                fontWeight: 500,
-                formatter: '{value}'
-            },
-            axisLine: { 
+            {
+                name: '光照',
+                type: 'line',
+                smooth: true,
+                smoothMonotone: 'x',
+                symbol: 'circle',
+                symbolSize: config.symbolSize,
+                data: [],
                 lineStyle: { 
-                    color: '#e2e8f0',
-                    width: 1.5
-                } 
-            },
-            splitLine: { 
-                lineStyle: { 
-                    color: '#f1f5f9',
-                    type: 'dashed'
-                } 
-            }
-        },
-        series: [{
-            name: '紫外线(UVI)',
-            type: 'line',
-            smooth: true,
-            smoothMonotone: 'x',
-            symbol: 'circle',
-            symbolSize: config.symbolSize,
-            data: window.chartData.sunray.length ? window.chartData.sunray : [0],
-            lineStyle: { 
-                width: config.lineWidth,
-                color: {
-                    type: 'linear',
-                    x: 0, y: 0, x2: 1, y2: 0,
-                    colorStops: [
-                        { offset: 0, color: '#ec4899' },
-                        { offset: 0.5, color: '#db2777' },
-                        { offset: 1, color: '#be185d' }
-                    ]
+                    width: config.lineWidth,
+                    color: '#f59e0b'
                 },
-                shadowColor: 'rgba(236, 72, 153, 0.3)',
-                shadowBlur: 8,
-                shadowOffsetY: 3
-            },
-            itemStyle: { 
-                color: '#db2777',
-                borderColor: '#fff',
-                borderWidth: 2,
-                shadowColor: 'rgba(236, 72, 153, 0.4)',
-                shadowBlur: 6
-            },
-            areaStyle: { 
-                color: {
-                    type: 'linear',
-                    x: 0, y: 0, x2: 0, y2: 1,
-                    colorStops: [
-                        { offset: 0, color: 'rgba(236, 72, 153, 0.25)' },
-                        { offset: 0.5, color: 'rgba(236, 72, 153, 0.1)' },
-                        { offset: 1, color: 'rgba(236, 72, 153, 0.02)' }
-                    ]
+                itemStyle: { 
+                    color: '#f59e0b',
+                    borderColor: '#fff',
+                    borderWidth: 2
                 }
             },
-            emphasis: {
-                focus: 'series',
-                itemStyle: {
-                    borderWidth: 3,
-                    shadowBlur: 10,
-                    shadowColor: 'rgba(236, 72, 153, 0.6)'
+            {
+                name: 'PM2.5',
+                type: 'line',
+                smooth: true,
+                smoothMonotone: 'x',
+                symbol: 'circle',
+                symbolSize: config.symbolSize,
+                data: [],
+                lineStyle: { 
+                    width: config.lineWidth,
+                    color: '#10b981'
+                },
+                itemStyle: { 
+                    color: '#10b981',
+                    borderColor: '#fff',
+                    borderWidth: 2
+                }
+            },
+            {
+                name: '紫外线',
+                type: 'line',
+                smooth: true,
+                smoothMonotone: 'x',
+                symbol: 'circle',
+                symbolSize: config.symbolSize,
+                data: [],
+                lineStyle: { 
+                    width: config.lineWidth,
+                    color: '#3b82f6'
+                },
+                itemStyle: { 
+                    color: '#3b82f6',
+                    borderColor: '#fff',
+                    borderWidth: 2
                 }
             }
-        }]
+        ],
+        animationDuration: 800,
+        animationEasing: 'cubicOut'
+    };
+
+    combinedChart.setOption(option);
+
+    // 响应式调整
+    window.addEventListener('resize', () => {
+        if (combinedChart) {
+            combinedChart.resize();
+        }
     });
-    sunrayChart.setOption({ dataZoom: common.dataZoom });
 
-    window.tempChart = tempChart;
-    window.humidityChart = humidityChart;
-    window.windChart = windChart;
-    window.lightChart = lightChart;
-    window.PM2Chart = PM2Chart;
-    window.sunrayChart = sunrayChart;
-
-    setTimeout(() => {
-        tempChart.resize();
-        humidityChart.resize();
-        windChart.resize();
-        lightChart.resize();
-        PM2Chart.resize();
-        sunrayChart.resize();
-    }, 100);
-    console.log('✅ 六图表初始化完成');
+    console.log('✅ 图表初始化完成');
 };
 
 // 图表更新队列和RAF优化
@@ -722,54 +340,56 @@ let chartUpdatePending = false;
 let lastChartUpdate = 0;
 const CHART_UPDATE_THROTTLE = 500; // 限制更新频率为500ms一次
 
-// 批量更新所有图表（使用RAF优化）
+// 计算各项数据的百分比（根据进度条范围）
+function calculatePercentage(value, min, max) {
+    if (value === null || value === undefined || isNaN(value)) return 0;
+    const percent = ((value - min) / (max - min)) * 100;
+    return Math.max(0, Math.min(100, percent));
+}
+
+// 批量更新图表（使用RAF优化）
 function batchUpdateCharts() {
-    if (!tempChart || !humidityChart || !windChart || !lightChart || !PM2Chart || !sunrayChart) {
+    if (!combinedChart) {
         return;
     }
     
     const xData = window.chartData.time;
     
+    // 计算各项数据的百分比
+    // 温度: -10°C 到 36°C
+    const tempPercent = window.chartData.temperature.map(t => calculatePercentage(t, -10, 36));
+    // 湿度: 0% 到 100%
+    const humidityPercent = window.chartData.humidity.map(h => h); // 已经是百分比
+    // 风速: 0 m/s 到 20 m/s
+    const windPercent = window.chartData.windSpeed.map(w => calculatePercentage(w, 0, 20));
+    // 光照: 0 lux 到 1000 lux
+    const lightPercent = window.chartData.illumination.map(l => calculatePercentage(l, 0, 1000));
+    // PM2.5: 0 到 150 μg/m³
+    const pm25Percent = window.chartData.PM2.map(p => calculatePercentage(p, 0, 150));
+    // 紫外线: 0 到 10 UVI
+    const sunrayPercent = window.chartData.sunray.map(s => calculatePercentage(s, 0, 10));
+    
     // 使用requestAnimationFrame确保在下一帧渲染
     requestAnimationFrame(() => {
-        // 批量更新，使用notMerge: false实现增量更新，提高性能
-        tempChart.setOption({
+        combinedChart.setOption({
             xAxis: { data: xData },
-            series: [{ data: window.chartData.temperature }]
-        }, { notMerge: false, lazyUpdate: true });
-        
-        humidityChart.setOption({
-            xAxis: { data: xData },
-            series: [{ data: window.chartData.humidity }]
-        }, { notMerge: false, lazyUpdate: true });
-        
-        windChart.setOption({
-            xAxis: { data: xData },
-            series: [{ data: window.chartData.windSpeed }]
-        }, { notMerge: false, lazyUpdate: true });
-        
-        lightChart.setOption({
-            xAxis: { data: xData },
-            series: [{ data: window.chartData.illumination }]
-        }, { notMerge: false, lazyUpdate: true });
-        
-        PM2Chart.setOption({
-            xAxis: { data: xData },
-            series: [{ data: window.chartData.PM2 }]
-        }, { notMerge: false, lazyUpdate: true });
-        
-        sunrayChart.setOption({
-            xAxis: { data: xData },
-            series: [{ data: window.chartData.sunray }]
+            series: [
+                { data: tempPercent },
+                { data: humidityPercent },
+                { data: windPercent },
+                { data: lightPercent },
+                { data: pm25Percent },
+                { data: sunrayPercent }
+            ]
         }, { notMerge: false, lazyUpdate: true });
         
         chartUpdatePending = false;
     });
 }
 
-// 更新六个图表数据（节流优化版）
+// 全局更新图表数据入口
 window.updateChartData = function(data) {
-    if (!tempChart || !humidityChart || !windChart || !lightChart || !PM2Chart || !sunrayChart) {
+    if (!combinedChart) {
         console.warn('⚠️ 图表未初始化，跳过更新');
         return;
     }
@@ -803,14 +423,11 @@ window.updateChartData = function(data) {
     window.chartData.PM2.push(PM2Val);
     window.chartData.sunray.push(sunrayVal);
     
-    // 根据当前视图长度裁剪数组（实时/历史切换）
+    // 根据当前视图长度裁剪数组
     const maxLen = window.CHART_MAX_LEN || 20;
     if (window.chartData.time.length > maxLen) {
         Object.keys(window.chartData).forEach(key => window.chartData[key].shift());
     }
-
-    // 如果处于暂停状态，仅更新内部数据，不渲染图表
-    if (window.chartRealtimePaused) return;
 
     // 节流控制：限制图表更新频率
     const currentTime = Date.now();
@@ -846,45 +463,17 @@ window.clearChartData = function() {
 
     const emptyXAxis = ['暂无数据'];
 
-    if (tempChart) {
-        tempChart.setOption({
+    if (combinedChart) {
+        combinedChart.setOption({
             xAxis: { data: emptyXAxis },
-            series: [{ data: [0] }]
-        });
-    }
-
-    if (humidityChart) {
-        humidityChart.setOption({
-            xAxis: { data: emptyXAxis },
-            series: [{ data: [0] }]
-        });
-    }
-
-    if (windChart) {
-        windChart.setOption({
-            xAxis: { data: emptyXAxis },
-            series: [{ data: [0] }]
-        });
-    }
-
-    if (lightChart) {
-        lightChart.setOption({
-            xAxis: { data: emptyXAxis },
-            series: [{ data: [0] }]
-        });
-    }
-
-    if (PM2Chart) {
-        PM2Chart.setOption({
-            xAxis: { data: emptyXAxis },
-            series: [{ data: [0] }]
-        });
-    }
-
-    if (sunrayChart) {
-        sunrayChart.setOption({
-            xAxis: { data: emptyXAxis },
-            series: [{ data: [0] }]
+            series: [
+                { data: [0] },
+                { data: [0] },
+                { data: [0] },
+                { data: [0] },
+                { data: [0] },
+                { data: [0] }
+            ]
         });
     }
 
@@ -898,342 +487,64 @@ window.clearChartData = function() {
     }
 };
 
-// 切换实时暂停/恢复（暂停时继续缓存数据，不更新图表）
-window.toggleChartRealtime = function() {
-    window.chartRealtimePaused = !window.chartRealtimePaused;
-    const btn = document.getElementById('chartPauseBtn');
-    if (btn) {
-        btn.textContent = window.chartRealtimePaused ? '恢复' : '暂停';
-        btn.setAttribute('aria-pressed', String(window.chartRealtimePaused));
-    }
-    if (!window.chartRealtimePaused) {
-        // 恢复后用当前缓存的数据刷新图表
-        const maxLen = window.CHART_MAX_LEN || 20;
-        const startIndex = Math.max(0, window.chartData.time.length - maxLen);
-        const xData = window.chartData.time.slice(startIndex);
-        tempChart.setOption({ xAxis: { data: xData }, series: [{ data: window.chartData.temperature.slice(startIndex) }] });
-        humidityChart.setOption({ xAxis: { data: xData }, series: [{ data: window.chartData.humidity.slice(startIndex) }] });
-        windChart.setOption({ xAxis: { data: xData }, series: [{ data: window.chartData.windSpeed.slice(startIndex) }] });
-        lightChart.setOption({ xAxis: { data: xData }, series: [{ data: window.chartData.illumination.slice(startIndex) }] });
-        PM2Chart.setOption({ xAxis: { data: xData }, series: [{ data: window.chartData.PM2.slice(startIndex) }] });
-        sunrayChart.setOption({ xAxis: { data: xData }, series: [{ data: window.chartData.sunray.slice(startIndex) }] });
-    }
-};
-
-// 切换历史视图与实时视图
-window.toggleChartHistoryView = function() {
-    const btn = document.getElementById('chartHistoryBtn');
-    const isHistory = window.CHART_MAX_LEN !== (window.CHART_HISTORY_LEN || 240);
-    if (isHistory) {
-        // 切换到历史视图
-        window.CHART_MAX_LEN = window.CHART_HISTORY_LEN || 240;
-        if (btn) { btn.textContent = '实时视图'; btn.setAttribute('aria-pressed', 'true'); }
-    } else {
-        // 切换回实时视图
-        window.CHART_MAX_LEN = 20;
-        if (btn) { btn.textContent = '历史视图'; btn.setAttribute('aria-pressed', 'false'); }
-    }
-    // 刷新图表显示为当前缓存的最后 CHART_MAX_LEN 条
-    const maxLen = window.CHART_MAX_LEN || 20;
-    const startIndex = Math.max(0, window.chartData.time.length - maxLen);
-    const xData = window.chartData.time.slice(startIndex);
-    tempChart.setOption({ xAxis: { data: xData }, series: [{ data: window.chartData.temperature.slice(startIndex) }] });
-    humidityChart.setOption({ xAxis: { data: xData }, series: [{ data: window.chartData.humidity.slice(startIndex) }] });
-    windChart.setOption({ xAxis: { data: xData }, series: [{ data: window.chartData.windSpeed.slice(startIndex) }] });
-    lightChart.setOption({ xAxis: { data: xData }, series: [{ data: window.chartData.illumination.slice(startIndex) }] });
-    PM2Chart.setOption({ xAxis: { data: xData }, series: [{ data: window.chartData.PM2.slice(startIndex) }] });
-    sunrayChart.setOption({ xAxis: { data: xData }, series: [{ data: window.chartData.sunray.slice(startIndex) }] });
-};
-
 // 重置所有图表的缩放
 window.resetAllChartZoom = function() {
-    if (tempChart) tempChart.dispatchAction({ type: 'dataZoom', start: 0, end: 100 });
-    if (humidityChart) humidityChart.dispatchAction({ type: 'dataZoom', start: 0, end: 100 });
-    if (windChart) windChart.dispatchAction({ type: 'dataZoom', start: 0, end: 100 });
-    if (lightChart) lightChart.dispatchAction({ type: 'dataZoom', start: 0, end: 100 });
-    if (PM2Chart) PM2Chart.dispatchAction({ type: 'dataZoom', start: 0, end: 100 });
-    if (sunrayChart) sunrayChart.dispatchAction({ type: 'dataZoom', start: 0, end: 100 });
+    if (combinedChart) {
+        combinedChart.dispatchAction({ type: 'dataZoom', start: 0, end: 100 });
+    }
 };
 
 // 应用图表设置（由菜单设置弹窗调用）
 window.applyChartSettings = function(settings) {
-    if (!settings) return;
+    if (!settings || !combinedChart) return;
     
     // 获取图表类型和样式设置
     const chartType = settings.chartType || 'line';
     const isSmooth = settings.smooth && chartType === 'line';
     const showMarkers = true; // 始终显示数据点标记
     
-    // 定义通用的系列配置更新函数
-    const updateSeriesConfig = (chart, seriesConfig) => {
-        if (!chart) return;
-        
-        const updatedConfig = {
+    // 更新所有系列的配置
+    const seriesUpdate = [];
+    const seriesNames = ['温度', '湿度', '风速', '光照', 'PM2.5', '紫外线'];
+    const seriesColors = ['#ef4444', '#0891b2', '#8b5cf6', '#f59e0b', '#10b981', '#3b82f6'];
+    
+    for (let i = 0; i < 6; i++) {
+        const config = {
             type: chartType,
             smooth: isSmooth,
             smoothMonotone: isSmooth ? 'x' : undefined,
             symbol: showMarkers ? 'circle' : 'none',
             symbolSize: showMarkers ? 6 : 0,
-            ...seriesConfig
+            lineStyle: chartType === 'line' ? {
+                width: 3,
+                color: seriesColors[i]
+            } : undefined,
+            itemStyle: {
+                color: seriesColors[i],
+                borderColor: '#fff',
+                borderWidth: chartType === 'bar' ? 0 : 2
+            }
         };
         
         // 如果是柱状图，移除某些仅适用于折线图的属性
         if (chartType === 'bar') {
-            delete updatedConfig.smooth;
-            delete updatedConfig.smoothMonotone;
-            delete updatedConfig.areaStyle;
+            delete config.smooth;
+            delete config.smoothMonotone;
         }
         
-        chart.setOption({
-            series: [updatedConfig]
-        });
-    };
-    
-    // 更新每个图表的系列配置
-    if (tempChart) {
-        updateSeriesConfig(tempChart, {
-            name: '温度(℃)',
-            lineStyle: chartType === 'line' ? {
-                width: 3,
-                color: {
-                    type: 'linear',
-                    x: 0, y: 0, x2: 1, y2: 0,
-                    colorStops: [
-                        { offset: 0, color: '#f97316' },
-                        { offset: 0.5, color: '#ef4444' },
-                        { offset: 1, color: '#dc2626' }
-                    ]
-                },
-                shadowColor: 'rgba(239, 68, 68, 0.3)',
-                shadowBlur: 8,
-                shadowOffsetY: 3
-            } : undefined,
-            itemStyle: {
-                color: '#ef4444',
-                borderColor: '#fff',
-                borderWidth: chartType === 'bar' ? 0 : 2
-            },
-            areaStyle: chartType === 'line' ? {
-                color: {
-                    type: 'linear',
-                    x: 0, y: 0, x2: 0, y2: 1,
-                    colorStops: [
-                        { offset: 0, color: 'rgba(239, 68, 68, 0.25)' },
-                        { offset: 0.5, color: 'rgba(239, 68, 68, 0.1)' },
-                        { offset: 1, color: 'rgba(239, 68, 68, 0.02)' }
-                    ]
-                }
-            } : undefined
-        });
+        seriesUpdate.push(config);
     }
     
-    if (humidityChart) {
-        updateSeriesConfig(humidityChart, {
-            name: '湿度(%)',
-            lineStyle: chartType === 'line' ? {
-                width: 3,
-                color: {
-                    type: 'linear',
-                    x: 0, y: 0, x2: 1, y2: 0,
-                    colorStops: [
-                        { offset: 0, color: '#06b6d4' },
-                        { offset: 0.5, color: '#0891b2' },
-                        { offset: 1, color: '#0e7490' }
-                    ]
-                },
-                shadowColor: 'rgba(8, 145, 178, 0.3)',
-                shadowBlur: 8,
-                shadowOffsetY: 3
-            } : undefined,
-            itemStyle: {
-                color: '#0891b2',
-                borderColor: '#fff',
-                borderWidth: chartType === 'bar' ? 0 : 2
-            },
-            areaStyle: chartType === 'line' ? {
-                color: {
-                    type: 'linear',
-                    x: 0, y: 0, x2: 0, y2: 1,
-                    colorStops: [
-                        { offset: 0, color: 'rgba(8, 145, 178, 0.25)' },
-                        { offset: 0.5, color: 'rgba(8, 145, 178, 0.1)' },
-                        { offset: 1, color: 'rgba(8, 145, 178, 0.02)' }
-                    ]
-                }
-            } : undefined
-        });
-    }
-    
-    if (windChart) {
-        updateSeriesConfig(windChart, {
-            name: '风速(m/s)',
-            lineStyle: chartType === 'line' ? {
-                width: 3,
-                color: {
-                    type: 'linear',
-                    x: 0, y: 0, x2: 1, y2: 0,
-                    colorStops: [
-                        { offset: 0, color: '#10b981' },
-                        { offset: 0.5, color: '#059669' },
-                        { offset: 1, color: '#047857' }
-                    ]
-                },
-                shadowColor: 'rgba(5, 150, 105, 0.3)',
-                shadowBlur: 8,
-                shadowOffsetY: 3
-            } : undefined,
-            itemStyle: {
-                color: '#059669',
-                borderColor: '#fff',
-                borderWidth: chartType === 'bar' ? 0 : 2
-            },
-            areaStyle: chartType === 'line' ? {
-                color: {
-                    type: 'linear',
-                    x: 0, y: 0, x2: 0, y2: 1,
-                    colorStops: [
-                        { offset: 0, color: 'rgba(5, 150, 105, 0.25)' },
-                        { offset: 0.5, color: 'rgba(5, 150, 105, 0.1)' },
-                        { offset: 1, color: 'rgba(5, 150, 105, 0.02)' }
-                    ]
-                }
-            } : undefined
-        });
-    }
-    
-    if (lightChart) {
-        updateSeriesConfig(lightChart, {
-            name: '光照(lx)',
-            lineStyle: chartType === 'line' ? {
-                width: 3,
-                color: {
-                    type: 'linear',
-                    x: 0, y: 0, x2: 1, y2: 0,
-                    colorStops: [
-                        { offset: 0, color: '#f59e0b' },
-                        { offset: 0.5, color: '#d97706' },
-                        { offset: 1, color: '#b45309' }
-                    ]
-                },
-                shadowColor: 'rgba(217, 119, 6, 0.3)',
-                shadowBlur: 8,
-                shadowOffsetY: 3
-            } : undefined,
-            itemStyle: {
-                color: '#d97706',
-                borderColor: '#fff',
-                borderWidth: chartType === 'bar' ? 0 : 2
-            },
-            areaStyle: chartType === 'line' ? {
-                color: {
-                    type: 'linear',
-                    x: 0, y: 0, x2: 0, y2: 1,
-                    colorStops: [
-                        { offset: 0, color: 'rgba(217, 119, 6, 0.25)' },
-                        { offset: 0.5, color: 'rgba(217, 119, 6, 0.1)' },
-                        { offset: 1, color: 'rgba(217, 119, 6, 0.02)' }
-                    ]
-                }
-            } : undefined
-        });
-    }
-    
-    if (PM2Chart) {
-        updateSeriesConfig(PM2Chart, {
-            name: 'PM2.5(μg/m³)',
-            lineStyle: chartType === 'line' ? {
-                width: 3,
-                color: {
-                    type: 'linear',
-                    x: 0, y: 0, x2: 1, y2: 0,
-                    colorStops: [
-                        { offset: 0, color: '#8b5cf6' },
-                        { offset: 0.5, color: '#7c3aed' },
-                        { offset: 1, color: '#6d28d9' }
-                    ]
-                },
-                shadowColor: 'rgba(124, 58, 237, 0.3)',
-                shadowBlur: 8,
-                shadowOffsetY: 3
-            } : undefined,
-            itemStyle: {
-                color: '#7c3aed',
-                borderColor: '#fff',
-                borderWidth: chartType === 'bar' ? 0 : 2
-            },
-            areaStyle: chartType === 'line' ? {
-                color: {
-                    type: 'linear',
-                    x: 0, y: 0, x2: 0, y2: 1,
-                    colorStops: [
-                        { offset: 0, color: 'rgba(124, 58, 237, 0.25)' },
-                        { offset: 0.5, color: 'rgba(124, 58, 237, 0.1)' },
-                        { offset: 1, color: 'rgba(124, 58, 237, 0.02)' }
-                    ]
-                }
-            } : undefined
-        });
-    }
-    
-    if (sunrayChart) {
-        updateSeriesConfig(sunrayChart, {
-            name: '紫外线强度',
-            lineStyle: chartType === 'line' ? {
-                width: 3,
-                color: {
-                    type: 'linear',
-                    x: 0, y: 0, x2: 1, y2: 0,
-                    colorStops: [
-                        { offset: 0, color: '#ec4899' },
-                        { offset: 0.5, color: '#db2777' },
-                        { offset: 1, color: '#be185d' }
-                    ]
-                },
-                shadowColor: 'rgba(219, 39, 119, 0.3)',
-                shadowBlur: 8,
-                shadowOffsetY: 3
-            } : undefined,
-            itemStyle: {
-                color: '#db2777',
-                borderColor: '#fff',
-                borderWidth: chartType === 'bar' ? 0 : 2
-            },
-            areaStyle: chartType === 'line' ? {
-                color: {
-                    type: 'linear',
-                    x: 0, y: 0, x2: 0, y2: 1,
-                    colorStops: [
-                        { offset: 0, color: 'rgba(219, 39, 119, 0.25)' },
-                        { offset: 0.5, color: 'rgba(219, 39, 119, 0.1)' },
-                        { offset: 1, color: 'rgba(219, 39, 119, 0.02)' }
-                    ]
-                }
-            } : undefined
-        });
-    }
-    
-    // 刷新图表显示
-    const maxLen = window.CHART_MAX_LEN || 20;
-    const startIndex = Math.max(0, window.chartData.time.length - maxLen);
-    const xData = window.chartData.time.slice(startIndex);
-    
-    if (tempChart) tempChart.setOption({ xAxis: { data: xData }, series: [{ data: window.chartData.temperature.slice(startIndex) }] });
-    if (humidityChart) humidityChart.setOption({ xAxis: { data: xData }, series: [{ data: window.chartData.humidity.slice(startIndex) }] });
-    if (windChart) windChart.setOption({ xAxis: { data: xData }, series: [{ data: window.chartData.windSpeed.slice(startIndex) }] });
-    if (lightChart) lightChart.setOption({ xAxis: { data: xData }, series: [{ data: window.chartData.illumination.slice(startIndex) }] });
-    if (PM2Chart) PM2Chart.setOption({ xAxis: { data: xData }, series: [{ data: window.chartData.PM2.slice(startIndex) }] });
-    if (sunrayChart) sunrayChart.setOption({ xAxis: { data: xData }, series: [{ data: window.chartData.sunray.slice(startIndex) }] });
+    combinedChart.setOption({
+        series: seriesUpdate
+    });
     
     console.log('✅ 图表设置已应用:', settings);
 };
 
 // 绑定页面控件事件（如果存在）
 document.addEventListener('DOMContentLoaded', () => {
-    const pauseBtn = document.getElementById('chartPauseBtn');
-    const histBtn = document.getElementById('chartHistoryBtn');
     const resetZoomBtn = document.getElementById('chartResetZoomBtn');
-    if (pauseBtn) pauseBtn.addEventListener('click', window.toggleChartRealtime);
-    if (histBtn) histBtn.addEventListener('click', window.toggleChartHistoryView);
     if (resetZoomBtn) resetZoomBtn.addEventListener('click', window.resetAllChartZoom);
     
     // 应用默认图表设置（折线图 + 平滑曲线）

@@ -25,7 +25,7 @@
         frame-ancestors 'none';
         upgrade-insecure-requests
     ">
-    <title>校园环境监测系统</title>
+    <title>校园环境信息</title>
     <!-- 预加载关键资源 -->
     <link rel="preconnect" href="https://cdn.jsdelivr.net">
     <link rel="stylesheet" href="css/style.css">
@@ -81,7 +81,7 @@
                 
                 <div class="temp-main-display">
                     <div class="temp-value-wrapper">
-                        <div class="temp-value" id="temperature">0</div>
+                        <div class="temp-value" id="temperature">--</div>
                         <span class="temp-unit">℃</span>
                     </div>
                     <div class="temp-status">
@@ -123,7 +123,7 @@
                 
                 <div class="card-main-display">
                     <div class="card-value-wrapper">
-                        <div class="card-value" id="humidity">0</div>
+                        <div class="card-value" id="humidity">--</div>
                         <span class="card-unit">%</span>
                     </div>
                     <div class="card-status">
@@ -165,7 +165,7 @@
                 
                 <div class="card-main-display">
                     <div class="card-value-wrapper">
-                        <div class="card-value" id="windSpeed">0</div>
+                        <div class="card-value" id="windSpeed">--</div>
                         <span class="card-unit">m/s</span>
                     </div>
                     <div class="card-status">
@@ -208,7 +208,7 @@
                 
                 <div class="card-main-display">
                     <div class="card-value-wrapper">
-                        <div class="card-value" id="illumination">0</div>
+                        <div class="card-value" id="illumination">--</div>
                         <span class="card-unit">lux</span>
                     </div>
                     <div class="card-status">
@@ -252,7 +252,7 @@
 
                 <div class="card-main-display">
                     <div class="card-value-wrapper">
-                        <div class="card-value" id="PM2">0</div>
+                        <div class="card-value" id="PM2">--</div>
                         <span class="card-unit PM2unit">μg/m³</span>
                     </div>
                     <div class="card-status">
@@ -297,7 +297,7 @@
 
                 <div class="card-main-display">
                     <div class="card-value-wrapper">
-                        <div class="card-value" id="sunray">0</div>
+                        <div class="card-value" id="sunray">--</div>
                         <span class="card-unit">UVI</span>
                     </div>
                     <div class="card-status">
@@ -361,22 +361,55 @@
         </main>
         
         <!-- 图表区域 -->
-        <section class="chart-text" aria-label="图表标题">
-            <h2>数据趋势图</h2>
-            <div class="chart-controls" id="chartControls" aria-hidden="false">
-                <button type="button" id="chartPauseBtn" class="btn" aria-pressed="false">暂停</button>
-                <button type="button" id="chartHistoryBtn" class="btn" aria-pressed="false">历史视图</button>
-                <button type="button" id="chartResetZoomBtn" class="btn" aria-pressed="false">重置缩放</button>
+        <section class="chart-legend-section" aria-label="数据选择">
+            <div class="chart-legend-container">
+                <button class="legend-item" data-series="temperature">
+                    <span class="legend-marker" style="background-color: #ef4444;"></span>
+                    <span class="legend-content">
+                        <span class="legend-text">温度</span>
+                        <span class="legend-range">-10 ~ 36°C</span>
+                    </span>
+                </button>
+                <button class="legend-item" data-series="humidity">
+                    <span class="legend-marker" style="background-color: #0891b2;"></span>
+                    <span class="legend-content">
+                        <span class="legend-text">湿度</span>
+                        <span class="legend-range">0 ~ 100%</span>
+                    </span>
+                </button>
+                <button class="legend-item" data-series="windSpeed">
+                    <span class="legend-marker" style="background-color: #8b5cf6;"></span>
+                    <span class="legend-content">
+                        <span class="legend-text">风速</span>
+                        <span class="legend-range">0 ~ 20 m/s</span>
+                    </span>
+                </button>
+                <button class="legend-item" data-series="illumination">
+                    <span class="legend-marker" style="background-color: #f59e0b;"></span>
+                    <span class="legend-content">
+                        <span class="legend-text">光照</span>
+                        <span class="legend-range">0 ~ 1000 lux</span>
+                    </span>
+                </button>
+                <button class="legend-item" data-series="PM2">
+                    <span class="legend-marker" style="background-color: #10b981;"></span>
+                    <span class="legend-content">
+                        <span class="legend-text">PM2.5</span>
+                        <span class="legend-range">0 ~ 150 μg/m³</span>
+                    </span>
+                </button>
+                <button class="legend-item" data-series="sunray">
+                    <span class="legend-marker" style="background-color: #3b82f6;"></span>
+                    <span class="legend-content">
+                        <span class="legend-text">紫外线</span>
+                        <span class="legend-range">0 ~ 10 UVI</span>
+                    </span>
+                </button>
             </div>
         </section>
 
         <section class="charts-container" aria-label="数据图表区域">
-            <figure class="chart-container" id="temp-chart" role="img" aria-label="温度趋势图表"></figure>
-            <figure class="chart-container" id="humidity-chart" role="img" aria-label="湿度趋势图表"></figure>
-            <figure class="chart-container" id="wind-chart" role="img" aria-label="风速趋势图表"></figure>
-            <figure class="chart-container" id="light-chart" role="img" aria-label="光照趋势图表"></figure>
-            <figure class="chart-container" id="pm25-chart" role="img" aria-label="PM2.5趋势图表"></figure>
-            <figure class="chart-container" id="sunray-chart" role="img" aria-label="紫外线强度趋势图表"></figure>
+            <figure class="chart-container combined-chart" id="combined-chart" role="img" aria-label="综合数据趋势图表"></figure>
         </section>
     </div>
 
@@ -491,17 +524,6 @@
             </div>
             <div class="modal-body">
                 <form id="chartSettingsForm">
-                    <!-- 图表类型 -->
-                    <div class="settings-row">
-                        <label class="settings-label">图表类型</label>
-                        <div class="settings-control">
-                            <select id="chartTypeSelect" class="custom-select enhanced-select" aria-label="选择图表类型">
-                                <option value="line" selected data-icon="📊">📊 折线图</option>
-                                <option value="bar" data-icon="📊">📊 柱状图</option>
-                            </select>
-                        </div>
-                    </div>
-
                     <!-- 平滑曲线开关 -->
                     <div class="settings-row">
                         <label class="settings-label">平滑曲线</label>
@@ -510,6 +532,14 @@
                                 <input type="checkbox" id="chartSmoothToggle" checked aria-label="启用平滑曲线">
                                 <span class="toggle-slider"></span>
                             </label>
+                        </div>
+                    </div>
+
+                    <!-- 重置缩放 -->
+                    <div class="settings-row">
+                        <label class="settings-label">缩放控制</label>
+                        <div class="settings-control">
+                            <button type="button" id="chartResetZoomBtn" class="btn" aria-pressed="false">重置缩放</button>
                         </div>
                     </div>
                 </form>
@@ -569,7 +599,7 @@
                 <div class="ai-avatar">🤖</div>
                 <div class="ai-message-content">
                     <p>👋 你好！我是AI环境分析助手。</p>
-                    <p>我可以帮你分析当前环境数据，提供专业建议。</p>
+                    <p>我已读取当前环境数据，可以为你分析提供专业建议。</p>
                     <div class="ai-quick-actions">
                         <button class="ai-quick-btn" data-action="analyze">📊 分析当前环境</button>
                         <button class="ai-quick-btn" data-action="comfort">🌡️ 舒适度评估</button>
@@ -658,6 +688,7 @@
     <script src="js/mqtt-config.js"></script>
     <script src="js/mqtt-client.js"></script>
     <script src="js/chart-utils.js"></script>
+    <script src="js/chart-legend.js"></script>
     <script src="js/menu-utils.js"></script>
     <script src="js/main-utils.js"></script>
     <script src="js/ai-assistant.js"></script>
