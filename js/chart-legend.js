@@ -37,3 +37,17 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }, 600);
 });
+
+// 刷新按钮事件绑定
+document.addEventListener('DOMContentLoaded', () => {
+    const refreshBtn = document.getElementById('chartRefreshBtn');
+    if (refreshBtn) {
+        refreshBtn.addEventListener('click', handleChartRefresh);
+    }
+});
+
+// 刷新函数（预留）
+function handleChartRefresh() {
+    console.log('刷新按钮被点击，逻辑处理待实现');
+    // TODO: 在这里添加刷新逻辑
+}

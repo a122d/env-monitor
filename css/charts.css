@@ -4,7 +4,14 @@
     animation: slideInUp 0.5s ease 0.3s backwards;
 }
 
+.chart-legend-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
 .chart-legend-container {
+    flex: 1;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -75,7 +82,52 @@
     white-space: nowrap;
 }
 
+/* 刷新按钮 */
+.chart-refresh-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    color: #ffffff;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
+    flex-shrink: 0;
+}
+
+.chart-refresh-btn:hover {
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 6px 20px rgba(59, 130, 246, 0.35);
+}
+
+.chart-refresh-btn:active {
+    transform: translateY(0) scale(0.98);
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
+}
+
+.chart-refresh-btn svg {
+    transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.chart-refresh-btn:hover svg {
+    transform: rotate(180deg);
+}
+
+.chart-refresh-btn:active svg {
+    transform: rotate(360deg);
+}
+
 @media (max-width: 767px) {
+    .chart-legend-wrapper {
+        flex-direction: column;
+        gap: 8px;
+    }
+    
     .chart-legend-container {
         gap: 12px;
         padding: 12px;
@@ -94,6 +146,11 @@
     
     .legend-range {
         font-size: 10px;
+    }
+    
+    .chart-refresh-btn {
+        width: 100%;
+        height: 44px;
     }
 }
 

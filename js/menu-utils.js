@@ -1,5 +1,55 @@
 // 菜单交互核心逻辑
 
+// CSV导出工具函数
+function exportDataToCSV() {
+    try {
+        const data = window.chartData;
+        if (!data || !data.time || data.time.length === 0) {
+            ToastAlert.show('暂无数据可导出');
+            return;
+        }
+
+        // 构建CSV内容
+        const headers = ['时间', '温度(°C)', '湿度(%)', '风速(m/s)', '光照(lux)', 'PM2.5(μg/m³)', '紫外线强度'];
+        let csvContent = headers.join(',') + '\n';
+
+        // 添加数据行
+        for (let i = 0; i < data.time.length; i++) {
+            const row = [
+                data.time[i] || '',
+                data.temperature[i] !== undefined ? data.temperature[i] : '',
+                data.humidity[i] !== undefined ? data.humidity[i] : '',
+                data.windSpeed[i] !== undefined ? data.windSpeed[i] : '',
+                data.illumination[i] !== undefined ? data.illumination[i] : '',
+                data.PM2[i] !== undefined ? data.PM2[i] : '',
+                data.sunray[i] !== undefined ? data.sunray[i] : ''
+            ];
+            csvContent += row.join(',') + '\n';
+        }
+
+        // 创建Blob并触发下载
+        const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        
+        // 生成文件名（包含当前时间）
+        const now = new Date();
+        const filename = `环境监测数据_${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}_${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}.csv`;
+        
+        link.href = url;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+
+        ToastAlert.show('数据导出成功');
+    } catch (error) {
+        console.error('导出CSV失败:', error);
+        ToastAlert.show('导出失败，请稍后重试');
+    }
+}
+
 // 滚动穿透控制工具
 const ScrollLock = {
     scrollTop: 0,
@@ -207,7 +257,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     dropdownMenu.classList.remove('show');
                     break;
                 case 'data-export':
-                    ToastAlert.show('即将导出监控数据为Excel（暂定）');
+                    exportDataToCSV();
+                    // 关闭汉堡菜单
+                    hamburgerMenu.classList.remove('active');
+                    dropdownMenu.classList.remove('show');
                     break;
                 case 'about':
                     // 打开关于系统弹窗
