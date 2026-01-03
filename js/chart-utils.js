@@ -13,6 +13,20 @@ let combinedChart;
 // 全局控制
 window.CHART_MAX_LEN = 20; // 实时视图默认保留点数
 
+// 显示图表加载错误
+function showChartLoadingError(message) {
+    const chartDom = document.getElementById('combined-chart');
+    if (chartDom) {
+        chartDom.innerHTML = `
+            <div style="display: flex; align-items: center; justify-content: center; height: 100%; color: #ef4444; flex-direction: column; gap: 10px;">
+                <div style="font-size: 48px;">⚠️</div>
+                <div style="font-size: 16px; font-weight: 500;">${message}</div>
+                <button onclick="location.reload()" style="padding: 8px 16px; background: #2563eb; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px;">刷新页面</button>
+            </div>
+        `;
+    }
+}
+
 // 获取响应式配置
 function getResponsiveConfig() {
     const width = window.innerWidth;
@@ -41,14 +55,42 @@ function getResponsiveConfig() {
     };
 }
 
+// ECharts加载超时计数
+let echartsLoadAttempts = 0;
+const MAX_LOAD_ATTEMPTS = 50; // 最多尝试10秒 (50 * 200ms)
+
 // 初始化合并图表
 window.initCharts = function() {
+    const loadingIndicator = document.getElementById('chartLoadingIndicator');
+    
     if (typeof echarts === 'undefined') {
-        console.error('❌ ECharts 库未加载！');
+        echartsLoadAttempts++;
+        if (echartsLoadAttempts >= MAX_LOAD_ATTEMPTS) {
+            console.error('❌ ECharts 库加载超时！请检查网络连接');
+            showChartLoadingError('图表库加载失败，请刷新页面重试');
+            return;
+        }
+        
+        // 更新加载文本
+        if (loadingIndicator) {
+            const loadingText = loadingIndicator.querySelector('.chart-loading-text');
+            if (loadingText) {
+                loadingText.textContent = `正在加载图表库... (${echartsLoadAttempts}/${MAX_LOAD_ATTEMPTS})`;
+            }
+        }
+        
+        console.warn(`⏳ 等待 ECharts 加载... (${echartsLoadAttempts}/${MAX_LOAD_ATTEMPTS})`);
         setTimeout(window.initCharts, 200);
         return;
     }
 
+    console.log('✅ ECharts 库已加载');
+    
+    // 隐藏加载指示器
+    if (loadingIndicator) {
+        loadingIndicator.classList.add('hidden');
+    }
+    
     const chartDom = document.getElementById('combined-chart');
 
     if (!chartDom) {

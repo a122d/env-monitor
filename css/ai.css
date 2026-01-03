@@ -42,8 +42,9 @@
     box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4),
                 0 4px 10px rgba(0, 0, 0, 0.1);
     transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    z-index: 100;
+    z-index: 10001;
     border: 3px solid rgba(255, 255, 255, 0.3);
+    pointer-events: auto;
 }
 
 .ai-assistant-btn:hover {

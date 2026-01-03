@@ -28,6 +28,8 @@ function isMQTTConnected() {
 
 // 初始化
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('🚀 AI助手模块开始初始化');
+    
     // 获取DOM元素
     aiSidebar = document.getElementById('aiSidebar');
     aiChatContainer = document.getElementById('aiChatContainer');
@@ -37,6 +39,15 @@ document.addEventListener('DOMContentLoaded', () => {
     aiApiKey = document.getElementById('aiApiKey');
     aiModel = document.getElementById('aiModel');
     aiModalApiBtn = document.getElementById('aiModalApiBtn');
+    
+    console.log('📋 DOM元素检查：', {
+        aiSidebar: !!aiSidebar,
+        aiChatContainer: !!aiChatContainer,
+        aiInput: !!aiInput,
+        aiSendBtn: !!aiSendBtn,
+        aiConfigModal: !!aiConfigModal,
+        aiBtn: !!document.getElementById('aiAssistantBtn')
+    });
 
     // 加载保存的配置
     loadAIConfig();
@@ -49,6 +60,8 @@ document.addEventListener('DOMContentLoaded', () => {
         clearInterval(aiDataDisplayInterval);
     }
     aiDataDisplayInterval = setInterval(updateAIDataDisplay, 2000);
+    
+    console.log('✅ AI助手模块初始化完成');
 });
 
 // 加载AI配置
@@ -63,6 +76,7 @@ function loadAIConfig() {
             console.error('❌ 加载AI配置失败：', e);
             localStorage.removeItem('aiConfig');
         }
+    }
     // 同步到输入框
     if (aiApiKey) aiApiKey.value = aiConfig.apiKey;
     if (aiModel) aiModel.value = aiConfig.model;
@@ -82,7 +96,20 @@ function bindAIEvents() {
     const aiBtn = document.getElementById('aiAssistantBtn');
     const closeBtn = document.getElementById('aiCloseBtn');
     
-    aiBtn?.addEventListener('click', () => {
+    if (!aiBtn) {
+        console.error('❌ AI助手按钮未找到');
+        return;
+    }
+    
+    if (!aiSidebar) {
+        console.error('❌ AI侧边栏未找到');
+        return;
+    }
+    
+    aiBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        console.log('✅ AI助手按钮被点击');
         aiSidebar.classList.add('show');
         // AI侧边栏不锁定背景滚动，允许用户查看左侧内容
         updateAIDataDisplay();
