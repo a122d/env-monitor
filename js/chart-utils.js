@@ -325,14 +325,11 @@ window.initCharts = function() {
 
     combinedChart.setOption(option);
 
-    // 响应式调整
     window.addEventListener('resize', () => {
         if (combinedChart) {
             combinedChart.resize();
         }
     });
-
-    console.log('✅ 图表初始化完成');
 };
 
 // 图表更新队列和RAF优化
@@ -476,15 +473,6 @@ window.clearChartData = function() {
             ]
         });
     }
-
-    if (typeof window.updateDataValue === 'function') {
-        window.updateDataValue('temperature', 0);
-        window.updateDataValue('humidity', 0);
-        window.updateDataValue('windSpeed', 0);
-        window.updateDataValue('illumination', 0);
-        window.updateDataValue('PM2', 0);
-        window.updateDataValue('sunray', 0);
-    }
 };
 
 // 重置所有图表的缩放
@@ -538,8 +526,6 @@ window.applyChartSettings = function(settings) {
     combinedChart.setOption({
         series: seriesUpdate
     });
-    
-    console.log('✅ 图表设置已应用:', settings);
 };
 
 // 绑定页面控件事件（如果存在）

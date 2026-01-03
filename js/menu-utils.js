@@ -46,6 +46,53 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // 历史数据时间设置弹窗交互绑定
+    const dataTimeModal = document.getElementById('dataTimeModal');
+    if (dataTimeModal) {
+        const dataTimeClose = document.getElementById('dataTimeClose');
+        const dataTimeSaveBtn = document.getElementById('dataTimeSaveBtn');
+        const dataTimeRange = document.getElementById('dataTimeRange');
+
+        function loadDataTimeSettings() {
+            try {
+                const saved = localStorage.getItem('dataTimeRange');
+                if (saved && dataTimeRange) {
+                    dataTimeRange.value = saved;
+                } else if (dataTimeRange) {
+                    dataTimeRange.value = '6hours';
+                }
+            } catch (e) { console.warn('加载数据时间设置失败', e); }
+        }
+
+        if (dataTimeClose) dataTimeClose.addEventListener('click', () => { 
+            dataTimeModal.classList.remove('show'); 
+            ScrollLock.unlock(); 
+        });
+
+        if (dataTimeSaveBtn) dataTimeSaveBtn.addEventListener('click', () => {
+            const selectedRange = dataTimeRange ? dataTimeRange.value : '6hours';
+            try { 
+                localStorage.setItem('dataTimeRange', selectedRange); 
+                ToastAlert.show('数据时间范围已保存');
+            } catch (e) { 
+                console.warn('保存数据时间设置失败', e); 
+            }
+            dataTimeModal.classList.remove('show');
+            ScrollLock.unlock();
+        });
+
+        // 点击遮罩关闭
+        const dataTimeContent = dataTimeModal.querySelector('.modal-content');
+        dataTimeModal.addEventListener('click', () => { 
+            dataTimeModal.classList.remove('show'); 
+            ScrollLock.unlock(); 
+        });
+        if (dataTimeContent) dataTimeContent.addEventListener('click', (e) => e.stopPropagation());
+
+        // 初始化时填充表单
+        loadDataTimeSettings();
+    }
+
     // 图表设置弹窗交互绑定
     const chartSettingsModal = document.getElementById('chartSettingsModal');
     if (chartSettingsModal) {
@@ -133,11 +180,18 @@ document.addEventListener('DOMContentLoaded', () => {
                     hamburgerMenu.classList.remove('active');
                     dropdownMenu.classList.remove('show');
                     break;
-                case 'data-clear':
-                    if (confirm('确定要清空所有历史监控数据吗？')) {
-                        console.log('清空历史数据');
-                        clearChartData(); // 预留函数
+                case 'data-time':
+                    // 打开历史数据时间设置弹窗
+                    const dataTimeModal = document.getElementById('dataTimeModal');
+                    if (dataTimeModal) {
+                        dataTimeModal.classList.add('show');
+                        ScrollLock.lock();
+                    } else {
+                        ToastAlert.show('历史数据时间设置尚未就绪');
                     }
+                    // 关闭汉堡菜单
+                    hamburgerMenu.classList.remove('active');
+                    dropdownMenu.classList.remove('show');
                     break;
                 case 'chart-setting':
                     // 打开图表显示设置弹窗

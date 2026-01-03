@@ -829,14 +829,7 @@
     font-size: 14px;
 }
 
-/* 卡片详细信息 */
-.card-details {
-    padding: 16px;
-    background: rgba(255, 255, 255, 0.6);
-    border-radius: 12px;
-    backdrop-filter: blur(10px);
-    animation: slideInUp 0.5s ease 0.1s backwards;
-}
+
 
 /* 湿度卡片颜色 */
 #humidityCard {
@@ -1139,11 +1132,4 @@
     border-radius: 4px;
 }
 
-.pressure-card .card-header h3,
-.pressure-card .card-value {
-    color: #6d4c41;
-}
-.altitude-card .card-header h3,
-.altitude-card .card-value {
-    color: #388e3c;
-}
+

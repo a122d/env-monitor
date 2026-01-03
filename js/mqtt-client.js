@@ -138,18 +138,7 @@ let mqttConfig = (() => {
     };
 })();
 
-// 确保 parseMqttUrl 函数可用（备用定义）
-if (!window.parseMqttUrl) {
-    window.parseMqttUrl = function(url) {
-        const parsed = new URL(url);
-        return {
-            host: parsed.hostname,
-            port: parseInt(parsed.port),
-            path: parsed.pathname || '/mqtt',
-            useSSL: parsed.protocol === 'wss:'
-        };
-    };
-}
+
 
 // 生成唯一ClientId（防重复）
 function generateUniqueClientId() {
@@ -697,7 +686,7 @@ function updatePM25Card(pm25Value) {
         progressFill.style.width = percentage + '%';
     }
     // 更新趋势
-    updateCardTrend(card, pm25Stats, '.card-trend', true);
+    updateCardTrend(card, pm25Stats, '.card-trend');
     // 更新详细信息
     updatePM25Details();
 }
@@ -788,7 +777,7 @@ function updateAltitudeCard(altitudeValue) {
 }
 
 // 通用卡片趋势更新函数
-function updateCardTrend(card, stats, trendSelector, invert = false) {
+function updateCardTrend(card, stats, trendSelector) {
     const history = stats.history;
     if (history.length < 2) return;
     
@@ -797,13 +786,8 @@ function updateCardTrend(card, stats, trendSelector, invert = false) {
     const change = current - previous;
     
     let trend = '→';
-    if (invert) {
-        if (change < 0.1) trend = '↑';
-        if (change > -0.1) trend = '↓';
-    } else {
-        if (change > 0.1) trend = '↑';
-        if (change < -0.1) trend = '↓';
-    }
+    if (change > 0.1) trend = '↑';
+    if (change < -0.1) trend = '↓';
     
     const trendEl = card.querySelector(trendSelector);
     if (trendEl) {
@@ -1096,9 +1080,6 @@ window.MQTTApp.disconnect = function() {
 
 // 🔐 使用用户凭证登录MQTT（用户登录界面调用）
 window.connectMQTTWithCredentials = function(credentials) {
-    console.log('🔐 用户登录，更新MQTT凭证...');
-    
-    // 验证传入参数
     if (!credentials || !credentials.username || !credentials.password) {
         console.error('❌ 无效的登录凭证');
         if (window.onMQTTConnectFailure) {
@@ -1107,21 +1088,9 @@ window.connectMQTTWithCredentials = function(credentials) {
         return;
     }
     
-    // 更新MQTT配置中的凭证
     mqttConfig.username = credentials.username;
     mqttConfig.password = credentials.password;
     
-    console.log('✅ MQTT凭证已更新');
-    console.log('📋 新凭证信息:', {
-        username: mqttConfig.username,
-        password: '***',
-        host: mqttConfig.host,
-        topic: mqttConfig.topic,
-        clientId: mqttConfig.clientId
-    });
-    
-    // 使用更新后的配置进行连接
-    console.log('🚀 开始连接到MQTT服务器...');
     window.MQTTApp.init(mqttConfig);
 };
 

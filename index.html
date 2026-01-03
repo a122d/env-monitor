@@ -54,9 +54,9 @@
                 </div>
                 <ul class="dropdown-menu" id="dropdownMenu">
                     <li class="dropdown-item" data-action="mqtt-config">用户登录</li>
-                    <li class="dropdown-item" data-action="data-clear">清空历史数据</li>
                     <li class="dropdown-divider"></li>
                     <li class="dropdown-item" data-action="chart-setting">图表显示设置</li>
+                    <li class="dropdown-item" data-action="data-time">设置历史时间</li>
                     <li class="dropdown-item" data-action="data-export">导出监控数据</li>
                     <li class="dropdown-divider"></li>
                     <li class="dropdown-item" data-action="about">关于系统</li>
@@ -65,7 +65,6 @@
             <div class="title-wrapper">
                 <h1 class="main-title">环境数据</h1>
             </div>
-            <!-- 主题切换已移除 -->
             <div class="status disconnected" id="mqtt-status">
                 <span class="status-dot"></span>
                 <span class="status-text">未连接</span>
@@ -546,6 +545,34 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-save" id="chartSettingsSaveBtn" title="保存并立即应用设置">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 历史数据时间设置弹窗 -->
+    <div class="chart-settings-modal" id="dataTimeModal">
+        <div class="modal-mask"></div>
+        <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="dataTimeTitle">
+            <div class="modal-header">
+                <h3 class="modal-title" id="dataTimeTitle">历史数据时间</h3>
+                <button type="button" class="modal-close" id="dataTimeClose" aria-label="关闭对话框">×</button>
+            </div>
+            <div class="modal-body">
+                <form id="dataTimeForm">
+                    <div class="settings-row">
+                        <label class="settings-label">数据时间范围</label>
+                        <div class="settings-control">
+                            <select id="dataTimeRange" class="enhanced-select">
+                                <option value="6hours" selected>6小时内</option>
+                                <option value="1day">一天内</option>
+                                <option value="1week">一周内</option>
+                            </select>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-save" id="dataTimeSaveBtn" title="保存设置">保存</button>
             </div>
         </div>
     </div>

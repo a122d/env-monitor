@@ -63,20 +63,17 @@ function loadAIConfig() {
             console.error('❌ 加载AI配置失败：', e);
             localStorage.removeItem('aiConfig');
         }
-    }
     // 同步到输入框
     if (aiApiKey) aiApiKey.value = aiConfig.apiKey;
     if (aiModel) aiModel.value = aiConfig.model;
 }
 
-// 保存AI配置
 function saveAIConfig() {
     aiConfig = {
         apiKey: aiApiKey.value,
         model: aiModel.value
     };
     localStorage.setItem('aiConfig', JSON.stringify(aiConfig));
-    // 注：不在这里更新按键状态，避免不必要的 DOM 变化导致闪烁
 }
 
 // 绑定事件
@@ -101,7 +98,6 @@ function bindAIEvents() {
     
     settingsBtn?.addEventListener('click', () => {
         aiConfigModal.classList.add('show');
-        // 打开时不更新状态，避免不必要的 DOM 变化导致闪烁
     });
     
     configClose?.addEventListener('click', () => {
