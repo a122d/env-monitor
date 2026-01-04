@@ -46,7 +46,7 @@ function getResponsiveConfig() {
         grid: {
             left: isMobile ? '4%' : '3%',
             right: isMobile ? '8%' : '8%',
-            bottom: isMobile ? '12%' : '10%',
+            bottom: isMobile ? '16%' : '10%',
             top: isMobile ? '24%' : '18%'
         },
         symbolSize: isMobile ? 4 : 6,
@@ -243,7 +243,7 @@ window.initCharts = function() {
                 show: true,
                 start: 0,
                 end: 100,
-                bottom: config.isMobile ? '0%' : '2%',
+                bottom: config.isMobile ? '2%' : '2%',
                 height: config.isMobile ? 25 : 30,
                 showDetail: true,
                 showDataShadow: true,
