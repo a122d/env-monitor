@@ -53,7 +53,7 @@
                     <span class="hamburger-line"></span>
                 </div>
                 <ul class="dropdown-menu" id="dropdownMenu">
-                    <li class="dropdown-item" data-action="mqtt-config">用户登录</li>
+                    <li class="dropdown-item" data-action="user-center">用户中心</li>
                     <li class="dropdown-divider"></li>
                     <li class="dropdown-item" data-action="chart-setting">图表显示设置</li>
                     <li class="dropdown-item" data-action="data-time">设置历史时间</li>
@@ -65,9 +65,12 @@
             <div class="title-wrapper">
                 <h1 class="main-title">环境数据</h1>
             </div>
-            <div class="status disconnected" id="mqtt-status">
-                <span class="status-dot"></span>
-                <span class="status-text">未连接</span>
+            <div class="user-status-container">
+                <div class="combined-status" id="combined-status">
+                    <span class="status-dot"></span>
+                    <span class="status-text" id="status-text">未登录</span>
+                    <span class="user-name" id="user-name" style="display: none;"></span>
+                </div>
             </div>
         </div>
 
@@ -427,25 +430,109 @@
     <!-- 新增：用户登录弹窗 -->
     <div class="mqtt-config-modal" id="mqttConfigModal">
         <div class="modal-mask"></div>
-        <div class="modal-content" role="dialog" aria-modal="true">
-            <div class="modal-header">
-                <h3 class="modal-title">用户登录</h3>
-                <button type="button" class="modal-close" id="modalClose" aria-label="关闭">×</button>
+        <div class="modal-content login-card" role="dialog" aria-modal="true">
+            <button type="button" class="modal-close" id="modalClose" aria-label="关闭">×</button>
+            
+            <div class="login-header">
+                <div class="login-icon">
+                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        <path d="M5 20C5 16.134 8.134 13 12 13C15.866 13 19 16.134 19 20" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                </div>
+                <h2 class="login-title">用户登录</h2>
+                <p class="login-subtitle">登录以访问环境监测系统</p>
             </div>
-            <div class="modal-body">
-                <form id="mqttConfigForm">
+            
+            <div class="login-body">
+                <form id="mqttConfigForm" class="login-form" autocomplete="off">
                     <div class="form-group">
-                        <label for="mqttUsername">用户名</label>
-                        <input type="text" id="mqttUsername" placeholder="请输入用户名" required>
+                        <label for="mqttUsername" class="form-label">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                                <path d="M20 21V19C20 16.7909 18.2091 15 16 15H8C5.79086 15 4 16.7909 4 19V21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                <circle cx="12" cy="7" r="4" stroke="currentColor" stroke-width="2"/>
+                            </svg>
+                            用户名
+                        </label>
+                        <input type="text" id="mqttUsername" class="form-input" placeholder="请输入用户名" required autocomplete="off">
                     </div>
+                    
                     <div class="form-group">
-                        <label for="mqttPassword">密码</label>
-                        <input type="password" id="mqttPassword" placeholder="请输入密码" required>
+                        <label for="mqttPassword" class="form-label">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                                <rect x="5" y="11" width="14" height="10" rx="2" stroke="currentColor" stroke-width="2"/>
+                                <path d="M7 11V7C7 4.23858 9.23858 2 12 2C14.7614 2 17 4.23858 17 7V11" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                            </svg>
+                            密码
+                        </label>
+                        <div class="password-input-wrapper">
+                            <input type="password" id="mqttPassword" class="form-input" placeholder="请输入密码" required autocomplete="off">
+                            <button type="button" class="password-toggle" id="passwordToggle" aria-label="显示/隐藏密码">
+                                <svg class="eye-icon" width="20" height="20" viewBox="0 0 24 24" fill="none">
+                                    <path d="M2 12C2 12 5 5 12 5C19 5 22 12 22 12C22 12 19 19 12 19C5 19 2 12 2 12Z" stroke="currentColor" stroke-width="2"/>
+                                    <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/>
+                                </svg>
+                                <svg class="eye-off-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" style="display: none;">
+                                    <path d="M2 12C2 12 5 5 12 5C19 5 22 12 22 12C22 12 19 19 12 19C5 19 2 12 2 12Z" stroke="currentColor" stroke-width="2"/>
+                                    <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/>
+                                    <line x1="3" y1="3" x2="21" y2="21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                </svg>
+                            </button>
+                        </div>
                     </div>
+                    
+                    <button type="button" class="btn-login" id="applyConfigBtn">
+                        <span class="btn-text">登录系统</span>
+                        <svg class="btn-icon" width="20" height="20" viewBox="0 0 24 24" fill="none">
+                            <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
                 </form>
             </div>
+        </div>
+    </div>
+
+    <!-- 用户中心弹窗 -->
+    <div class="user-center-modal" id="userCenterModal">
+        <div class="modal-mask"></div>
+        <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="userCenterTitle">
+            <div class="modal-header">
+                <h3 class="modal-title" id="userCenterTitle">用户中心</h3>
+                <button type="button" class="modal-close" id="userCenterClose" aria-label="关闭对话框">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="user-info-section" id="userInfoSection" style="display: none;">
+                    <div class="settings-row user-info-row">
+                        <label class="settings-label">用户名</label>
+                        <div class="settings-value" id="userCenterUsername">--</div>
+                    </div>
+                    <div class="settings-row user-info-row">
+                        <label class="settings-label">用户角色</label>
+                        <div class="settings-value" id="userCenterRole">--</div>
+                    </div>
+                    <div class="settings-row user-info-row">
+                        <label class="settings-label">连接状态</label>
+                        <div class="settings-value" id="userCenterStatus">
+                            <span class="status-indicator"></span>
+                            <span class="status-text">已连接</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="user-login-prompt" id="userLoginPrompt">
+                    <div class="login-prompt-icon">🔐</div>
+                    <p class="login-prompt-text">您还未登录，请先登录系统</p>
+                </div>
+            </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-apply" id="applyConfigBtn">登录 MQTT</button>
+                <button type="button" class="btn btn-logout" id="logoutBtn" style="display: none;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                        <polyline points="16 17 21 12 16 7"/>
+                        <line x1="21" y1="12" x2="9" y2="12"/>
+                    </svg>
+                    退出登录
+                </button>
+                <button type="button" class="btn btn-login-prompt" id="loginPromptBtn" style="display: none;">立即登录</button>
             </div>
         </div>
     </div>

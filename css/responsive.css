@@ -74,6 +74,60 @@
         max-height: none;
         padding: 8px;
     }
+    
+    /* 用户状态容器移动端优化 */
+    .user-status-container {
+        left: 10px;
+    }
+    
+    .combined-status {
+        padding: 5px 10px;
+        gap: 6px;
+    }
+    
+    .combined-status .status-dot {
+        width: 10px;
+        height: 10px;
+    }
+    
+    .combined-status .user-name {
+        font-size: 12px;
+        max-width: 80px;
+    }
+    
+    .combined-status .status-text {
+        font-size: 12px;
+    }
+    
+    .mqtt-status {
+        padding: 5px 10px;
+        gap: 5px;
+    }
+    
+    .mqtt-status .status-dot {
+        width: 6px;
+        height: 6px;
+    }
+    
+    .mqtt-status .status-label {
+        font-size: 12px;
+    }
+    
+    .user-info {
+        padding: 5px 10px;
+        gap: 5px;
+    }
+    
+    .user-info .user-icon {
+        width: 14px;
+        height: 14px;
+    }
+    
+    .user-info .user-name {
+        font-size: 12px;
+        max-width: 60px;
+    }
+    
     .status-dot {
         width: 12px;
         height: 12px;

@@ -68,12 +68,129 @@ const ScrollLock = {
 // 导出供其他模块使用
 window.ScrollLock = ScrollLock;
 
+// 更新用户中心显示
+function updateUserCenterDisplay() {
+    const userInfoSection = document.getElementById('userInfoSection');
+    const userLoginPrompt = document.getElementById('userLoginPrompt');
+    const userCenterUsername = document.getElementById('userCenterUsername');
+    const userCenterRole = document.getElementById('userCenterRole');
+    const logoutBtn = document.getElementById('logoutBtn');
+    const loginPromptBtn = document.getElementById('loginPromptBtn');
+    
+    if (!userInfoSection || !userLoginPrompt) return;
+    
+    // 检查用户是否已登录
+    if (window.currentUser && window.currentUser.username) {
+        // 已登录，显示用户信息
+        userInfoSection.style.display = 'block';
+        userLoginPrompt.style.display = 'none';
+        if (logoutBtn) logoutBtn.style.display = 'flex';
+        if (loginPromptBtn) loginPromptBtn.style.display = 'none';
+        
+        if (userCenterUsername) {
+            userCenterUsername.textContent = window.currentUser.username;
+        }
+        
+        if (userCenterRole) {
+            const roleText = window.currentUser.role === window.USER_ROLES.ADMIN 
+                ? '👑 管理员 ' + window.currentUser.username 
+                : '👤 用户 ' + window.currentUser.username;
+            userCenterRole.textContent = roleText;
+        }
+    } else {
+        // 未登录，显示登录提示
+        userInfoSection.style.display = 'none';
+        userLoginPrompt.style.display = 'flex';
+        if (logoutBtn) logoutBtn.style.display = 'none';
+        if (loginPromptBtn) loginPromptBtn.style.display = 'inline-flex';
+    }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     const hamburgerMenu = document.getElementById('hamburgerMenu');
     const dropdownMenu = document.getElementById('dropdownMenu');
     const mqttConfigModal = document.getElementById('mqttConfigModal');
     const aboutModal = document.getElementById('aboutModal');
     const aboutModalClose = document.getElementById('aboutModalClose');
+    const userCenterModal = document.getElementById('userCenterModal');
+    const userCenterClose = document.getElementById('userCenterClose');
+    const loginPromptBtn = document.getElementById('loginPromptBtn');
+    const logoutBtn = document.getElementById('logoutBtn');
+
+    // 用户中心关闭按钮
+    if (userCenterClose) {
+        userCenterClose.addEventListener('click', () => {
+            userCenterModal.classList.remove('show');
+            ScrollLock.unlock();
+        });
+    }
+
+    // 用户中心登录提示按钮
+    if (loginPromptBtn) {
+        loginPromptBtn.addEventListener('click', () => {
+            // 关闭用户中心弹窗
+            userCenterModal.classList.remove('show');
+            // 打开登录弹窗
+            if (window.openMqttConfig && typeof window.openMqttConfig === 'function') {
+                window.openMqttConfig();
+            }
+        });
+    }
+
+    // 退出登录按钮
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', () => {
+            // 使用自定义确认弹窗而非浏览器默认confirm
+            const confirmLogout = document.createElement('div');
+            confirmLogout.className = 'toast-alert-modal show';
+            confirmLogout.innerHTML = `
+                <div class="modal-mask"></div>
+                <div class="toast-alert-content">
+                    <div class="toast-alert-body">
+                        <p style="margin: 0; font-size: 16px; line-height: 1.6;">
+                            确定要退出登录吗？
+                        </p>
+                    </div>
+                    <div class="toast-alert-footer" style="display: flex; gap: 12px; justify-content: center;">
+                        <button type="button" class="btn btn-test" style="min-width: 100px;">取消</button>
+                        <button type="button" class="btn btn-save" style="min-width: 100px;">确定退出</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(confirmLogout);
+            
+            const cancelBtn = confirmLogout.querySelector('.btn-test');
+            const confirmBtn = confirmLogout.querySelector('.btn-save');
+            
+            cancelBtn.addEventListener('click', () => {
+                confirmLogout.remove();
+            });
+            
+            confirmBtn.addEventListener('click', () => {
+                confirmLogout.remove();
+                location.reload();
+            });
+            
+            // 点击遮罩关闭
+            confirmLogout.querySelector('.modal-mask').addEventListener('click', () => {
+                confirmLogout.remove();
+            });
+        });
+    }
+
+    // 点击用户中心弹窗背景关闭
+    if (userCenterModal) {
+        userCenterModal.addEventListener('click', () => {
+            userCenterModal.classList.remove('show');
+            ScrollLock.unlock();
+        });
+        const userCenterContent = userCenterModal.querySelector('.modal-content');
+        if (userCenterContent) {
+            userCenterContent.addEventListener('click', (e) => {
+                e.stopPropagation();
+            });
+        }
+    }
 
     // 点击汉堡菜单切换显隐
     hamburgerMenu.addEventListener('click', (e) => {
@@ -216,6 +333,21 @@ document.addEventListener('DOMContentLoaded', () => {
             const action = targetItem.dataset.action;
             
             switch(action) {
+                case 'user-center':
+                    // 打开用户中心弹窗
+                    const userCenterModal = document.getElementById('userCenterModal');
+                    if (userCenterModal) {
+                        // 更新用户信息显示
+                        updateUserCenterDisplay();
+                        userCenterModal.classList.add('show');
+                        ScrollLock.lock();
+                    } else {
+                        ToastAlert.show('用户中心尚未就绪');
+                    }
+                    // 关闭汉堡菜单
+                    hamburgerMenu.classList.remove('active');
+                    dropdownMenu.classList.remove('show');
+                    break;
                 case 'mqtt-config':
                     // 检查是否已连接，如果已连接则不允许重新登录
                     if (window.mqttClient && window.mqttClient.isConnected && window.mqttClient.isConnected()) {

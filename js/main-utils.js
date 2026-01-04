@@ -33,23 +33,10 @@ const DeviceDetector = {
     isIOS: () => /iPhone|iPad|iPod/i.test(navigator.userAgent)
 };
 
-// 核心：动态计算状态点位置（左侧与菜单对称）
+// 核心：动态计算状态点位置（使用flex布局）
 function setStatusDotPosition() {
-    const status = document.getElementById('mqtt-status');
-    const titleContainer = document.getElementById('titleContainer');
-    
-    if (!status || !titleContainer) return;
-
-    const containerRect = titleContainer.getBoundingClientRect();
-    const dotMargin = getComputedStyle(document.documentElement).getPropertyValue('--dot-margin').trim();
-    
-    // 左侧：与菜单按钮对称（菜单在右侧位置，状态点在左侧）
-    const left = parseInt(dotMargin) || 15;
-    // 垂直：容器中心点
-    const top = (containerRect.height / 2);
-
-    status.style.left = `${left}px`;
-    status.style.top = `${top}px`;
+    const status = document.getElementById('combined-status') || document.getElementById('mqtt-status');
+    if (!status) return;
     status.style.opacity = 1;
 }
 
@@ -58,9 +45,8 @@ let lastMQTTStatus = null;
 
 // MQTT状态更新逻辑 - 性能优化版
 function updateMQTTStatus(statusType) {
-    const statusElement = document.getElementById('mqtt-status');
-    const statusText = statusElement.querySelector('.status-text');
-    if (!statusElement || !statusText) return;
+    const statusElement = document.getElementById('combined-status') || document.getElementById('mqtt-status');
+    if (!statusElement) return;
     
     // 如果状态没有变化，跳过更新（避免重复动画）
     if (lastMQTTStatus === statusType) return;
@@ -77,16 +63,18 @@ function updateMQTTStatus(statusType) {
     
     switch(statusType) {
         case 'connecting':
-            statusText.textContent = "连接中...";
             statusElement.classList.add('connecting');
             break;
         case 'success':
-            statusText.textContent = "已连接";
             statusElement.classList.add('connected');
             break;
         case 'failed':
-            statusText.textContent = "已断开";
             statusElement.classList.add('failed', 'disconnected');
+            // MQTT断开时清空用户信息，显示"未登录"
+            window.currentUser = { username: null, role: null };
+            if (window.updateUserInfoDisplay) {
+                window.updateUserInfoDisplay();
+            }
             break;
     }
     setStatusDotPosition();
