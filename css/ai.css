@@ -29,7 +29,7 @@
 /* AI悬浮按钮 */
 .ai-assistant-btn {
     position: fixed;
-    bottom: 30px;
+    bottom: 100px;
     right: 30px;
     width: 60px;
     height: 60px;
@@ -45,6 +45,13 @@
     z-index: 10001;
     border: 3px solid rgba(255, 255, 255, 0.3);
     pointer-events: auto;
+}
+
+/* 侧边栏打开时隐藏AI按钮 */
+.ai-sidebar.show ~ .ai-assistant-btn {
+    opacity: 0;
+    pointer-events: none;
+    transform: scale(0.3);
 }
 
 .ai-assistant-btn:hover {
@@ -731,7 +738,7 @@
 /* 移动端适配 */
 @media (max-width: 767px) {
     .ai-assistant-btn {
-        bottom: max(20px, env(safe-area-inset-bottom));
+        bottom: max(120px, calc(env(safe-area-inset-bottom) + 110px));
         right: 16px;
         width: 52px;
         height: 52px;

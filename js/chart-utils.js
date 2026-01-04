@@ -243,12 +243,68 @@ window.initCharts = function() {
                 show: true,
                 start: 0,
                 end: 100,
-                bottom: config.isMobile ? '0%' : '2%'
-            },
-            {
-                type: 'inside',
-                start: 0,
-                end: 100
+                bottom: config.isMobile ? '0%' : '2%',
+                height: config.isMobile ? 25 : 30,
+                showDetail: true,
+                showDataShadow: true,
+                brushSelect: true,
+                borderColor: '#e2e8f0',
+                fillerColor: 'rgba(37, 99, 235, 0.15)',
+                handleIcon: 'path://M10.7,11.9H9.3c-4.9,0.3-8.8,4.4-8.8,9.4c0,5,3.9,9.1,8.8,9.4h1.3c4.9-0.3,8.8-4.4,8.8-9.4C19.5,16.3,15.6,12.2,10.7,11.9z M13.3,24.4H6.7v-1.2h6.6z M13.3,22H6.7v-1.2h6.6z M13.3,19.6H6.7v-1.2h6.6z',
+                handleSize: config.isMobile ? '120%' : '140%',
+                handleStyle: {
+                    color: '#2563eb',
+                    borderColor: '#fff',
+                    borderWidth: 2,
+                    shadowBlur: 8,
+                    shadowColor: 'rgba(37, 99, 235, 0.4)',
+                    shadowOffsetX: 0,
+                    shadowOffsetY: 2
+                },
+                moveHandleSize: 8,
+                moveHandleStyle: {
+                    color: '#3b82f6',
+                    opacity: 0.6
+                },
+                emphasis: {
+                    handleStyle: {
+                        color: '#1d4ed8',
+                        shadowBlur: 12,
+                        shadowColor: 'rgba(37, 99, 235, 0.6)'
+                    },
+                    moveHandleStyle: {
+                        color: '#2563eb',
+                        opacity: 0.8
+                    }
+                },
+                dataBackground: {
+                    lineStyle: {
+                        color: '#cbd5e1',
+                        width: 1
+                    },
+                    areaStyle: {
+                        color: 'rgba(203, 213, 225, 0.3)'
+                    }
+                },
+                selectedDataBackground: {
+                    lineStyle: {
+                        color: '#3b82f6',
+                        width: 1.5
+                    },
+                    areaStyle: {
+                        color: 'rgba(37, 99, 235, 0.2)'
+                    }
+                },
+                textStyle: {
+                    color: '#64748b',
+                    fontSize: config.isMobile ? 10 : 11
+                },
+                filterMode: 'filter',
+                labelFormatter: function(value, valueStr) {
+                    return valueStr;
+                },
+                zoomLock: false,
+                throttle: 100
             }
         ],
         series: [
@@ -367,11 +423,42 @@ window.initCharts = function() {
 
     combinedChart.setOption(option);
 
-    window.addEventListener('resize', () => {
-        if (combinedChart) {
-            combinedChart.resize();
+    // 窗口大小变化时自动调整图表尺寸
+    let resizeTimer = null;
+    let resizeRAF = null;
+    
+    const handleResize = () => {
+        // 取消之前的动画帧
+        if (resizeRAF) {
+            cancelAnimationFrame(resizeRAF);
         }
-    });
+        
+        // 使用RAF确保在浏览器下次重绘前调整
+        resizeRAF = requestAnimationFrame(() => {
+            if (combinedChart) {
+                combinedChart.resize();
+            }
+        });
+        
+        // 清除之前的定时器
+        if (resizeTimer) {
+            clearTimeout(resizeTimer);
+        }
+        
+        // 延迟再调整一次，确保完全响应
+        resizeTimer = setTimeout(() => {
+            if (combinedChart) {
+                combinedChart.resize();
+            }
+        }, 100);
+    };
+    
+    window.addEventListener('resize', handleResize, { passive: true });
+    
+    // 监听全屏变化
+    document.addEventListener('fullscreenchange', handleResize);
+    document.addEventListener('webkitfullscreenchange', handleResize);
+    document.addEventListener('mozfullscreenchange', handleResize);
 };
 
 // 图表更新队列和RAF优化
@@ -520,8 +607,55 @@ window.clearChartData = function() {
 // 重置所有图表的缩放
 window.resetAllChartZoom = function() {
     if (combinedChart) {
-        combinedChart.dispatchAction({ type: 'dataZoom', start: 0, end: 100 });
+        combinedChart.dispatchAction({ 
+            type: 'dataZoom', 
+            start: 0, 
+            end: 100 
+        });
     }
+};
+
+// 设置图表缩放范围
+window.setChartZoom = function(type) {
+    if (!combinedChart || !window.chartData || !window.chartData.time.length) {
+        console.warn('图表未初始化或无数据');
+        return;
+    }
+    
+    const totalPoints = window.chartData.time.length;
+    let start = 0;
+    let end = 100;
+    
+    switch(type) {
+        case 'all':
+            start = 0;
+            end = 100;
+            break;
+        case 'last10':
+            if (totalPoints > 10) {
+                start = Math.max(0, ((totalPoints - 10) / totalPoints) * 100);
+                end = 100;
+            }
+            break;
+        case 'last20':
+            if (totalPoints > 20) {
+                start = Math.max(0, ((totalPoints - 20) / totalPoints) * 100);
+                end = 100;
+            }
+            break;
+        case 'last50':
+            if (totalPoints > 50) {
+                start = Math.max(0, ((totalPoints - 50) / totalPoints) * 100);
+                end = 100;
+            }
+            break;
+    }
+    
+    combinedChart.dispatchAction({
+        type: 'dataZoom',
+        start: start,
+        end: end
+    });
 };
 
 // 应用图表设置（由菜单设置弹窗调用）
