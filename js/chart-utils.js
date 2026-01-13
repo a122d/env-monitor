@@ -154,7 +154,7 @@ window.initCharts = function() {
                             unit = 'μg/m³';
                             break;
                         case '紫外线':
-                            originalValue = window.chartData.sunray[index];
+                            originalValue = Number(window.chartData.sunray[index]).toFixed(2);
                             unit = 'UVI';
                             break;
                     }
@@ -539,8 +539,8 @@ window.updateChartData = function(data) {
         ? parseInt(data.pm25)
         : 0;
     const sunrayVal = data.sunray !== undefined && data.sunray !== null
-        ? parseInt(data.sunray)
-        : 0;
+        ? parseFloat(parseFloat(data.sunray) / 100).toFixed(2)
+        : '0';
 
     window.chartData.temperature.push(Number(tempVal));
     window.chartData.humidity.push(Number(humVal));

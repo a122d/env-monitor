@@ -310,9 +310,9 @@ function updateDataCards(data) {
         updateDataValue('PM2', pm25Value);
         updatePM25Card(pm25Value);
     }
-    // 紫外线强度：保持整数
+    // 紫外线强度：÷100保留2位小数 UVI
     if (data.sunray !== undefined) {
-        const sunrayValue = parseInt(data.sunray);
+        const sunrayValue = (parseFloat(data.sunray) / 100).toFixed(2);
         updateDataValue('sunray', sunrayValue);
         updateSunrayCard(sunrayValue);
     }
@@ -693,7 +693,7 @@ function updatePM25Card(pm25Value) {
 
 // 更新紫外线强度卡片
 function updateSunrayCard(sunrayValue) {
-    const sunrayNum = parseInt(sunrayValue);
+    const sunrayNum = parseFloat(sunrayValue);
     const card = document.getElementById('sunrayCard');
     if (!card) return;
 
