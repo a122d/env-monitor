@@ -10,23 +10,40 @@
 }
 
 @keyframes slideInUp {
-    from { opacity: 0; transform: translateY(20px); }
+    from { opacity: 0; transform: translateY(30px); }
     to { opacity: 1; transform: translateY(0); }
 }
 
+@keyframes cardEntrance {
+    0% { opacity: 0; transform: translateY(30px) scale(0.95); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
 @keyframes shimmer {
-    0% { background-position: -1000px 0; }
-    100% { background-position: 1000px 0; }
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
 }
 
 @keyframes float {
     0%, 100% { transform: translateY(0px); }
-    50% { transform: translateY(-8px); }
+    50% { transform: translateY(-6px); }
 }
 
 @keyframes glow {
     0%, 100% { box-shadow: 0 0 5px rgba(37, 99, 235, 0.3); }
-    50% { box-shadow: 0 0 15px rgba(37, 99, 235, 0.6); }
+    50% { box-shadow: 0 0 20px rgba(37, 99, 235, 0.5); }
+}
+
+@keyframes statusPulse {
+    0% { box-shadow: 0 0 0 0 rgba(39, 174, 96, 0.7); }
+    70% { box-shadow: 0 0 0 6px rgba(39, 174, 96, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(39, 174, 96, 0); }
+}
+
+@keyframes statusPulseRed {
+    0% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.7); }
+    70% { box-shadow: 0 0 0 6px rgba(231, 76, 60, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0); }
 }
 
 @keyframes colorShift {
@@ -55,11 +72,11 @@
     }
 }
 
-/* 弹窗淡入缩放动画 */
+/* 弹窗淡入缩放动画 - 兼容旧版调用 */
 @keyframes modalFadeInScale {
     0% {
         opacity: 0;
-        transform: translate3d(-50%, -50%, 0) scale(0.9);
+        transform: translate3d(-50%, -46%, 0) scale(0.95);
     }
     100% {
         opacity: 1;

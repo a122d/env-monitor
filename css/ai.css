@@ -569,8 +569,7 @@
     opacity: 0;
     visibility: hidden;
     transform: translateZ(0);
-    transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-                visibility 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: opacity 0.3s ease, visibility 0s linear 0.3s;
     contain: layout style paint;
     will-change: opacity, visibility;
 }
@@ -578,6 +577,7 @@
 .ai-config-modal.show {
     opacity: 1;
     visibility: visible;
+    transition: opacity 0.3s ease, visibility 0s linear 0s;
 }
 
 .ai-config-modal .modal-content {

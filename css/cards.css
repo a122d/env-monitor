@@ -4,7 +4,6 @@
     grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
     gap: clamp(12px, 2vw, 20px);
     margin: 0 0 clamp(15px, 2vw, 20px) 0;
-    animation: slideInUp 0.6s ease 0.3s backwards; 
 }
 
 .data-card {
@@ -24,7 +23,16 @@
     /* 性能优化：默认不使用will-change，只在hover时启用 */
     transform: translateZ(0); /* 启用硬件加速 */
     contain: layout style paint;
+    animation: cardEntrance 0.6s var(--ease-bounce) backwards;
 }
+
+/* Staggered animation delays for cards */
+.data-card:nth-child(1) { animation-delay: 0.1s; }
+.data-card:nth-child(2) { animation-delay: 0.2s; }
+.data-card:nth-child(3) { animation-delay: 0.3s; }
+.data-card:nth-child(4) { animation-delay: 0.4s; }
+.data-card:nth-child(5) { animation-delay: 0.5s; }
+.data-card:nth-child(6) { animation-delay: 0.6s; }
 
 .data-card::before {
     content: '';

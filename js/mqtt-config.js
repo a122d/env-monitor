@@ -2,7 +2,7 @@
 
 // ============ 应用版本号 ============
 // 统一版本号管理
-const APP_VERSION = 'V5.4.3';
+const APP_VERSION = 'V5.4.5';
 
 // 暴露全局版本号
 window.APP_VERSION = APP_VERSION;
@@ -96,6 +96,19 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         return window.USER_ROLES.USER;
     }
+    
+    // 确保currentUser对象完整性
+    function ensureCurrentUser() {
+        if (!window.currentUser || typeof window.currentUser.isAdmin !== 'function') {
+            window.currentUser = {
+                username: null,
+                role: null,
+                isAdmin: function() {
+                    return this.role === window.USER_ROLES.ADMIN;
+                }
+            };
+        }
+    }
 
     // 获取登录配置
     function getLoginConfig() {
@@ -130,6 +143,9 @@ document.addEventListener('DOMContentLoaded', () => {
         
         const login = getLoginConfig();
         
+        // 确保对象完整
+        ensureCurrentUser();
+
         // 识别用户角色
         const userRole = identifyUserRole(login.username);
         window.currentUser.username = login.username;
@@ -168,11 +184,14 @@ document.addEventListener('DOMContentLoaded', () => {
         // 同时设置连接失败处理
         window.onMQTTConnectFailure = function(errorMessage) {
             console.error('❌ MQTT 连接失败:', errorMessage);
+            
             // 恢复按钮状态
             applyConfigBtn.disabled = false;
             applyConfigBtn.innerHTML = '<span class="btn-text">登录系统</span><svg class="btn-icon" width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+            
             // 显示错误提示
             ToastAlert.show('❌ 登录失败：' + (errorMessage || '用户名或密码错误'));
+            
             // 清除回调
             window.onMQTTConnectFailure = null;
         };
@@ -211,8 +230,12 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // 只有在用户真正登录后才显示用户名（window.currentUser.username存在且不为空）
         if (window.currentUser && window.currentUser.username && window.currentUser.username.trim()) {
-            // 显示用户名（管理员添加图标）
-            const displayName = window.currentUser.isAdmin() ? 
+            // 显示用户名（管理员添加图标） - 增加安全检查
+            const isAdmin = window.currentUser.isAdmin && typeof window.currentUser.isAdmin === 'function' 
+                ? window.currentUser.isAdmin() 
+                : (window.currentUser.role === window.USER_ROLES.ADMIN);
+                
+            const displayName = isAdmin ? 
                 `👑 ${window.currentUser.username}` : 
                 window.currentUser.username;
             userName.textContent = displayName;

@@ -1041,8 +1041,11 @@ window.MQTTApp.init = function(newConfig) {
                 updateMQTTStatus('failed');
                 
                 // 触发连接失败的全局事件
+                // 如果存在全局回调，说明是用户手动触发的登录
+                // 这种情况下，不要自动重连，而是等待用户再次手动操作
                 if (window.onMQTTConnectFailure) {
                     window.onMQTTConnectFailure(res.errorMessage);
+                    return; 
                 }
                 
                 // 如果不是来自应用配置界面的连接，弹出提示
@@ -1061,7 +1064,14 @@ window.MQTTApp.init = function(newConfig) {
     } catch (e) {
         console.error('❌ MQTT初始化失败：', e);
         updateMQTTStatus('failed');
-        ToastAlert.show('初始化失败：' + e.message);
+        
+        // 触发连接失败的全局事件（确保UI能响应）
+        if (window.onMQTTConnectFailure) {
+            window.onMQTTConnectFailure(e.message);
+        } else {
+             ToastAlert.show('初始化失败：' + e.message);
+        }
+        
         reconnect();
     }
 
@@ -1088,6 +1098,12 @@ window.connectMQTTWithCredentials = function(credentials) {
         return;
     }
     
+    // 重置尝试计数器，允许在此次手动登录中重新尝试
+    totalAttempts = 0;
+    
+    // 生成新的ClientId，避免旧连接未完全断开导致的冲突
+    mqttConfig.clientId = generateUniqueClientId();
+
     mqttConfig.username = credentials.username;
     mqttConfig.password = credentials.password;
     

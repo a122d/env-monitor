@@ -9,8 +9,7 @@
     opacity: 0;
     visibility: hidden;
     transform: translateZ(0);
-    transition: opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1),
-                visibility 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: opacity 0.3s ease, visibility 0s linear 0.3s;
     /* 性能优化 */
     contain: layout style paint;
     will-change: opacity, visibility;
@@ -19,6 +18,7 @@
 .mqtt-config-modal.show {
     opacity: 1;
     visibility: visible;
+    transition: opacity 0.3s ease, visibility 0s linear 0s;
 }
 
 /* 图表设置弹窗样式（采用与 about-modal 相同的布局和交互） */
@@ -32,8 +32,7 @@
     opacity: 0;
     visibility: hidden;
     transform: translateZ(0);
-    transition: opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1),
-                visibility 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: opacity 0.3s ease, visibility 0s linear 0.3s;
     /* 性能优化 */
     contain: layout style paint;
     will-change: opacity, visibility;
@@ -42,6 +41,7 @@
 .chart-settings-modal.show { 
     opacity: 1;
     visibility: visible;
+    transition: opacity 0.3s ease, visibility 0s linear 0s;
 }
 
 .chart-settings-modal .modal-content {
@@ -112,8 +112,7 @@
     will-change: opacity;
     transform: translateZ(0);
     opacity: 0;
-    transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-                backdrop-filter 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: opacity 0.3s ease;
 }
 
 /* 当弹窗显示时，遮罩层渐入 */
@@ -136,8 +135,6 @@
     top: 50%;
     left: 50%;
     /* 性能优化：使用transform3d启用GPU加速 */
-    transform: translate3d(-50%, -50%, 0) scale(0.9);
-    will-change: transform, opacity;
     width: 90%;
     max-width: 900px;
     max-height: 90vh;
@@ -150,9 +147,13 @@
     overflow: hidden;
     display: flex;
     flex-direction: column;
+    
+    /* 动画初始状态 */
     opacity: 0;
-    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275),
-                opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transform: translate3d(-50%, -46%, 0) scale(0.95);
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+                opacity 0.2s ease;
+    will-change: transform, opacity;
 }
 
 /* 当弹窗显示时，modal-content动画 */
@@ -163,7 +164,8 @@
 .user-center-modal.show .modal-content {
     transform: translate3d(-50%, -50%, 0) scale(1);
     opacity: 1;
-    animation: modalFadeInScale 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275),
+                opacity 0.3s ease;
 }
 
 .modal-content:hover {
@@ -953,8 +955,7 @@ select:not(.custom-select) option {
     opacity: 0;
     visibility: hidden;
     transform: translateZ(0);
-    transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-                visibility 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: opacity 0.3s ease, visibility 0s linear 0.3s;
     contain: layout style paint;
     will-change: opacity, visibility;
 }
@@ -962,6 +963,7 @@ select:not(.custom-select) option {
 .about-modal.show {
     opacity: 1;
     visibility: visible;
+    transition: opacity 0.3s ease, visibility 0s linear 0s;
 }
 
 .about-modal .modal-content {
@@ -1841,8 +1843,7 @@ select:not(.custom-select) option {
     opacity: 0;
     visibility: hidden;
     transform: translateZ(0);
-    transition: opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1),
-                visibility 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: opacity 0.3s ease, visibility 0s linear 0.3s;
     contain: layout style paint;
     will-change: opacity, visibility;
 }
@@ -1850,6 +1851,7 @@ select:not(.custom-select) option {
 .user-center-modal.show {
     opacity: 1;
     visibility: visible;
+    transition: opacity 0.3s ease, visibility 0s linear 0s;
 }
 
 /* 用户中心弹窗专用样式 - 采用蓝色渐变背景 */

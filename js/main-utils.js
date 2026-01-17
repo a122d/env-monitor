@@ -71,7 +71,10 @@ function updateMQTTStatus(statusType) {
         case 'failed':
             statusElement.classList.add('failed', 'disconnected');
             // MQTT断开时清空用户信息，显示"未登录"
-            window.currentUser = { username: null, role: null };
+            if (window.currentUser) {
+                window.currentUser.username = null;
+                window.currentUser.role = null;
+            }
             if (window.updateUserInfoDisplay) {
                 window.updateUserInfoDisplay();
             }

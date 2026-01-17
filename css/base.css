@@ -42,7 +42,6 @@
 }
 
 .loading-indicator.hidden {
-    display: none;
     opacity: 0;
     pointer-events: none;
 }
@@ -365,17 +364,13 @@ body {
     height: 12px;
     border-radius: 50%;
     background-color: #e74c3c;
-    animation: pulse-dot 2s ease-in-out infinite;
+    animation: statusPulseRed 2s infinite;
     flex-shrink: 0;
 }
 
 .combined-status.connected .status-dot {
     background-color: #27ae60;
-}
-
-@keyframes pulse-dot {
-    0%, 100% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.6; transform: scale(1.1); }
+    animation: statusPulse 2s infinite;
 }
 
 .combined-status .user-name {
@@ -487,13 +482,13 @@ body {
     background-color: #27ae60;
     border: 2px solid #f0f9f4;
     transition: all 0.3s ease;
-    animation: glow 2s ease-in-out infinite;
+    animation: statusPulse 2s infinite;
 }
 
 .status.disconnected .status-dot {
     background-color: #e74c3c;
     border-color: #ffebee;
-    animation: glow 1s ease-in-out infinite;
+    animation: statusPulseRed 2s infinite;
 }
 
 .status-text {
