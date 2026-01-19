@@ -382,7 +382,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (saved && dataTimeRange) {
                     dataTimeRange.value = saved;
                 } else if (dataTimeRange) {
-                    dataTimeRange.value = '6hours';
+                    dataTimeRange.value = '1day';  // 默认一天内
                 }
             } catch (e) { console.warn('加载数据时间设置失败', e); }
         }
@@ -396,7 +396,18 @@ document.addEventListener('DOMContentLoaded', () => {
             const selectedRange = dataTimeRange ? dataTimeRange.value : '6hours';
             try { 
                 localStorage.setItem('dataTimeRange', selectedRange); 
-                ToastAlert.show('数据时间范围已保存');
+                
+                // 📤 发送历史数据请求到 MQTT
+                if (window.sendHistoryDataRequest) {
+                    const sent = window.sendHistoryDataRequest(selectedRange);
+                    if (sent) {
+                        ToastAlert.show('正在获取历史数据...');
+                    } else {
+                        ToastAlert.show('数据时间范围已保存（MQTT未连接）');
+                    }
+                } else {
+                    ToastAlert.show('数据时间范围已保存');
+                }
             } catch (e) { 
                 console.warn('保存数据时间设置失败', e); 
             }

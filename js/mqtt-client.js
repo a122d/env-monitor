@@ -999,6 +999,27 @@ window.MQTTApp.init = function(newConfig) {
                 }
             }
             
+            // 📊 处理历史数据主题消息
+            if (topic === mqttConfig.historyDataTopic) {
+                try {
+                    const historyData = JSON.parse(payload);
+                    
+                    // 验证ClientID是否匹配
+                    if (historyData.clientId && historyData.clientId !== mqttConfig.clientId) {
+                        return;  // 忽略不属于本客户端的消息
+                    }
+                    
+                    console.log('📊 收到历史数据：', historyData);
+                    
+                    // 处理历史数据并更新图表
+                    if (window.processHistoryData) {
+                        window.processHistoryData(historyData);
+                    }
+                } catch (e) {
+                    console.error('❌ 历史数据消息解析失败：', e);
+                }
+            }
+            
         };
 
         // 连接配置（仅保留Paho支持的属性）
@@ -1021,6 +1042,23 @@ window.MQTTApp.init = function(newConfig) {
                         ToastAlert.show('订阅失败：' + res.errorMessage);
                     }
                 });
+                
+                // 📊 订阅历史数据主题
+                if (mqttConfig.historyDataTopic) {
+                    client.subscribe(mqttConfig.historyDataTopic, {
+                        onSuccess: () => {
+                            console.log('✅ 已订阅历史数据主题：', mqttConfig.historyDataTopic);
+                            
+                            // 连接成功后发送默认历史数据请求（根据本地存储的设置）
+                            setTimeout(() => {
+                                window.sendHistoryDataRequest();
+                            }, 500);
+                        },
+                        onFailure: (res) => {
+                            console.warn('⚠️ 订阅历史数据主题失败：', res.errorMessage);
+                        }
+                    });
+                }
                 
                 // 如果是管理员，订阅设备控制主题
                 if (window.currentUser && window.currentUser.isAdmin && window.currentUser.isAdmin()) {
@@ -1249,6 +1287,142 @@ window.sendDeviceControl = function(controlType, value) {
     
     // 发送完整消息
     return window.sendDeviceControlMessage(autoValue, lightValue);
+};
+
+// ===== 📊 历史数据请求与处理 =====
+
+// 将时间范围转换为 number 值
+function getHistoryNumber(timeRange) {
+    switch (timeRange) {
+        case '6hours':
+            return 6;
+        case '1day':
+            return 24;
+        case '1week':
+            return 24;  // 一周也是24条（按设计要求）
+        default:
+            return 24;
+    }
+}
+
+// 发送历史数据请求
+window.sendHistoryDataRequest = function(timeRange) {
+    if (!mqttClient || !mqttClient.isConnected()) {
+        console.warn('⚠️ MQTT未连接，无法发送历史数据请求');
+        return false;
+    }
+    
+    // 如果未指定时间范围，从本地存储获取
+    if (!timeRange) {
+        try {
+            timeRange = localStorage.getItem('dataTimeRange') || '1day';
+        } catch (e) {
+            timeRange = '1day';
+        }
+    }
+    
+    const number = getHistoryNumber(timeRange);
+    
+    const requestPayload = {
+        clientId: mqttConfig.clientId,
+        number: number
+    };
+    
+    try {
+        const message = new Paho.MQTT.Message(JSON.stringify(requestPayload));
+        message.destinationName = mqttConfig.historySetTopic;
+        message.qos = 1;
+        
+        mqttClient.send(message);
+        console.log(`📤 发送历史数据请求：${timeRange} (number: ${number})`, requestPayload);
+        return true;
+    } catch (err) {
+        console.error('❌ 发送历史数据请求失败：', err);
+        return false;
+    }
+};
+
+// 处理历史数据并更新图表
+window.processHistoryData = function(historyData) {
+    if (!historyData || !historyData.data || !Array.isArray(historyData.data)) {
+        console.warn('⚠️ 无效的历史数据格式');
+        return;
+    }
+    
+    const dataArray = historyData.data;
+    console.log(`📊 处理 ${dataArray.length} 条历史数据`);
+    
+    // 清空现有图表数据
+    window.chartData = {
+        time: [],
+        temperature: [],
+        humidity: [],
+        windSpeed: [],
+        illumination: [],
+        PM2: [],
+        sunray: []
+    };
+    
+    // 历史数据是按时间降序排列的（最新的在前），需要反转为升序
+    const sortedData = [...dataArray].reverse();
+    
+    // 遍历历史数据并填充图表数据
+    sortedData.forEach(item => {
+        // 构建时间标签：date + hour
+        // 例如：date: "20260119", hour: 17 => "01-19 17:00"
+        let timeLabel = '';
+        if (item.date && item.hour !== undefined) {
+            const dateStr = String(item.date);
+            const month = dateStr.substring(4, 6);
+            const day = dateStr.substring(6, 8);
+            const hourStr = String(item.hour).padStart(2, '0');
+            timeLabel = `${month}-${day} ${hourStr}:00`;
+        } else {
+            timeLabel = new Date().toLocaleTimeString();
+        }
+        
+        window.chartData.time.push(timeLabel);
+        
+        // 温度：原始值÷10保留1位小数
+        const tempVal = item.temperature !== undefined ? 
+            parseFloat((item.temperature / 10).toFixed(1)) : 0;
+        window.chartData.temperature.push(tempVal);
+        
+        // 湿度：原始值÷10保留1位小数
+        const humVal = item.humidity !== undefined ? 
+            parseFloat((item.humidity / 10).toFixed(1)) : 0;
+        window.chartData.humidity.push(humVal);
+        
+        // 风速：原始值÷10保留1位小数
+        const windVal = item.windSpeed !== undefined ? 
+            parseFloat((item.windSpeed / 10).toFixed(1)) : 0;
+        window.chartData.windSpeed.push(windVal);
+        
+        // 光照：保持整数
+        const lightVal = item.illumination !== undefined ? 
+            parseInt(item.illumination) : 0;
+        window.chartData.illumination.push(lightVal);
+        
+        // PM2.5：保持整数
+        const pm25Val = item.pm25 !== undefined ? 
+            parseInt(item.pm25) : 0;
+        window.chartData.PM2.push(pm25Val);
+        
+        // 紫外线：原始值÷100保留2位小数
+        const sunrayVal = item.sunray !== undefined ? 
+            parseFloat((item.sunray / 100).toFixed(2)) : 0;
+        window.chartData.sunray.push(sunrayVal);
+    });
+    
+    // 更新图表显示
+    if (window.refreshChartFromData) {
+        window.refreshChartFromData();
+    }
+    
+    console.log('✅ 历史数据已加载到图表');
+    if (typeof ToastAlert !== 'undefined' && ToastAlert.show) {
+        ToastAlert.show(`已加载 ${dataArray.length} 条历史数据`);
+    }
 };
 
 // 页面加载初始化

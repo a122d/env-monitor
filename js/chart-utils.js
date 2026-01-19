@@ -11,7 +11,7 @@ window.chartData = {
 
 let combinedChart;
 // 全局控制
-window.CHART_MAX_LEN = 20; // 实时视图默认保留点数
+window.CHART_MAX_LEN = 25; // 实时视图默认保留点数（历史数据+1条实时）
 
 // 显示图表加载错误
 function showChartLoadingError(message) {
@@ -602,6 +602,57 @@ window.clearChartData = function() {
             ]
         });
     }
+};
+
+// 📊 从已有数据刷新图表显示（用于历史数据加载后刷新）
+window.refreshChartFromData = function() {
+    if (!combinedChart) {
+        console.warn('⚠️ 图表未初始化，跳过刷新');
+        return;
+    }
+    
+    if (!window.chartData || !window.chartData.time.length) {
+        console.warn('⚠️ 无图表数据可显示');
+        return;
+    }
+    
+    const xData = window.chartData.time;
+    
+    // 计算各项数据的百分比
+    // 温度: -10°C 到 36°C
+    const tempPercent = window.chartData.temperature.map(t => calculatePercentage(t, -10, 36));
+    // 湿度: 0% 到 100%
+    const humidityPercent = window.chartData.humidity.map(h => h); // 已经是百分比
+    // 风速: 0 m/s 到 20 m/s
+    const windPercent = window.chartData.windSpeed.map(w => calculatePercentage(w, 0, 20));
+    // 光照: 0 lux 到 1000 lux
+    const lightPercent = window.chartData.illumination.map(l => calculatePercentage(l, 0, 1000));
+    // PM2.5: 0 到 150 μg/m³
+    const pm25Percent = window.chartData.PM2.map(p => calculatePercentage(p, 0, 150));
+    // 紫外线: 0 到 10 UVI
+    const sunrayPercent = window.chartData.sunray.map(s => calculatePercentage(s, 0, 10));
+    
+    // 更新图表
+    combinedChart.setOption({
+        xAxis: { data: xData },
+        series: [
+            { data: tempPercent },
+            { data: humidityPercent },
+            { data: windPercent },
+            { data: lightPercent },
+            { data: pm25Percent },
+            { data: sunrayPercent }
+        ]
+    }, { notMerge: false, lazyUpdate: false });
+    
+    // 重置缩放到显示全部数据
+    combinedChart.dispatchAction({
+        type: 'dataZoom',
+        start: 0,
+        end: 100
+    });
+    
+    console.log(`✅ 图表已刷新，显示 ${xData.length} 条数据`);
 };
 
 // 重置所有图表的缩放

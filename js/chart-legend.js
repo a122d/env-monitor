@@ -60,12 +60,35 @@ function handleChartRefresh() {
     // 添加动画类
     btn.classList.add('refreshing');
 
-    // 执行刷新逻辑（触发 resize 或重绘）
-    const chartDom = document.getElementById('combined-chart');
-    if (chartDom && typeof echarts !== 'undefined') {
-        const chartInstance = echarts.getInstanceByDom(chartDom);
-        if (chartInstance) {
-            chartInstance.resize();
+    // 📤 发送历史数据请求获取最新数据
+    if (window.sendHistoryDataRequest) {
+        const sent = window.sendHistoryDataRequest();
+        if (sent) {
+            console.log('📤 刷新：已发送历史数据请求');
+            if (typeof ToastAlert !== 'undefined' && ToastAlert.show) {
+                ToastAlert.show('正在刷新数据...');
+            }
+        } else {
+            // MQTT未连接时，仅刷新图表显示
+            const chartDom = document.getElementById('combined-chart');
+            if (chartDom && typeof echarts !== 'undefined') {
+                const chartInstance = echarts.getInstanceByDom(chartDom);
+                if (chartInstance) {
+                    chartInstance.resize();
+                }
+            }
+            if (typeof ToastAlert !== 'undefined' && ToastAlert.show) {
+                ToastAlert.show('MQTT未连接，无法获取数据');
+            }
+        }
+    } else {
+        // 降级：仅执行图表 resize
+        const chartDom = document.getElementById('combined-chart');
+        if (chartDom && typeof echarts !== 'undefined') {
+            const chartInstance = echarts.getInstanceByDom(chartDom);
+            if (chartInstance) {
+                chartInstance.resize();
+            }
         }
     }
     

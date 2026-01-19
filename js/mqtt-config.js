@@ -2,7 +2,7 @@
 
 // ============ 应用版本号 ============
 // 统一版本号管理
-const APP_VERSION = 'V5.5.0';
+const APP_VERSION = 'V5.6.0';
 
 // 暴露全局版本号
 window.APP_VERSION = APP_VERSION;
@@ -39,7 +39,6 @@ window.currentUser = {
 };
 
 // ============ MQTT全局配置（供mqtt-client.js使用） ============
-// ⚠️ 安全提示：不要在代码中硬编码密码和敏感凭证
 window.MQTT_DEFAULT_CONFIG = {
     host: 'wss://mb67e10b.ala.cn-hangzhou.emqxsl.cn:8084/mqtt',  // MQTT服务器地址
     clientId: 'env-monitor-' + Math.random().toString(16).substr(2, 8),
@@ -52,7 +51,11 @@ window.MQTT_DEFAULT_CONFIG = {
     // 🤖 AI API 主题配置
     aiRequestTopic: 'Get/AI_API',        // 📤 发送AI请求的主题（包含clientId）
     aiResponseTopic: 'Set/AI_API',       // 📥 接收API响应的主题（应用层ClientID过滤）
-    aiLocalOnly: true                    // ✅ 仅允许本地客户端模式
+    aiLocalOnly: true,                   // ✅ 仅允许本地客户端模式
+    
+    // 📊 历史数据主题配置
+    historySetTopic: 'environment/set',      // 📤 发送历史数据请求的主题
+    historyDataTopic: 'environment/history'  // 📥 接收历史数据的主题
 };
 
 // 解析MQTT URL（提取host/port/path/SSL）
