@@ -1389,15 +1389,23 @@ window.processHistoryData = function(historyData) {
     
     // 遍历历史数据并填充图表数据
     sortedData.forEach(item => {
-        // 构建时间标签：date + hour
-        // 例如：date: "20260119", hour: 17 => "01-19 17:00"
+        // 构建时间标签
+        // 小时数据格式：date: "20260119", hour: 17 => "01-19 17:00"
+        // 一周数据格式：date: "20260119" (无hour字段) => "01-19"
         let timeLabel = '';
-        if (item.date && item.hour !== undefined) {
+        if (item.date) {
             const dateStr = String(item.date);
             const month = dateStr.substring(4, 6);
             const day = dateStr.substring(6, 8);
-            const hourStr = String(item.hour).padStart(2, '0');
-            timeLabel = `${month}-${day} ${hourStr}:00`;
+            
+            if (item.hour !== undefined) {
+                // 小时级别数据，显示 "MM-DD HH:00"
+                const hourStr = String(item.hour).padStart(2, '0');
+                timeLabel = `${month}-${day} ${hourStr}:00`;
+            } else {
+                // 一周/天级别数据，只显示 "MM-DD"
+                timeLabel = `${month}-${day}`;
+            }
         } else {
             timeLabel = new Date().toLocaleTimeString();
         }
