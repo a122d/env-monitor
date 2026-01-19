@@ -1,97 +1,188 @@
-/* ===== 全局动画定义 ===== */
+/* ===== 全局动画定义 - 性能优化版 ===== */
+
+/* 基础淡入动画 - 使用GPU加速 */
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
+    from { 
+        opacity: 0; 
+        transform: translate3d(0, 10px, 0);
+    }
+    to { 
+        opacity: 1; 
+        transform: translate3d(0, 0, 0);
+    }
+}
+
+/* 淡入缩放 - 更自然的弹性效果 */
+@keyframes fadeInScale {
+    0% { 
+        opacity: 0; 
+        transform: scale3d(0.92, 0.92, 1);
+    }
+    60% {
+        opacity: 1;
+        transform: scale3d(1.02, 1.02, 1);
+    }
+    100% { 
+        opacity: 1; 
+        transform: scale3d(1, 1, 1);
+    }
 }
 
 @keyframes slideInDown {
-    from { opacity: 0; transform: translateY(-20px); }
-    to { opacity: 1; transform: translateY(0); }
+    from { 
+        opacity: 0; 
+        transform: translate3d(0, -20px, 0);
+    }
+    to { 
+        opacity: 1; 
+        transform: translate3d(0, 0, 0);
+    }
 }
 
 @keyframes slideInUp {
-    from { opacity: 0; transform: translateY(30px); }
-    to { opacity: 1; transform: translateY(0); }
+    from { 
+        opacity: 0; 
+        transform: translate3d(0, 30px, 0);
+    }
+    to { 
+        opacity: 1; 
+        transform: translate3d(0, 0, 0);
+    }
 }
 
+/* 卡片入场动画 - 优化弹性曲线 */
 @keyframes cardEntrance {
-    0% { opacity: 0; transform: translateY(30px) scale(0.95); }
-    100% { opacity: 1; transform: translateY(0) scale(1); }
+    0% { 
+        opacity: 0; 
+        transform: translate3d(0, 25px, 0) scale3d(0.96, 0.96, 1);
+    }
+    70% {
+        opacity: 1;
+        transform: translate3d(0, -3px, 0) scale3d(1.01, 1.01, 1);
+    }
+    100% { 
+        opacity: 1; 
+        transform: translate3d(0, 0, 0) scale3d(1, 1, 1);
+    }
 }
 
+/* 骨架屏闪烁 - 优化帧率 */
 @keyframes shimmer {
     0% { background-position: -200% 0; }
     100% { background-position: 200% 0; }
 }
 
+/* 悬浮动画 - 更柔和的曲线 */
 @keyframes float {
-    0%, 100% { transform: translateY(0px); }
-    50% { transform: translateY(-6px); }
+    0%, 100% { 
+        transform: translate3d(0, 0, 0);
+    }
+    50% { 
+        transform: translate3d(0, -5px, 0);
+    }
 }
 
+/* 呼吸光晕效果 */
 @keyframes glow {
-    0%, 100% { box-shadow: 0 0 5px rgba(37, 99, 235, 0.3); }
-    50% { box-shadow: 0 0 20px rgba(37, 99, 235, 0.5); }
+    0%, 100% { 
+        box-shadow: 0 0 5px rgba(37, 99, 235, 0.3);
+    }
+    50% { 
+        box-shadow: 0 0 18px rgba(37, 99, 235, 0.45);
+    }
 }
 
+/* 柔和的脉冲光环 */
+@keyframes softPulse {
+    0%, 100% { 
+        transform: scale3d(1, 1, 1);
+        opacity: 1;
+    }
+    50% { 
+        transform: scale3d(1.02, 1.02, 1);
+        opacity: 0.95;
+    }
+}
+
+/* 状态指示器脉冲 - 绿色 */
 @keyframes statusPulse {
-    0% { box-shadow: 0 0 0 0 rgba(39, 174, 96, 0.7); }
-    70% { box-shadow: 0 0 0 6px rgba(39, 174, 96, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(39, 174, 96, 0); }
+    0% { 
+        box-shadow: 0 0 0 0 rgba(39, 174, 96, 0.6);
+    }
+    70% { 
+        box-shadow: 0 0 0 6px rgba(39, 174, 96, 0);
+    }
+    100% { 
+        box-shadow: 0 0 0 0 rgba(39, 174, 96, 0);
+    }
 }
 
+/* 状态指示器脉冲 - 红色 */
 @keyframes statusPulseRed {
-    0% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.7); }
-    70% { box-shadow: 0 0 0 6px rgba(231, 76, 60, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0); }
+    0% { 
+        box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.6);
+    }
+    70% { 
+        box-shadow: 0 0 0 6px rgba(231, 76, 60, 0);
+    }
+    100% { 
+        box-shadow: 0 0 0 0 rgba(231, 76, 60, 0);
+    }
 }
 
+/* 渐变色位移 */
 @keyframes colorShift {
     0% { background-position: 0% 50%; }
     50% { background-position: 100% 50%; }
     100% { background-position: 0% 50%; }
 }
 
+/* 旋转加载 - 优化流畅度 */
 @keyframes spin {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
+    from { 
+        transform: rotate(0deg);
+    }
+    to { 
+        transform: rotate(360deg);
+    }
 }
 
+/* 中心弹入 */
 @keyframes bounceInCenter {
     0% { 
         opacity: 0;
-        transform: translate(-50%, -50%) scale(0.3);
+        transform: translate(-50%, -50%) scale3d(0.85, 0.85, 1);
     }
     50% {
         opacity: 1;
-        transform: translate(-50%, -50%) scale(1.05);
+        transform: translate(-50%, -50%) scale3d(1.03, 1.03, 1);
     }
     100% {
         opacity: 1;
-        transform: translate(-50%, -50%) scale(1);
+        transform: translate(-50%, -50%) scale3d(1, 1, 1);
     }
 }
 
-/* 弹窗淡入缩放动画 - 兼容旧版调用 */
+/* 弹窗淡入缩放动画 - GPU加速版 */
 @keyframes modalFadeInScale {
     0% {
         opacity: 0;
-        transform: translate3d(-50%, -46%, 0) scale(0.95);
+        transform: translate3d(-50%, -46%, 0) scale3d(0.95, 0.95, 1);
     }
     100% {
         opacity: 1;
-        transform: translate3d(-50%, -50%, 0) scale(1);
+        transform: translate3d(-50%, -50%, 0) scale3d(1, 1, 1);
     }
 }
 
-/* 按钮点击波纹效果 */
+/* 按钮点击波纹效果 - 优化性能 */
 @keyframes buttonRipple {
     0% {
-        transform: scale(0);
-        opacity: 0.6;
+        transform: scale3d(0, 0, 1);
+        opacity: 0.5;
     }
     100% {
-        transform: scale(2.5);
+        transform: scale3d(2.5, 2.5, 1);
         opacity: 0;
     }
 }
@@ -102,14 +193,99 @@
         transform: rotate(0deg) scale(1);
     }
     50% {
-        transform: rotate(180deg) scale(1.1);
+        transform: rotate(180deg) scale(1.08);
     }
     100% {
         transform: rotate(360deg) scale(1);
     }
 }
 
-/* 减少动效偏好支持 - 无障碍优化 */
+/* 数值变化闪烁 */
+@keyframes valueFlash {
+    0%, 100% {
+        filter: brightness(1);
+    }
+    50% {
+        filter: brightness(1.15);
+    }
+}
+
+/* 微震效果 - 用于错误提示 */
+@keyframes shake {
+    0%, 100% { transform: translate3d(0, 0, 0); }
+    10%, 30%, 50%, 70%, 90% { transform: translate3d(-4px, 0, 0); }
+    20%, 40%, 60%, 80% { transform: translate3d(4px, 0, 0); }
+}
+
+/* 弹性弹跳 */
+@keyframes bounce {
+    0%, 100% {
+        transform: translate3d(0, 0, 0);
+        animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
+    }
+    50% {
+        transform: translate3d(0, -8px, 0);
+        animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
+    }
+}
+
+/* 涟漪扩散效果 */
+@keyframes rippleExpand {
+    0% {
+        transform: scale3d(0, 0, 1);
+        opacity: 1;
+    }
+    100% {
+        transform: scale3d(4, 4, 1);
+        opacity: 0;
+    }
+}
+
+/* 高亮闪烁 - 用于数据更新提示 */
+@keyframes highlight {
+    0% {
+        background-color: rgba(37, 99, 235, 0);
+    }
+    30% {
+        background-color: rgba(37, 99, 235, 0.1);
+    }
+    100% {
+        background-color: rgba(37, 99, 235, 0);
+    }
+}
+
+/* 进度条流动 */
+@keyframes progressFlow {
+    0% {
+        background-position: 0% 50%;
+    }
+    100% {
+        background-position: 100% 50%;
+    }
+}
+
+/* ===== 工具类动画 ===== */
+
+/* GPU加速层 - 用于需要硬件加速的元素 */
+.gpu-accelerated {
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    perspective: 1000px;
+}
+
+/* 平滑过渡基类 */
+.smooth-transition {
+    transition-timing-function: var(--ease-out-expo);
+    transition-duration: var(--transition-normal);
+}
+
+/* 弹性过渡基类 */
+.spring-transition {
+    transition-timing-function: var(--ease-spring);
+    transition-duration: var(--transition-normal);
+}
+
+/* ===== 减少动效偏好支持 - 无障碍优化 ===== */
 @media (prefers-reduced-motion: reduce) {
     *,
     *::before,
@@ -117,5 +293,13 @@
         animation-duration: 0.01ms !important;
         animation-iteration-count: 1 !important;
         transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+    
+    .gpu-accelerated,
+    .smooth-transition,
+    .spring-transition {
+        transform: none !important;
+        transition: none !important;
     }
 }

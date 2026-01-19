@@ -1,16 +1,20 @@
-/* AI配置弹窗 loading 遮罩 */
+/* AI配置弹窗 loading 遮罩 - 优化版 */
 .modal-loading-mask {
     position: fixed;
     top: 0;
     left: 0;
     width: 100vw;
     height: 100vh;
-    background: rgba(255,255,255,0.6);
+    background: rgba(255, 255, 255, 0.65);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
     z-index: 35;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: opacity 0.2s;
+    transition: opacity var(--transition-fast) var(--ease-smooth);
+    /* GPU加速 */
+    transform: translate3d(0, 0, 0);
 }
 .modal-loading-spinner {
     width: 48px;
@@ -18,13 +22,16 @@
     border: 5px solid #e0e7ef;
     border-top: 5px solid #2563eb;
     border-radius: 50%;
-    animation: spin 1s linear infinite;
+    animation: spin 0.8s linear infinite;
+    /* GPU加速 */
+    transform: translate3d(0, 0, 0);
+    backface-visibility: hidden;
 }
 @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
 }
-/* ===== AI助手样式 ===== */
+/* ===== AI助手样式 - 性能优化版 ===== */
 
 /* AI悬浮按钮 */
 .ai-assistant-btn {
@@ -41,28 +48,34 @@
     cursor: pointer;
     box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4),
                 0 4px 10px rgba(0, 0, 0, 0.1);
-    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    /* 优化过渡效果 */
+    transition: transform var(--transition-normal) var(--ease-spring),
+                box-shadow var(--transition-normal) var(--ease-smooth),
+                opacity var(--transition-fast) var(--ease-smooth);
     z-index: 10001;
     border: 3px solid rgba(255, 255, 255, 0.3);
     pointer-events: auto;
+    /* GPU加速 */
+    transform: translate3d(0, 0, 0);
+    backface-visibility: hidden;
 }
 
 /* 侧边栏打开时隐藏AI按钮 */
 .ai-sidebar.show ~ .ai-assistant-btn {
     opacity: 0;
     pointer-events: none;
-    transform: scale(0.3);
+    transform: scale3d(0.3, 0.3, 1);
 }
 
 .ai-assistant-btn:hover {
-    transform: scale(1.15) translateY(-5px);
+    transform: scale3d(1.12, 1.12, 1) translate3d(0, -4px, 0);
     box-shadow: 0 12px 35px rgba(99, 102, 241, 0.5),
                 0 6px 15px rgba(0, 0, 0, 0.15);
 }
 
 .ai-assistant-btn:active {
-    transform: scale(1.05) translateY(-3px);
-    transition: all 0.1s ease;
+    transform: scale3d(1.05, 1.05, 1) translate3d(0, -2px, 0);
+    transition-duration: var(--transition-micro);
 }
 
 .ai-icon {
@@ -78,15 +91,17 @@
     background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
     animation: aiPulse 2s ease-out infinite;
     z-index: 1;
+    /* GPU加速 */
+    transform: translate3d(0, 0, 0);
 }
 
 @keyframes aiPulse {
     0% {
-        transform: scale(1);
+        transform: scale3d(1, 1, 1);
         opacity: 0.5;
     }
     100% {
-        transform: scale(1.5);
+        transform: scale3d(1.5, 1.5, 1);
         opacity: 0;
     }
 }
@@ -104,7 +119,10 @@
     z-index: 9999;
     display: flex;
     flex-direction: column;
-    transition: right 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    /* 优化侧边栏滑入动画 */
+    transition: right var(--transition-slow) var(--ease-out-expo);
+    /* GPU加速 */
+    transform: translate3d(0, 0, 0);
 }
 
 .ai-sidebar.show {
@@ -153,19 +171,25 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    /* 优化过渡效果 */
+    transition: transform var(--transition-normal) var(--ease-spring),
+                box-shadow var(--transition-fast) var(--ease-smooth),
+                background var(--transition-fast) var(--ease-smooth);
+    /* GPU加速 */
+    transform: translate3d(0, 0, 0);
+    backface-visibility: hidden;
 }
 
 .ai-settings-btn:hover,
 .ai-close-btn:hover {
-    transform: scale(1.15) rotate(90deg);
+    transform: scale3d(1.12, 1.12, 1) rotate(90deg);
     box-shadow: 0 4px 16px rgba(106,92,255,0.35);
 }
 
 .ai-settings-btn:active,
 .ai-close-btn:active {
-    transform: scale(1.05) rotate(90deg);
-    transition: all 0.1s ease;
+    transform: scale3d(1.02, 1.02, 1) rotate(90deg);
+    transition-duration: var(--transition-micro);
 }
 /* 设置按钮SVG主色 */
 .ai-settings-btn .ai-settings-icon {
@@ -206,7 +230,7 @@
 .ai-close-btn:hover {
     background: linear-gradient(135deg, #a18fff 60%, #6a5cff 100%);
     box-shadow: 0 4px 16px rgba(106,92,255,0.28);
-    transform: scale(1.15);
+    transform: scale3d(1.12, 1.12, 1);
 }
 
 /* AI聊天容器 */
@@ -219,13 +243,15 @@
     gap: 16px;
     overscroll-behavior: contain;
     -webkit-overflow-scrolling: touch;
+    /* 优化滚动性能 */
+    scroll-behavior: smooth;
 }
 
 /* AI欢迎消息 */
 .ai-welcome-message {
     display: flex;
     gap: 12px;
-    animation: fadeIn 0.5s ease;
+    animation: fadeIn 0.4s var(--ease-out-expo);
 }
 
 .ai-welcome-message .ai-message-content {

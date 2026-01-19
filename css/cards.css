@@ -13,26 +13,28 @@
     text-align: center;
     box-shadow: var(--shadow-md), 0 0 20px rgba(37, 99, 235, 0.04);
     border: 2px solid rgba(255, 255, 255, 0.85);
-    transition: transform var(--transition-normal) var(--ease-bounce),
+    /* 优化过渡：使用更流畅的缓动曲线 */
+    transition: transform var(--transition-normal) var(--ease-out-expo),
                 box-shadow var(--transition-normal) var(--ease-smooth),
-                border-color var(--transition-normal) var(--ease-smooth);
+                border-color var(--transition-fast) var(--ease-smooth);
     cursor: pointer;
     position: relative;
     overflow: hidden;
     touch-action: manipulation;
-    /* 性能优化：默认不使用will-change，只在hover时启用 */
-    transform: translateZ(0); /* 启用硬件加速 */
+    /* 性能优化：使用GPU加速层 */
+    transform: translate3d(0, 0, 0);
+    backface-visibility: hidden;
     contain: layout style paint;
-    animation: cardEntrance 0.6s var(--ease-bounce) backwards;
+    animation: cardEntrance 0.5s var(--ease-out-expo) backwards;
 }
 
-/* Staggered animation delays for cards */
-.data-card:nth-child(1) { animation-delay: 0.1s; }
-.data-card:nth-child(2) { animation-delay: 0.2s; }
-.data-card:nth-child(3) { animation-delay: 0.3s; }
-.data-card:nth-child(4) { animation-delay: 0.4s; }
-.data-card:nth-child(5) { animation-delay: 0.5s; }
-.data-card:nth-child(6) { animation-delay: 0.6s; }
+/* Staggered animation delays for cards - 优化动画节奏 */
+.data-card:nth-child(1) { animation-delay: 0.05s; }
+.data-card:nth-child(2) { animation-delay: 0.1s; }
+.data-card:nth-child(3) { animation-delay: 0.15s; }
+.data-card:nth-child(4) { animation-delay: 0.2s; }
+.data-card:nth-child(5) { animation-delay: 0.25s; }
+.data-card:nth-child(6) { animation-delay: 0.3s; }
 
 .data-card::before {
     content: '';
@@ -41,21 +43,27 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: linear-gradient(135deg, rgba(37, 99, 235, 0.1), transparent);
+    background: linear-gradient(135deg, rgba(37, 99, 235, 0.08), transparent);
     opacity: 0;
-    transition: opacity 0.3s ease;
-    will-change: opacity;
+    transition: opacity var(--transition-fast) var(--ease-smooth);
+    pointer-events: none;
 }
 
+/* 优化hover效果 - 更流畅的交互响应 */
 .data-card:hover {
-    transform: translateY(-8px) scale(1.01) translateZ(0);
-    box-shadow: var(--shadow-lg), 0 0 30px rgba(37, 99, 235, 0.15);
+    transform: translate3d(0, -6px, 0) scale3d(1.01, 1.01, 1);
+    box-shadow: var(--shadow-hover);
     border-color: var(--color-primary);
-    will-change: transform; /* 仅在hover时提示浏览器 */
 }
 
 .data-card:hover::before {
     opacity: 1;
+}
+
+/* 点击按下效果 */
+.data-card:active {
+    transform: translate3d(0, -2px, 0) scale3d(0.99, 0.99, 1);
+    transition-duration: var(--transition-micro);
 }
 
 .data-card h3 {
@@ -72,21 +80,24 @@
     font-size: 34px;
     font-weight: bold;
     color: #1f2937;
-    transition: transform 0.3s ease, color 0.3s ease; /* 减少transition时间 */
+    /* 优化数值变化动画 */
+    transition: transform var(--transition-fast) var(--ease-out-expo), 
+                color var(--transition-fast) var(--ease-smooth);
     display: inline-block;
     position: relative;
     z-index: 1;
-    transform: translateZ(0);
+    transform: translate3d(0, 0, 0);
 }
 
 .data-value.changed {
-    animation: pulse 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); /* 缩短动画时间 */
+    animation: pulse 0.5s var(--ease-spring);
 }
 
+/* 优化数值脉冲动画 - 更柔和的视觉反馈 */
 @keyframes pulse {   
-    0% { transform: scale(1) translateZ(0); }
-    50% { transform: scale(1.08) translateZ(0); color: #2563eb; } /* 减小缩放幅度 */
-    100% { transform: scale(1) translateZ(0); }
+    0% { transform: scale3d(1, 1, 1); }
+    40% { transform: scale3d(1.06, 1.06, 1); color: #2563eb; }
+    100% { transform: scale3d(1, 1, 1); }
 }
 
 .unit {  
@@ -104,7 +115,8 @@
     padding: 28px 24px !important;
     position: relative;
     overflow: hidden;
-    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) !important; /* 缩短过渡时间 */
+    /* 优化过渡效果 */
+    transition: all var(--transition-normal) var(--ease-out-expo) !important;
 }
 
 .temp-card::before {
@@ -114,9 +126,9 @@
     right: -50%;
     width: 200%;
     height: 200%;
-    background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba(255,255,255,0.25) 0%, transparent 70%);
     opacity: 0;
-    transition: opacity 0.5s ease;
+    transition: opacity var(--transition-slow) var(--ease-smooth);
     pointer-events: none;
 }
 
@@ -141,7 +153,9 @@
 
 .temp-icon {
     font-size: 24px;
-    animation: float 3s ease-in-out infinite;
+    animation: float 2.5s ease-in-out infinite;
+    /* 优化动画性能 */
+    transform: translate3d(0, 0, 0);
 }
 
 /* 温度主显示 */
@@ -163,7 +177,9 @@
     font-size: 48px;
     font-weight: 700;
     line-height: 1;
-    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    /* 优化过渡动画 */
+    transition: all var(--transition-normal) var(--ease-out-expo);
+    transform: translate3d(0, 0, 0);
 }
 
 .temp-unit {
@@ -173,13 +189,14 @@
 }
 
 .temp-value.changed {
-    animation: scaleBounce 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+    animation: scaleBounce 0.45s var(--ease-spring);
 }
 
+/* 优化温度值弹跳动画 */
 @keyframes scaleBounce {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.15); }
-    100% { transform: scale(1); }
+    0% { transform: scale3d(1, 1, 1); }
+    45% { transform: scale3d(1.1, 1.1, 1); }
+    100% { transform: scale3d(1, 1, 1); }
 }
 
 /* 温度状态 */
@@ -201,7 +218,7 @@
 
 .temp-trend {
     font-size: 20px;
-    transition: transform 0.4s ease;
+    transition: transform var(--transition-normal) var(--ease-out-expo);
     display: inline-block;
 }
 
@@ -238,7 +255,8 @@
 .progress-fill {
     height: 100%;
     border-radius: 4px;
-    transition: width 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    /* 优化进度条过渡效果 */
+    transition: width var(--transition-slow) var(--ease-out-expo);
     background: linear-gradient(90deg, #4dd0e1 0%, #2196F3 25%, #FF9800 75%, #f44336 100%);
 }
 
@@ -313,11 +331,13 @@
     padding: 10px;
     background: rgba(255, 255, 255, 0.7);
     border-radius: 8px;
-    transition: all 0.3s ease;
+    /* 优化hover过渡 */
+    transition: transform var(--transition-fast) var(--ease-out-expo),
+                box-shadow var(--transition-fast) var(--ease-smooth);
 }
 
 .detail-item:hover {
-    transform: translateY(-2px);
+    transform: translate3d(0, -2px, 0);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 

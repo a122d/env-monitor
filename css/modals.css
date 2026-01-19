@@ -1,4 +1,4 @@
-/* ===== MQTT配置弹窗样式 ===== */
+/* ===== MQTT配置弹窗样式 - 性能优化版 ===== */
 .mqtt-config-modal {
     position: fixed;
     top: 0;
@@ -9,16 +9,17 @@
     opacity: 0;
     visibility: hidden;
     transform: translateZ(0);
-    transition: opacity 0.3s ease, visibility 0s linear 0.3s;
+    transition: opacity var(--transition-normal) var(--ease-smooth), 
+                visibility 0s linear var(--transition-normal);
     /* 性能优化 */
     contain: layout style paint;
-    will-change: opacity, visibility;
 }
 
 .mqtt-config-modal.show {
     opacity: 1;
     visibility: visible;
-    transition: opacity 0.3s ease, visibility 0s linear 0s;
+    transition: opacity var(--transition-normal) var(--ease-smooth), 
+                visibility 0s linear 0s;
 }
 
 /* 图表设置弹窗样式（采用与 about-modal 相同的布局和交互） */
@@ -32,16 +33,17 @@
     opacity: 0;
     visibility: hidden;
     transform: translateZ(0);
-    transition: opacity 0.3s ease, visibility 0s linear 0.3s;
+    transition: opacity var(--transition-normal) var(--ease-smooth), 
+                visibility 0s linear var(--transition-normal);
     /* 性能优化 */
     contain: layout style paint;
-    will-change: opacity, visibility;
 }
 
 .chart-settings-modal.show { 
     opacity: 1;
     visibility: visible;
-    transition: opacity 0.3s ease, visibility 0s linear 0s;
+    transition: opacity var(--transition-normal) var(--ease-smooth), 
+                visibility 0s linear 0s;
 }
 
 .chart-settings-modal .modal-content {
@@ -69,17 +71,21 @@
     align-items: center;
     justify-content: center;
     border-radius: 50%;
-    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    /* 优化过渡动画 */
+    transition: transform var(--transition-normal) var(--ease-spring), 
+                background var(--transition-fast) var(--ease-smooth),
+                color var(--transition-fast) var(--ease-smooth),
+                box-shadow var(--transition-fast) var(--ease-smooth);
     z-index: 10;
-    /* 性能优化 */
-    will-change: transform, background;
-    transform: translateZ(0); /* 启用硬件加速 */
+    /* 性能优化 - GPU加速 */
+    transform: translate3d(0, 0, 0);
+    backface-visibility: hidden;
 }
 
 .chart-settings-modal .modal-close:hover {
     background: linear-gradient(135deg, #ff6b6b, #ff8e53);
     color: #ffffff;
-    transform: rotate(90deg) scale(1.15) translateZ(0);
+    transform: rotate(90deg) scale3d(1.12, 1.12, 1);
     box-shadow: 0 8px 22px rgba(255, 107, 107, 0.35);
 }
 
@@ -97,7 +103,7 @@
 
 /* 按下时做完整旋转动画，增强交互感 */
 .chart-settings-modal .modal-close:active {
-    animation: modal-close-spin 0.6s ease-in-out;
+    animation: modal-close-spin 0.5s var(--ease-out-expo);
 }
 
 .modal-mask {
@@ -106,13 +112,13 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0,0,0,0.5);
-    backdrop-filter: blur(4px);
-    /* 性能优化 */
-    will-change: opacity;
-    transform: translateZ(0);
+    background: rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    /* 性能优化 - GPU加速 */
+    transform: translate3d(0, 0, 0);
     opacity: 0;
-    transition: opacity 0.3s ease;
+    transition: opacity var(--transition-normal) var(--ease-smooth);
 }
 
 /* 当弹窗显示时，遮罩层渐入 */
@@ -148,24 +154,25 @@
     display: flex;
     flex-direction: column;
     
-    /* 动画初始状态 */
+    /* 动画初始状态 - 优化缓动曲线 */
     opacity: 0;
-    transform: translate3d(-50%, -46%, 0) scale(0.95);
-    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
-                opacity 0.2s ease;
-    will-change: transform, opacity;
+    transform: translate3d(-50%, -46%, 0) scale3d(0.96, 0.96, 1);
+    transition: transform var(--transition-normal) var(--ease-out-expo),
+                opacity var(--transition-fast) var(--ease-smooth);
+    /* GPU加速层 */
+    backface-visibility: hidden;
 }
 
-/* 当弹窗显示时，modal-content动画 */
+/* 当弹窗显示时，modal-content动画 - 优化弹入效果 */
 .mqtt-config-modal.show .modal-content,
 .chart-settings-modal.show .modal-content,
 .about-modal.show .modal-content,
 .ai-config-modal.show .modal-content,
 .user-center-modal.show .modal-content {
-    transform: translate3d(-50%, -50%, 0) scale(1);
+    transform: translate3d(-50%, -50%, 0) scale3d(1, 1, 1);
     opacity: 1;
-    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275),
-                opacity 0.3s ease;
+    transition: transform var(--transition-slow) var(--ease-spring),
+                opacity var(--transition-normal) var(--ease-smooth);
 }
 
 .modal-content:hover {
@@ -220,30 +227,31 @@
     align-items: center;
     justify-content: center;
     border-radius: 50%;
-    transition: background 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275), 
-                color 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275), 
-                box-shadow 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275), 
-                transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    /* 优化过渡效果 - 分离属性提升性能 */
+    transition: background var(--transition-fast) var(--ease-smooth), 
+                color var(--transition-fast) var(--ease-smooth), 
+                box-shadow var(--transition-fast) var(--ease-smooth), 
+                transform var(--transition-normal) var(--ease-spring);
     position: relative;
     z-index: 10;
     flex-shrink: 0;
-    background: rgba(255,255,255,0.85);
+    background: rgba(255, 255, 255, 0.85);
     color: #334155;
-    will-change: transform, background-color, color;
-    transform-origin: center center;
+    /* GPU加速 */
+    transform: translate3d(0, 0, 0);
     backface-visibility: hidden;
 }
 
 .modal-close:hover {
     background: linear-gradient(135deg, #ff6b6b, #ff8e53);
     color: #ffffff;
-    transform: rotate(90deg) scale(1.15);
+    transform: rotate(90deg) scale3d(1.12, 1.12, 1);
     box-shadow: 0 8px 22px rgba(255, 107, 107, 0.35);
 }
 
 .modal-close:active {
-    transform: rotate(90deg) scale(1.05);
-    transition: all 0.1s ease;
+    transform: rotate(90deg) scale3d(1.02, 1.02, 1);
+    transition-duration: var(--transition-micro);
 }
 
 .modal-body {
@@ -281,7 +289,11 @@
     border-radius: 8px;
     font-size: 13px;
     color: #1f2937;
-    transition: all 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    /* 优化输入框过渡效果 */
+    transition: border-color var(--transition-fast) var(--ease-smooth),
+                background var(--transition-fast) var(--ease-smooth),
+                box-shadow var(--transition-fast) var(--ease-smooth),
+                transform var(--transition-fast) var(--ease-out-expo);
     background: #f8fafc;
 }
 
@@ -289,8 +301,8 @@
     outline: none;
     border-color: #2563eb;
     background: #ffffff;
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
-    transform: translateY(-2px) scale(1.005);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+    transform: translate3d(0, -1px, 0);
 }
 
 .form-group input::placeholder {
@@ -321,10 +333,16 @@
     font-size: 14px;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    /* 优化按钮过渡效果 */
+    transition: transform var(--transition-fast) var(--ease-out-expo),
+                box-shadow var(--transition-fast) var(--ease-smooth),
+                background var(--transition-fast) var(--ease-smooth);
     border: none;
     position: relative;
     overflow: hidden;
+    /* GPU加速 */
+    transform: translate3d(0, 0, 0);
+    backface-visibility: hidden;
 }
 
 /* 🔐 登录弹窗按钮缩小 */
@@ -344,7 +362,7 @@
     width: 100%;
     height: 100%;
     background: rgba(255,255,255,0.2);
-    transition: left 0.4s ease;
+    transition: left var(--transition-slow) var(--ease-out-expo);
     z-index: -1;
 }
 
@@ -363,12 +381,12 @@
     color: #1f2937;
     border-color: #2563eb;
     box-shadow: 0 6px 20px rgba(37, 99, 235, 0.15);
-    transform: translateY(-2px) scale(1.02);
+    transform: translate3d(0, -2px, 0) scale3d(1.02, 1.02, 1);
 }
 
 .btn-test:active {
-    transform: translateY(0) scale(0.98);
-    transition: all 0.1s ease;
+    transform: translate3d(0, 0, 0) scale3d(0.98, 0.98, 1);
+    transition-duration: var(--transition-micro);
 }
 
 .btn-save {
@@ -380,12 +398,12 @@
 .btn-save:hover {
     background: linear-gradient(135deg, #1d4ed8, #153db0);
     box-shadow: 0 8px 25px rgba(37, 99, 235, 0.4);
-    transform: translateY(-3px) scale(1.02);
+    transform: translate3d(0, -2px, 0) scale3d(1.02, 1.02, 1);
 }
 
 .btn-save:active {
-    transform: translateY(-1px) scale(0.98);
-    transition: all 0.1s ease;
+    transform: translate3d(0, -1px, 0) scale3d(0.98, 0.98, 1);
+    transition-duration: var(--transition-micro);
 }
 
 .btn-apply {
@@ -397,7 +415,7 @@
 .btn-apply:hover {
     background: linear-gradient(135deg, #219653, #1a7d47);
     box-shadow: 0 8px 25px rgba(39, 174, 96, 0.4);
-    transform: translateY(-3px) scale(1.02);
+    transform: translate3d(0, -2px, 0) scale3d(1.02, 1.02, 1);
 }
 
 .btn-apply:active {
