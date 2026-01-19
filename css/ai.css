@@ -3,8 +3,10 @@
     position: fixed;
     top: 0;
     left: 0;
-    width: 100vw;
-    height: 100vh;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    height: 100%;
     background: rgba(255, 255, 255, 0.65);
     backdrop-filter: blur(4px);
     -webkit-backdrop-filter: blur(4px);
@@ -113,7 +115,13 @@
     right: -420px;
     width: 400px;
     max-width: 100vw;
-    height: 100vh;
+    /* 兼容APP WebView：优先使用dvh，fallback到100% */
+    height: 100%;
+    height: 100dvh;
+    /* 适配安全区域 */
+    padding-top: env(safe-area-inset-top, 0);
+    padding-bottom: env(safe-area-inset-bottom, 0);
+    box-sizing: border-box;
     background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
     box-shadow: -10px 0 40px rgba(0, 0, 0, 0.15);
     z-index: 9999;
@@ -589,8 +597,10 @@
     position: fixed;
     top: 0;
     left: 0;
-    width: 100vw;
-    height: 100vh;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    height: 100%;
     z-index: 100;
     opacity: 0;
     visibility: hidden;
@@ -778,7 +788,11 @@
         width: 92%;
         max-width: none;
         height: auto;
+        /* 兼容APP WebView：使用calc和多重fallback */
+        max-height: 85%;
+        max-height: calc(100% - env(safe-area-inset-top, 20px) - env(safe-area-inset-bottom, 20px) - 40px);
         max-height: 88svh;
+        max-height: 88dvh;
         position: fixed;
         top: 50%;
         left: 50%;
@@ -792,6 +806,9 @@
         flex-direction: column;
         overflow: hidden;
         box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        /* 清除桌面端的padding */
+        padding-top: 0;
+        padding-bottom: 0;
     }
     
     .ai-sidebar.show {
