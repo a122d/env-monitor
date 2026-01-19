@@ -1352,6 +1352,27 @@ window.processHistoryData = function(historyData) {
     const dataArray = historyData.data;
     console.log(`📊 处理 ${dataArray.length} 条历史数据`);
     
+    // 📊 保存当前的实时数据（保存最后一条，如果存在的话）
+    let savedRealtimeData = null;
+    if (window.chartData && window.chartData.time && window.chartData.time.length > 0) {
+        const lastIdx = window.chartData.time.length - 1;
+        // 检查最后一条是否是实时数据（时间格式不同于历史数据的 MM-DD HH:00 格式）
+        const lastTime = window.chartData.time[lastIdx];
+        // 实时数据的时间格式类似 "18:30:45"，历史数据是 "01-19 17:00"
+        if (lastTime && !lastTime.includes('-')) {
+            savedRealtimeData = {
+                time: lastTime,
+                temperature: window.chartData.temperature[lastIdx],
+                humidity: window.chartData.humidity[lastIdx],
+                windSpeed: window.chartData.windSpeed[lastIdx],
+                illumination: window.chartData.illumination[lastIdx],
+                PM2: window.chartData.PM2[lastIdx],
+                sunray: window.chartData.sunray[lastIdx]
+            };
+            console.log('📊 保留实时数据：', savedRealtimeData.time);
+        }
+    }
+    
     // 清空现有图表数据
     window.chartData = {
         time: [],
@@ -1413,6 +1434,21 @@ window.processHistoryData = function(historyData) {
             parseFloat((item.sunray / 100).toFixed(2)) : 0;
         window.chartData.sunray.push(sunrayVal);
     });
+    
+    // 📊 记录历史数据条数，用于实时数据覆盖逻辑
+    window.chartHistoryCount = dataArray.length;
+    
+    // 📊 恢复之前保存的实时数据
+    if (savedRealtimeData) {
+        window.chartData.time.push(savedRealtimeData.time);
+        window.chartData.temperature.push(savedRealtimeData.temperature);
+        window.chartData.humidity.push(savedRealtimeData.humidity);
+        window.chartData.windSpeed.push(savedRealtimeData.windSpeed);
+        window.chartData.illumination.push(savedRealtimeData.illumination);
+        window.chartData.PM2.push(savedRealtimeData.PM2);
+        window.chartData.sunray.push(savedRealtimeData.sunray);
+        console.log('✅ 已恢复实时数据');
+    }
     
     // 更新图表显示
     if (window.refreshChartFromData) {

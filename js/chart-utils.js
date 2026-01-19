@@ -514,6 +514,7 @@ function batchUpdateCharts() {
 }
 
 // 全局更新图表数据入口
+// 📊 实时数据更新：始终只保留一条最新实时数据，覆盖而非追加
 window.updateChartData = function(data) {
     if (!combinedChart) {
         console.warn('⚠️ 图表未初始化，跳过更新');
@@ -521,8 +522,8 @@ window.updateChartData = function(data) {
     }
 
     const now = new Date().toLocaleTimeString();
-    window.chartData.time.push(now);
-
+    
+    // 解析数据值
     const tempVal = data.temperature !== undefined && data.temperature !== null
         ? parseFloat(parseFloat(data.temperature) / 10).toFixed(1)
         : '0';
@@ -542,17 +543,35 @@ window.updateChartData = function(data) {
         ? parseFloat(parseFloat(data.sunray) / 100).toFixed(2)
         : '0';
 
-    window.chartData.temperature.push(Number(tempVal));
-    window.chartData.humidity.push(Number(humVal));
-    window.chartData.windSpeed.push(Number(windVal));
-    window.chartData.illumination.push(lightVal);
-    window.chartData.PM2.push(PM2Val);
-    window.chartData.sunray.push(sunrayVal);
+    // 获取历史数据条数（如果已设置）
+    const historyCount = window.chartHistoryCount || 0;
+    const currentLen = window.chartData.time.length;
     
-    // 根据当前视图长度裁剪数组
-    const maxLen = window.CHART_MAX_LEN || 20;
-    if (window.chartData.time.length > maxLen) {
-        Object.keys(window.chartData).forEach(key => window.chartData[key].shift());
+    if (historyCount > 0 && currentLen >= historyCount) {
+        // 已有历史数据 + 实时数据，覆盖最后一条实时数据
+        const lastIdx = currentLen - 1;
+        window.chartData.time[lastIdx] = now;
+        window.chartData.temperature[lastIdx] = Number(tempVal);
+        window.chartData.humidity[lastIdx] = Number(humVal);
+        window.chartData.windSpeed[lastIdx] = Number(windVal);
+        window.chartData.illumination[lastIdx] = lightVal;
+        window.chartData.PM2[lastIdx] = PM2Val;
+        window.chartData.sunray[lastIdx] = sunrayVal;
+    } else {
+        // 无历史数据或首次添加实时数据，直接追加
+        window.chartData.time.push(now);
+        window.chartData.temperature.push(Number(tempVal));
+        window.chartData.humidity.push(Number(humVal));
+        window.chartData.windSpeed.push(Number(windVal));
+        window.chartData.illumination.push(lightVal);
+        window.chartData.PM2.push(PM2Val);
+        window.chartData.sunray.push(sunrayVal);
+        
+        // 限制最大长度（无历史数据时的fallback）
+        const maxLen = window.CHART_MAX_LEN || 25;
+        if (window.chartData.time.length > maxLen) {
+            Object.keys(window.chartData).forEach(key => window.chartData[key].shift());
+        }
     }
 
     // 节流控制：限制图表更新频率
