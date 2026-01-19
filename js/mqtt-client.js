@@ -1299,7 +1299,7 @@ function getHistoryNumber(timeRange) {
         case '1day':
             return 24;
         case '1week':
-            return 24;  // 一周也是24条（按设计要求）
+            return 7;   // 一周数据发送 number: 7
         default:
             return 24;
     }
