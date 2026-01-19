@@ -55,6 +55,7 @@
                 <ul class="dropdown-menu" id="dropdownMenu">
                     <li class="dropdown-item" data-action="user-center">用户中心</li>
                     <li class="dropdown-divider"></li>
+                    <li class="dropdown-item admin-only" id="menuDeviceControl" data-action="device-control" style="display: none;">环境设备控制</li>
                     <li class="dropdown-item" data-action="chart-setting">图表显示设置</li>
                     <li class="dropdown-item" data-action="data-time">设置历史时间</li>
                     <li class="dropdown-item" data-action="data-export">导出监控数据</li>
@@ -779,6 +780,53 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-test" id="aiTestBtn">测试连接</button>
                 <button type="button" class="btn btn-save" id="aiSaveBtn">保存配置</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 环境设备控制弹窗 (仅管理员可见) -->
+    <div class="chart-settings-modal device-control-modal" id="deviceControlModal">
+        <div class="modal-mask"></div>
+        <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="deviceControlTitle">
+            <div class="modal-header">
+                <h3 class="modal-title" id="deviceControlTitle">设备控制</h3>
+                <button type="button" class="modal-close" id="deviceControlClose" aria-label="关闭">×</button>
+            </div>
+            <div class="modal-body">
+                <form id="deviceControlForm">
+                    <!-- 控制模式 -->
+                    <div class="settings-row">
+                        <label class="settings-label">控制模式</label>
+                        <div class="settings-control">
+                            <div class="control-toggle-group">
+                                <button type="button" class="control-toggle-btn" data-control="auto" data-value="1" title="自动模式">
+                                    🤖 自动
+                                </button>
+                                <button type="button" class="control-toggle-btn" data-control="auto" data-value="0" title="手动模式">
+                                    ✋ 手动
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 灯光控制 -->
+                    <div class="settings-row">
+                        <label class="settings-label">灯光控制</label>
+                        <div class="settings-control">
+                            <div class="control-toggle-group">
+                                <button type="button" class="control-toggle-btn control-toggle-on" data-control="light" data-value="1" title="开灯">
+                                    💡 开灯
+                                </button>
+                                <button type="button" class="control-toggle-btn control-toggle-off" data-control="light" data-value="0" title="关灯">
+                                    🌙 关灯
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-save" id="deviceControlCloseBtn">关闭</button>
             </div>
         </div>
     </div>

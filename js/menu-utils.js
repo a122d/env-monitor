@@ -68,6 +68,162 @@ const ScrollLock = {
 // 导出供其他模块使用
 window.ScrollLock = ScrollLock;
 
+// ===== 环境设备控制面板 =====
+
+// 设备控制状态缓存
+let deviceControlState = {
+    auto: null,
+    light: null,
+    lastUpdate: null
+};
+
+// 初始化设备控制面板
+function initDeviceControlPanel() {
+    const deviceControlModal = document.getElementById('deviceControlModal');
+    if (!deviceControlModal) return;
+    
+    // 使用新的按钮类名
+    const controlBtns = deviceControlModal.querySelectorAll('.control-toggle-btn');
+    const closeBtn = document.getElementById('deviceControlCloseBtn');
+    const deviceControlClose = document.getElementById('deviceControlClose');
+    
+    // 同步全局状态
+    if (window.deviceControlState) {
+        deviceControlState.auto = window.deviceControlState.Auto;
+        deviceControlState.light = window.deviceControlState.Light;
+    }
+    
+    // 关闭按钮事件
+    if (closeBtn) {
+        closeBtn.addEventListener('click', () => {
+            deviceControlModal.classList.remove('show');
+            ScrollLock.unlock();
+        });
+    }
+    
+    if (deviceControlClose) {
+        deviceControlClose.addEventListener('click', () => {
+            deviceControlModal.classList.remove('show');
+            ScrollLock.unlock();
+        });
+    }
+    
+    // 点击遮罩关闭
+    const modalMask = deviceControlModal.querySelector('.modal-mask');
+    if (modalMask) {
+        modalMask.addEventListener('click', () => {
+            deviceControlModal.classList.remove('show');
+            ScrollLock.unlock();
+        });
+    }
+    
+    // 阻止点击内容区域关闭
+    const modalContent = deviceControlModal.querySelector('.modal-content');
+    if (modalContent) {
+        modalContent.addEventListener('click', (e) => {
+            e.stopPropagation();
+        });
+    }
+    
+    // 控制按钮事件处理
+    controlBtns.forEach(btn => {
+        btn.addEventListener('click', handleDeviceControlClick);
+    });
+    
+    // 初始化状态显示
+    updateAllButtonStates();
+}
+
+// 处理设备控制按钮点击
+function handleDeviceControlClick(e) {
+    const btn = e.currentTarget;
+    const controlType = btn.dataset.control;
+    const controlValue = parseInt(btn.dataset.value);
+    
+    if (!controlType) {
+        console.error('❌ 设备控制类型未定义');
+        return;
+    }
+    
+    // 显示加载状态
+    btn.disabled = true;
+    const originalText = btn.textContent;
+    btn.textContent = '⏳ 发送...';
+    
+    // 发送控制命令（sendDeviceControl会自动处理Auto=0逻辑）
+    const success = window.sendDeviceControl(controlType, controlValue);
+    
+    // 恢复按钮状态
+    setTimeout(() => {
+        btn.disabled = false;
+        btn.textContent = originalText;
+        
+        if (success) {
+            // 从全局状态同步到本地
+            if (window.deviceControlState) {
+                deviceControlState.auto = window.deviceControlState.Auto;
+                deviceControlState.light = window.deviceControlState.Light;
+            }
+            
+            // 更新所有按钮的UI状态
+            updateAllButtonStates();
+        }
+    }, 300);
+}
+
+// 更新所有按钮的显示状态
+function updateAllButtonStates() {
+    const deviceControlModal = document.getElementById('deviceControlModal');
+    if (!deviceControlModal) return;
+    
+    // 更新自动控制按钮状态
+    updateButtonActiveState('auto', deviceControlState.auto);
+    // 更新灯光控制按钮状态
+    updateButtonActiveState('light', deviceControlState.light);
+    // 更新状态文本
+    updateControlStatusText();
+}
+
+// 更新按钮显示状态
+function updateButtonActiveState(controlType, controlValue) {
+    const deviceControlModal = document.getElementById('deviceControlModal');
+    if (!deviceControlModal) return;
+    
+    // 使用新的按钮类名
+    const relevantBtns = deviceControlModal.querySelectorAll(`.control-toggle-btn[data-control="${controlType}"]`);
+    
+    relevantBtns.forEach(btn => {
+        const btnValue = parseInt(btn.dataset.value);
+        if (btnValue === controlValue) {
+            btn.classList.add('active');
+        } else {
+            btn.classList.remove('active');
+        }
+    });
+}
+
+// 更新设备状态显示（简化版，不再有状态文本区域）
+function updateDeviceControlStatus() {
+    // 从全局状态同步
+    if (window.deviceControlState) {
+        deviceControlState.auto = window.deviceControlState.Auto;
+        deviceControlState.light = window.deviceControlState.Light;
+    }
+    
+    // 更新按钮状态
+    updateAllButtonStates();
+}
+
+// 更新状态文本显示（保留但简化）
+function updateControlStatusText() {
+    // 新版UI不需要状态文本，直接通过按钮active状态显示
+}
+
+// 导出全局
+window.initDeviceControlPanel = initDeviceControlPanel;
+window.updateDeviceControlStatus = updateDeviceControlStatus;
+window.updateAllButtonStates = updateAllButtonStates;
+
 // 更新用户中心显示
 function updateUserCenterDisplay() {
     const userInfoSection = document.getElementById('userInfoSection');
@@ -343,6 +499,28 @@ document.addEventListener('DOMContentLoaded', () => {
                         ScrollLock.lock();
                     } else {
                         ToastAlert.show('用户中心尚未就绪');
+                    }
+                    // 关闭汉堡菜单
+                    hamburgerMenu.classList.remove('active');
+                    dropdownMenu.classList.remove('show');
+                    break;
+                case 'device-control':
+                    // 打开环境设备控制弹窗 - 仅管理员可见
+                    if (!window.currentUser || !window.currentUser.isAdmin || !window.currentUser.isAdmin()) {
+                        ToastAlert.show('❌ 此功能仅限管理员使用');
+                        hamburgerMenu.classList.remove('active');
+                        dropdownMenu.classList.remove('show');
+                        break;
+                    }
+                    
+                    const deviceControlModal = document.getElementById('deviceControlModal');
+                    if (deviceControlModal) {
+                        deviceControlModal.classList.add('show');
+                        ScrollLock.lock();
+                        // 初始化设备控制面板
+                        initDeviceControlPanel();
+                    } else {
+                        ToastAlert.show('设备控制弹窗尚未就绪');
                     }
                     // 关闭汉堡菜单
                     hamburgerMenu.classList.remove('active');

@@ -1021,6 +1021,24 @@ window.MQTTApp.init = function(newConfig) {
                         ToastAlert.show('订阅失败：' + res.errorMessage);
                     }
                 });
+                
+                // 如果是管理员，订阅设备控制主题
+                if (window.currentUser && window.currentUser.isAdmin && window.currentUser.isAdmin()) {
+                    const deviceControlTopic = 'environment/con';
+                    client.subscribe(deviceControlTopic, {
+                        onFailure: (res) => {
+                            console.warn('⚠️ 订阅设备控制主题失败：', res.errorMessage);
+                        }
+                    });
+                    console.log('✅ 管理员：已订阅设备控制主题 environment/con');
+                    
+                    // 显示设备控制菜单项
+                    const menuDeviceControl = document.getElementById('menuDeviceControl');
+                    if (menuDeviceControl) {
+                        menuDeviceControl.style.display = '';
+                    }
+                }
+                
                 // 不在全局连接时订阅 AI 响应主题，改为按需订阅
 
                 // 禁用登录菜单项（连接成功后不允许重新登录）
@@ -1147,6 +1165,90 @@ window.sendAIAPIRequest = function(userMessage) {
         console.error('❌ 发送AI请求失败：', err);
         return false;
     }
+};
+
+// ===== 环境设备控制 =====
+
+// 设备控制状态（全局状态缓存）
+window.deviceControlState = {
+    Auto: 0,
+    Light: 0
+};
+
+// 发送完整设备控制消息（仅管理员可用）
+window.sendDeviceControlMessage = function(autoValue, lightValue) {
+    // 权限检查：仅管理员可操作
+    if (!window.currentUser || !window.currentUser.isAdmin || !window.currentUser.isAdmin()) {
+        console.warn('⚠️ 您无权操作设备控制');
+        return false;
+    }
+    
+    // 验证MQTT连接状态
+    if (!mqttClient || !mqttClient.isConnected()) {
+        console.error('❌ MQTT未连接');
+        return false;
+    }
+    
+    // 构建完整控制消息
+    const messagePayload = {
+        Auto: autoValue,
+        Light: lightValue
+    };
+    
+    try {
+        const message = new Paho.MQTT.Message(JSON.stringify(messagePayload));
+        message.destinationName = 'environment/con';
+        message.qos = 1;
+        message.retained = false;
+        
+        mqttClient.send(message);
+        console.log(`✅ 发送设备控制命令:`, messagePayload);
+        
+        // 更新全局状态
+        window.deviceControlState.Auto = autoValue;
+        window.deviceControlState.Light = lightValue;
+        
+        return true;
+    } catch (err) {
+        console.error('❌ 发送设备控制命令失败：', err);
+        return false;
+    }
+};
+
+// 兼容旧版调用 - 发送单独控制（会自动处理Auto逻辑）
+window.sendDeviceControl = function(controlType, value) {
+    // 权限检查：仅管理员可操作
+    if (!window.currentUser || !window.currentUser.isAdmin || !window.currentUser.isAdmin()) {
+        console.warn('⚠️ 您无权操作设备控制');
+        return false;
+    }
+    
+    // 验证MQTT连接状态
+    if (!mqttClient || !mqttClient.isConnected()) {
+        console.error('❌ MQTT未连接');
+        return false;
+    }
+    
+    // 获取当前状态
+    let autoValue = window.deviceControlState.Auto;
+    let lightValue = window.deviceControlState.Light;
+    
+    // 根据控制类型更新相应值
+    if (controlType === 'auto') {
+        autoValue = value;
+    } else if (controlType === 'light') {
+        lightValue = value;
+        // 手动控制灯光时，自动将Auto设为0（手动模式）
+        if (value === 1 || value === 0) {
+            autoValue = 0;
+        }
+    } else {
+        console.error('❌ 未知的控制类型：', controlType);
+        return false;
+    }
+    
+    // 发送完整消息
+    return window.sendDeviceControlMessage(autoValue, lightValue);
 };
 
 // 页面加载初始化

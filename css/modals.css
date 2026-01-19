@@ -2064,3 +2064,70 @@ select:not(.custom-select) option {
         padding: 40px 20px;
     }
 }
+
+/* ===== 设备控制弹窗样式（复用chart-settings-modal） ===== */
+.device-control-modal.chart-settings-modal .modal-content {
+    background: linear-gradient(180deg, #fef3c7 0%, #fffbeb 100%);
+}
+
+/* 控制按钮组 */
+.control-toggle-group {
+    display: flex;
+    gap: 8px;
+}
+
+.control-toggle-btn {
+    padding: 8px 14px;
+    border-radius: 10px;
+    border: 2px solid #e2e8f0;
+    background: #ffffff;
+    color: #64748b;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s var(--ease-out-expo);
+    white-space: nowrap;
+}
+
+.control-toggle-btn:hover {
+    border-color: #3b82f6;
+    color: #3b82f6;
+    background: #eff6ff;
+}
+
+.control-toggle-btn:active {
+    transform: scale(0.96);
+}
+
+.control-toggle-btn.active {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    color: #ffffff;
+    border-color: #3b82f6;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.35);
+}
+
+/* 开灯按钮激活态 */
+.control-toggle-btn.control-toggle-on.active {
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    border-color: #22c55e;
+    box-shadow: 0 4px 12px rgba(34, 197, 94, 0.35);
+}
+
+/* 关灯按钮激活态 */
+.control-toggle-btn.control-toggle-off.active {
+    background: linear-gradient(135deg, #64748b, #475569);
+    border-color: #64748b;
+    box-shadow: 0 4px 12px rgba(100, 116, 139, 0.35);
+}
+
+/* 移动端适配 */
+@media (max-width: 767px) {
+    .control-toggle-group {
+        gap: 6px;
+    }
+    
+    .control-toggle-btn {
+        padding: 8px 12px;
+        font-size: 12px;
+    }
+}
