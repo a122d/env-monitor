@@ -204,13 +204,13 @@ function updateButtonActiveState(controlType, controlValue) {
 
 // 更新设备状态显示（简化版，不再有状态文本区域）
 function updateDeviceControlStatus() {
-    // 从全局状态同步
+    // 从全局状态同步（仅更新存在的字段）
     if (window.deviceControlState) {
-        deviceControlState.auto = window.deviceControlState.Auto;
-        deviceControlState.light = window.deviceControlState.Light;
+        if (window.deviceControlState.Auto !== undefined) deviceControlState.auto = window.deviceControlState.Auto;
+        if (window.deviceControlState.Light !== undefined) deviceControlState.light = window.deviceControlState.Light;
     }
     
-    // 更新按钮状态
+    // 更新按钮active状态（根据 auto/light 值）
     updateAllButtonStates();
 }
 

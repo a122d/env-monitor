@@ -1019,6 +1019,25 @@ window.MQTTApp.init = function(newConfig) {
                     console.error('❌ 历史数据消息解析失败：', e);
                 }
             }
+
+            // 处理设备控制状态消息（来自设备或管理员）
+            if (topic === 'environment/con') {
+                try {
+                    const controlData = JSON.parse(payload);
+                    console.log('📥 收到设备控制状态：', controlData);
+
+                    if (controlData.DriveStatus == 0) {
+                        if (controlData.Auto !== undefined) window.deviceControlState.Auto = controlData.Auto;
+                        if (controlData.Light !== undefined) window.deviceControlState.Light = controlData.Light;
+
+                        if (window.updateDeviceControlStatus) {
+                            window.updateDeviceControlStatus();
+                        }
+                    }
+                } catch (e) {
+                    console.error('❌ 设备控制消息解析失败：', e);
+                }
+            }
             
         };
 
@@ -1210,7 +1229,9 @@ window.sendAIAPIRequest = function(userMessage) {
 // 设备控制状态（全局状态缓存）
 window.deviceControlState = {
     Auto: 0,
-    Light: 0
+    Light: 0,
+    // 设备上报的 DriveStatus（null 表示未知）
+    DriveStatus: null
 };
 
 // 发送完整设备控制消息（仅管理员可用）
@@ -1227,10 +1248,11 @@ window.sendDeviceControlMessage = function(autoValue, lightValue) {
         return false;
     }
     
-    // 构建完整控制消息
+    // 构建完整控制消息（包含 DriveStatus: 1，表示网页发出的控制命令，仅作方向标记，不代表设备状态）
     const messagePayload = {
         Auto: autoValue,
-        Light: lightValue
+        Light: lightValue,
+        DriveStatus: 1
     };
     
     try {
@@ -1242,7 +1264,6 @@ window.sendDeviceControlMessage = function(autoValue, lightValue) {
         mqttClient.send(message);
         console.log(`✅ 发送设备控制命令:`, messagePayload);
         
-        // 更新全局状态
         window.deviceControlState.Auto = autoValue;
         window.deviceControlState.Light = lightValue;
         

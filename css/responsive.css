@@ -150,6 +150,39 @@
         width: 200px;
         right: -5px;
     }
+
+    /* 弹窗移动端适配 */
+    .modal-content {
+        width: 92% !important;
+        max-width: none !important;
+        max-height: 85vh !important;
+        aspect-ratio: auto !important;
+    }
+
+    .chart-settings-modal .modal-content {
+        width: 90% !important;
+        max-width: 400px !important;
+    }
+
+    .modal-header {
+        padding: 16px 20px;
+    }
+
+    .modal-body {
+        padding: 12px 16px;
+    }
+
+    .settings-row {
+        padding: 12px 16px;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .settings-control {
+        width: 100%;
+        justify-content: flex-start;
+    }
 }
 
 /* ===== 响应式设计 - 小屏手机适配 ===== */
