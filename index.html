@@ -59,6 +59,7 @@
                     <li class="dropdown-item" data-action="data-time">设置历史时间</li>
                     <li class="dropdown-item" data-action="data-export">导出监控数据</li>
                     <li class="dropdown-divider"></li>
+                    <li class="dropdown-item" data-action="device-version">设备版本</li>
                     <li class="dropdown-item" data-action="about">关于系统</li>
                 </ul>
             </div>
@@ -533,6 +534,67 @@
                     退出登录
                 </button>
                 <button type="button" class="btn btn-login-prompt" id="loginPromptBtn" style="display: none;">立即登录</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 设备版本弹窗 -->
+    <div class="device-version-modal" id="deviceVersionModal">
+        <div class="modal-mask"></div>
+        <div class="modal-content" role="dialog" aria-modal="true">
+            <button type="button" class="modal-close" id="deviceVersionModalClose" aria-label="关闭">×</button>
+            <div class="modal-body">
+                <div class="device-version-content">
+                    <div class="version-header">
+                        <svg class="header-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <rect x="4" y="6" width="16" height="12" rx="1.5" stroke="currentColor" stroke-width="1.5" fill="url(#headerGradient)"/>
+                            <path d="M8 9h8M8 12h6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+                            <circle cx="16" cy="12" r="1" fill="currentColor"/>
+                            <defs>
+                                <linearGradient id="headerGradient" x1="4" y1="6" x2="20" y2="18" gradientUnits="userSpaceOnUse">
+                                    <stop offset="0%" stop-color="#2563eb" stop-opacity="0.15"/>
+                                    <stop offset="100%" stop-color="#7c3aed" stop-opacity="0.15"/>
+                                </linearGradient>
+                            </defs>
+                        </svg>
+                        <h4>设备固件版本</h4>
+                    </div>
+                    
+                    <div class="version-divider"></div>
+                    
+                    <div class="version-list">
+                        <div class="version-item stm32-item">
+                            <div class="item-left">
+                                <svg class="item-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <rect x="6" y="8" width="12" height="8" rx="1" stroke="currentColor" stroke-width="1.5" fill="currentColor" fill-opacity="0.1"/>
+                                    <path d="M9 11h6M9 13h4" stroke="currentColor" stroke-width="1" stroke-linecap="round"/>
+                                </svg>
+                                <div class="item-info">
+                                    <div class="item-name">STM32 主控芯片</div>
+                                </div>
+                            </div>
+                            <div class="item-version" id="stm32Version">--</div>
+                        </div>
+
+                        <div class="version-item esp32-item">
+                            <div class="item-left">
+                                <svg class="item-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <rect x="6" y="8" width="12" height="8" rx="1" stroke="currentColor" stroke-width="1.5" fill="currentColor" fill-opacity="0.1"/>
+                                    <path d="M9 11h6M9 13h5" stroke="currentColor" stroke-width="1" stroke-linecap="round"/>
+                                    <path d="M15.5 11.5l1 1M16.5 11.5l-1 1" stroke="currentColor" stroke-width="1" stroke-linecap="round"/>
+                                </svg>
+                                <div class="item-info">
+                                    <div class="item-name">ESP32 通信模块</div>
+                                </div>
+                            </div>
+                            <div class="item-version" id="esp32Version">--</div>
+                        </div>
+                    </div>
+                    
+                    <div class="version-footer">
+                        <span class="footer-time">更新时间：<span id="lastUpdateTime">--</span></span>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

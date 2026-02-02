@@ -268,6 +268,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const mqttConfigModal = document.getElementById('mqttConfigModal');
     const aboutModal = document.getElementById('aboutModal');
     const aboutModalClose = document.getElementById('aboutModalClose');
+    const deviceVersionModal = document.getElementById('deviceVersionModal');
+    const deviceVersionModalClose = document.getElementById('deviceVersionModalClose');
     const userCenterModal = document.getElementById('userCenterModal');
     const userCenterClose = document.getElementById('userCenterClose');
     const loginPromptBtn = document.getElementById('loginPromptBtn');
@@ -367,6 +369,28 @@ document.addEventListener('DOMContentLoaded', () => {
             aboutModal.classList.remove('show');
             ScrollLock.unlock();
         });
+    }
+
+    // 设备版本弹窗 关闭按钮
+    if (deviceVersionModalClose) {
+        deviceVersionModalClose.addEventListener('click', () => {
+            deviceVersionModal.classList.remove('show');
+            ScrollLock.unlock();
+        });
+    }
+
+    // 点击设备版本弹窗背景关闭
+    if (deviceVersionModal) {
+        deviceVersionModal.addEventListener('click', () => {
+            deviceVersionModal.classList.remove('show');
+            ScrollLock.unlock();
+        });
+        const deviceVersionModalContent = deviceVersionModal.querySelector('.modal-content');
+        if (deviceVersionModalContent) {
+            deviceVersionModalContent.addEventListener('click', (e) => {
+                e.stopPropagation();
+            });
+        }
     }
 
     // 历史数据时间设置弹窗交互绑定
@@ -583,6 +607,20 @@ document.addEventListener('DOMContentLoaded', () => {
                     hamburgerMenu.classList.remove('active');
                     dropdownMenu.classList.remove('show');
                     break;
+                case 'device-version':
+                    // 打开设备版本弹窗
+                    if (deviceVersionModal) {
+                        deviceVersionModal.classList.add('show');
+                        ScrollLock.lock();
+                        // 更新版本信息
+                        updateDeviceVersionDisplay();
+                    } else {
+                        ToastAlert.show('设备版本弹窗尚未就绪');
+                    }
+                    // 关闭汉堡菜单
+                    hamburgerMenu.classList.remove('active');
+                    dropdownMenu.classList.remove('show');
+                    break;
                 case 'about':
                     // 打开关于系统弹窗
                     aboutModal.classList.add('show');
@@ -595,3 +633,35 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 });
+
+// 更新设备版本显示函数
+function updateDeviceVersionDisplay() {
+    // 从全局数据中获取版本信息
+    const stm32Ver = window.latestData?.stm_ver;
+    const esp32Ver = window.latestData?.esp_ver;
+    
+    const stm32VersionEl = document.getElementById('stm32Version');
+    const esp32VersionEl = document.getElementById('esp32Version');
+    const lastUpdateTimeEl = document.getElementById('lastUpdateTime');
+    
+    if (stm32VersionEl) {
+        stm32VersionEl.textContent = stm32Ver ? stm32Ver : '--';
+    }
+    
+    if (esp32VersionEl) {
+        esp32VersionEl.textContent = esp32Ver ? esp32Ver : '--';
+    }
+    
+    if (lastUpdateTimeEl) {
+        if (window.latestData?.stm_ver || window.latestData?.esp_ver) {
+            const now = new Date();
+            const timeStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
+            lastUpdateTimeEl.textContent = timeStr;
+        } else {
+            lastUpdateTimeEl.textContent = '--';
+        }
+    }
+}
+
+// 暴露给全局作用域
+window.updateDeviceVersionDisplay = updateDeviceVersionDisplay;

@@ -280,6 +280,12 @@ function resetAllDataCards() {
 // 更新数据卡片
 // 温/湿/风/海拔÷10保留1位小数  大气压÷10000保留3位小数
 function updateDataCards(data) {
+    // 保存完整数据到全局变量供其他功能使用（如设备版本显示）
+    if (!window.latestData) {
+        window.latestData = {};
+    }
+    Object.assign(window.latestData, data);
+    
     // 温度：÷10保留1位小数，更新统计信息和颜色
     if (data.temperature !== undefined) {
         const tempValue = (parseFloat(data.temperature) / 10).toFixed(1);
@@ -1485,9 +1491,7 @@ window.processHistoryData = function(historyData) {
     }
     
     console.log('✅ 历史数据已加载到图表');
-    if (typeof ToastAlert !== 'undefined' && ToastAlert.show) {
-        ToastAlert.show(`已加载 ${dataArray.length} 条历史数据`);
-    }
+    // 已移除弹窗提示，仅保留控制台日志
 };
 
 // 页面加载初始化
