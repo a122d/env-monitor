@@ -154,7 +154,7 @@ window.initCharts = function() {
                             unit = 'μg/m³';
                             break;
                         case '紫外线':
-                            originalValue = Number(window.chartData.sunray[index]).toFixed(2);
+                            originalValue = Number(window.chartData.sunray[index]).toFixed(1);
                             unit = 'UVI';
                             break;
                     }
@@ -540,7 +540,7 @@ window.updateChartData = function(data) {
         ? parseInt(data.pm25)
         : 0;
     const sunrayVal = data.sunray !== undefined && data.sunray !== null
-        ? parseFloat(parseFloat(data.sunray) / 100).toFixed(2)
+        ? parseFloat(parseFloat(data.sunray) / 10).toFixed(1)
         : '0';
 
     // 获取历史数据条数（如果已设置）

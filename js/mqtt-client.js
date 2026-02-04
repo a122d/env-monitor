@@ -316,9 +316,9 @@ function updateDataCards(data) {
         updateDataValue('PM2', pm25Value);
         updatePM25Card(pm25Value);
     }
-    // 紫外线强度：÷100保留2位小数 UVI
+    // 紫外线强度：÷10保留1位小数 UVI
     if (data.sunray !== undefined) {
-        const sunrayValue = (parseFloat(data.sunray) / 100).toFixed(2);
+        const sunrayValue = (parseFloat(data.sunray) / 10).toFixed(1);
         updateDataValue('sunray', sunrayValue);
         updateSunrayCard(sunrayValue);
     }
@@ -1464,9 +1464,9 @@ window.processHistoryData = function(historyData) {
             parseInt(item.pm25) : 0;
         window.chartData.PM2.push(pm25Val);
         
-        // 紫外线：原始值÷100保留2位小数
+        // 紫外线：÷10保留1位小数
         const sunrayVal = item.sunray !== undefined ? 
-            parseFloat((item.sunray / 100).toFixed(2)) : 0;
+            parseFloat((item.sunray / 10).toFixed(1)) : 0;
         window.chartData.sunray.push(sunrayVal);
     });
     
