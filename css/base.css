@@ -51,7 +51,7 @@
     pointer-events: none;
 }
 
-/* 旋转加载器 - 优化流畅度 */
+/* 旋转加载器 */
 .spinner {
     width: 48px;
     height: 48px;

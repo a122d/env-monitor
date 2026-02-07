@@ -1,4 +1,4 @@
-/* ===== 全局动画定义 - 性能优化版 ===== */
+/* ===== 全局动画定义 ===== */
 
 /* 基础淡入动画 - 使用GPU加速 */
 @keyframes fadeIn {
@@ -163,7 +163,7 @@
     }
 }
 
-/* 弹窗淡入缩放动画 - GPU加速版 */
+/* 弹窗淡入缩放动画 */
 @keyframes modalFadeInScale {
     0% {
         opacity: 0;
@@ -175,7 +175,7 @@
     }
 }
 
-/* 按钮点击波纹效果 - 优化性能 */
+/* 按钮点击波纹效果 */
 @keyframes buttonRipple {
     0% {
         transform: scale3d(0, 0, 1);
@@ -285,7 +285,7 @@
     transition-duration: var(--transition-normal);
 }
 
-/* ===== 减少动效偏好支持 - 无障碍优化 ===== */
+/* ===== 减少动效偏好支持 ===== */
 @media (prefers-reduced-motion: reduce) {
     *,
     *::before,

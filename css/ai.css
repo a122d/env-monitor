@@ -1,4 +1,4 @@
-/* AI配置弹窗 loading 遮罩 - 优化版 */
+/* AI配置弹窗 */
 .modal-loading-mask {
     position: fixed;
     top: 0;
@@ -33,7 +33,7 @@
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
 }
-/* ===== AI助手样式 - 性能优化版 ===== */
+/* ===== AI助手样式 ===== */
 
 /* AI悬浮按钮 */
 .ai-assistant-btn {
@@ -462,7 +462,7 @@
     cursor: not-allowed;
 }
 
-/* 配置表单容器 - 包含输入框和API按键并排 */
+/* 配置表单容器 */
 .form-group-with-button {
     display: flex;
     gap: 16px;

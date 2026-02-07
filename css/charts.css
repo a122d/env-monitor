@@ -91,7 +91,7 @@
     white-space: nowrap;
 }
 
-/* 刷新按钮 - 优化交互动画 */
+/* 刷新按钮 */
 .chart-refresh-btn {
     display: flex;
     align-items: center;

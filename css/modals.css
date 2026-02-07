@@ -1,4 +1,4 @@
-/* ===== MQTT配置弹窗样式 - 性能优化版 ===== */
+/* ===== MQTT配置弹窗样式 ===== */
 .mqtt-config-modal {
     position: fixed;
     top: 0;
@@ -93,7 +93,7 @@
     box-shadow: 0 8px 22px rgba(255, 107, 107, 0.35);
 }
 
-/* 聚焦态可见性支持（键盘访问） */
+/* 聚焦态可见性支持 */
 .chart-settings-modal .modal-close:focus {
     outline: 2px solid rgba(37,99,235,0.18);
     outline-offset: 2px;
