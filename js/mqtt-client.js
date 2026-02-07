@@ -9,8 +9,6 @@ let baseClientId = 'env-monitor-' + Math.random().toString(16);
 // 温度统计数据
 let temperatureStats = {
     current: 0,
-    max: -Infinity,
-    min: Infinity,
     sum: 0,
     count: 0,
     history: [],           // 保存最近10次数据用于趋势计算
@@ -20,8 +18,6 @@ let temperatureStats = {
 // 湿度统计数据
 let humidityStats = {
     current: 0,
-    max: -Infinity,
-    min: Infinity,
     sum: 0,
     count: 0,
     history: [],
@@ -31,8 +27,6 @@ let humidityStats = {
 // 风速统计数据
 let windSpeedStats = {
     current: 0,
-    max: -Infinity,
-    min: Infinity,
     sum: 0,
     count: 0,
     history: [],
@@ -42,8 +36,6 @@ let windSpeedStats = {
 // 光照强度统计数据
 let illuminationStats = {
     current: 0,
-    max: -Infinity,
-    min: Infinity,
     sum: 0,
     count: 0,
     history: [],
@@ -53,8 +45,6 @@ let illuminationStats = {
 // PM2.5统计数据
 let pm25Stats = {
     current: 0,
-    max: -Infinity,
-    min: Infinity,
     sum: 0,
     count: 0,
     history: [],
@@ -64,8 +54,24 @@ let pm25Stats = {
 // 紫外线强度统计数据
 let sunrayStats = {
     current: 0,
-    max: -Infinity,
-    min: Infinity,
+    sum: 0,
+    count: 0,
+    history: [],
+    lastUpdateTime: null
+};
+
+// 大气压强统计数据
+let pressureStats = {
+    current: 0,
+    sum: 0,
+    count: 0,
+    history: [],
+    lastUpdateTime: null
+};
+
+// 海拔高度统计数据
+let altitudeStats = {
+    current: 0,
     sum: 0,
     count: 0,
     history: [],
@@ -351,13 +357,6 @@ function updateTemperatureCard(tempValue) {
     
     // 更新温度统计
     temperatureStats.current = tempNum;
-    if (temperatureStats.count === 0) {
-        temperatureStats.max = tempNum;
-        temperatureStats.min = tempNum;
-    } else {
-        temperatureStats.max = Math.max(temperatureStats.max, tempNum);
-        temperatureStats.min = Math.min(temperatureStats.min, tempNum);
-    }
     temperatureStats.sum += tempNum;
     temperatureStats.count++;
     
@@ -417,8 +416,6 @@ function updateTemperatureCard(tempValue) {
             }
         }
         
-        // 更新详细信息
-        updateTemperatureDetails();
     });
 }
 
@@ -433,19 +430,7 @@ function updateProgressBar(tempNum) {
     progressFill.style.width = percentage + '%';
 }
 
-// 更新温度详细信息（增强版）
-function updateTemperatureDetails() {
-    // 检查必要的DOM元素
-    const tempMaxEl = document.getElementById('tempMax');
-    const tempMinEl = document.getElementById('tempMin');
-    if (!tempMaxEl || !tempMinEl) return;
-    
-    const max = temperatureStats.max !== -Infinity ? temperatureStats.max.toFixed(1) : '--';
-    const min = temperatureStats.min !== Infinity ? temperatureStats.min.toFixed(1) : '--';
-    
-    tempMaxEl.textContent = max;
-    tempMinEl.textContent = min;
-}
+
 
 // 更新湿度卡片
 function updateHumidityCard(humidityValue) {
@@ -460,13 +445,6 @@ function updateHumidityCard(humidityValue) {
     }
     
     humidityStats.current = humidityNum;
-    if (humidityStats.count === 0) {
-        humidityStats.max = humidityNum;
-        humidityStats.min = humidityNum;
-    } else {
-        humidityStats.max = Math.max(humidityStats.max, humidityNum);
-        humidityStats.min = Math.min(humidityStats.min, humidityNum);
-    }
     humidityStats.sum += humidityNum;
     humidityStats.count++;
     
@@ -502,9 +480,8 @@ function updateHumidityCard(humidityValue) {
     // 更新趋势
     updateCardTrend(card, humidityStats, '.card-trend');
     
-    // 更新详细信息
-    updateHumidityDetails();
 }
+
 
 // 更新风速卡片
 function updateWindSpeedCard(windSpeedValue) {
@@ -519,13 +496,6 @@ function updateWindSpeedCard(windSpeedValue) {
     }
     
     windSpeedStats.current = windNum;
-    if (windSpeedStats.count === 0) {
-        windSpeedStats.max = windNum;
-        windSpeedStats.min = windNum;
-    } else {
-        windSpeedStats.max = Math.max(windSpeedStats.max, windNum);
-        windSpeedStats.min = Math.min(windSpeedStats.min, windNum);
-    }
     windSpeedStats.sum += windNum;
     windSpeedStats.count++;
     
@@ -565,9 +535,8 @@ function updateWindSpeedCard(windSpeedValue) {
     // 更新趋势
     updateCardTrend(card, windSpeedStats, '.card-trend');
     
-    // 更新详细信息
-    updateWindSpeedDetails();
 }
+
 
 // 更新光照强度卡片
 function updateIlluminationCard(illuminationValue) {
@@ -582,13 +551,6 @@ function updateIlluminationCard(illuminationValue) {
     }
     
     illuminationStats.current = illuminationNum;
-    if (illuminationStats.count === 0) {
-        illuminationStats.max = illuminationNum;
-        illuminationStats.min = illuminationNum;
-    } else {
-        illuminationStats.max = Math.max(illuminationStats.max, illuminationNum);
-        illuminationStats.min = Math.min(illuminationStats.min, illuminationNum);
-    }
     illuminationStats.sum += illuminationNum;
     illuminationStats.count++;
     
@@ -627,9 +589,8 @@ function updateIlluminationCard(illuminationValue) {
     }
     // 更新趋势
     updateCardTrend(card, illuminationStats, '.card-trend');
-    // 更新详细信息
-    updateIlluminationDetails();
 }
+
 
 // PM2.5卡片更新
 function updatePM25Card(pm25Value) {
@@ -643,13 +604,6 @@ function updatePM25Card(pm25Value) {
         pm25Stats.history.shift();
     }
     pm25Stats.current = pm25Num;
-    if (pm25Stats.count === 0) {
-        pm25Stats.max = pm25Num;
-        pm25Stats.min = pm25Num;
-    } else {
-        pm25Stats.max = Math.max(pm25Stats.max, pm25Num);
-        pm25Stats.min = Math.min(pm25Stats.min, pm25Num);
-    }
     pm25Stats.sum += pm25Num;
     pm25Stats.count++;
     
@@ -693,9 +647,8 @@ function updatePM25Card(pm25Value) {
     }
     // 更新趋势
     updateCardTrend(card, pm25Stats, '.card-trend');
-    // 更新详细信息
-    updatePM25Details();
 }
+
 
 // 更新紫外线强度卡片
 function updateSunrayCard(sunrayValue) {
@@ -709,13 +662,6 @@ function updateSunrayCard(sunrayValue) {
         sunrayStats.history.shift();
     }
     sunrayStats.current = sunrayNum;
-    if (sunrayStats.count === 0) {
-        sunrayStats.max = sunrayNum;
-        sunrayStats.min = sunrayNum;
-    } else {
-        sunrayStats.max = Math.max(sunrayStats.max, sunrayNum);
-        sunrayStats.min = Math.min(sunrayStats.min, sunrayNum);
-    }
     sunrayStats.sum += sunrayNum;
     sunrayStats.count++;
     
@@ -754,20 +700,62 @@ function updateSunrayCard(sunrayValue) {
     }
     // 更新趋势
     updateCardTrend(card, sunrayStats, '.card-trend');
-    // 更新详细信息
-    updateSunrayDetails();
 }
+
 
 // 更新大气压强卡片
 function updatePressureCard(pressureValue) {
     const pressureNum = parseFloat(pressureValue);
     const card = document.getElementById('pressureCard');
     if (!card) return;
-    // 只更新数值部分
+    
+    pressureStats.lastUpdateTime = Date.now();
+    pressureStats.history.push(pressureNum);
+    if (pressureStats.history.length > 10) {
+        pressureStats.history.shift();
+    }
+    
+    pressureStats.current = pressureNum;
+    pressureStats.sum += pressureNum;
+    pressureStats.count++;
+    
+    // 更新颜色类
+    card.classList.remove('pressure-low', 'pressure-normal', 'pressure-high');
+    if (pressureNum < 100) {
+        card.classList.add('pressure-low');
+    } else if (pressureNum < 103) {
+        card.classList.add('pressure-normal');
+    } else {
+        card.classList.add('pressure-high');
+    }
+    
+    // 更新等级标签
+    const levelEl = card.querySelector('.card-level');
+    if (levelEl) {
+        if (pressureNum < 100) {
+            levelEl.textContent = '偏低';
+        } else if (pressureNum < 103) {
+            levelEl.textContent = '正常';
+        } else {
+            levelEl.textContent = '偏高';
+        }
+    }
+    
+    // 更新数值
     const valueEl = card.querySelector('.card-value');
     if (valueEl) {
-        valueEl.textContent = pressureNum.toFixed(3);
+        valueEl.textContent = pressureNum.toFixed(2);
     }
+    
+    // 更新进度条 (90-110 KPa)
+    const progressFill = card.querySelector('.card-progress-bar .progress-fill');
+    if (progressFill) {
+        const percentage = Math.max(0, Math.min(100, ((pressureNum - 90) / 20) * 100));
+        progressFill.style.width = percentage + '%';
+    }
+    
+    // 更新趋势
+    updateCardTrend(card, pressureStats, '.card-trend');
 }
 
 // 更新海拔高度卡片
@@ -775,11 +763,56 @@ function updateAltitudeCard(altitudeValue) {
     const altitudeNum = parseFloat(altitudeValue);
     const card = document.getElementById('altitudeCard');
     if (!card) return;
-    // 只更新数值部分
+    
+    altitudeStats.lastUpdateTime = Date.now();
+    altitudeStats.history.push(altitudeNum);
+    if (altitudeStats.history.length > 10) {
+        altitudeStats.history.shift();
+    }
+    
+    altitudeStats.current = altitudeNum;
+    altitudeStats.sum += altitudeNum;
+    altitudeStats.count++;
+    
+    // 更新颜色类
+    card.classList.remove('altitude-low', 'altitude-medium', 'altitude-high');
+    if (altitudeNum < 500) {
+        card.classList.add('altitude-low');
+    } else if (altitudeNum < 1500) {
+        card.classList.add('altitude-medium');
+    } else {
+        card.classList.add('altitude-high');
+    }
+    
+    // 更新等级标签
+    const levelEl = card.querySelector('.card-level');
+    if (levelEl) {
+        if (altitudeNum < 500) {
+            levelEl.textContent = '低海拔';
+        } else if (altitudeNum < 1500) {
+            levelEl.textContent = '中海拔';
+        } else if (altitudeNum < 3000) {
+            levelEl.textContent = '高海拔';
+        } else {
+            levelEl.textContent = '超高海拔';
+        }
+    }
+    
+    // 更新数值
     const valueEl = card.querySelector('.card-value');
     if (valueEl) {
         valueEl.textContent = altitudeNum.toFixed(1);
     }
+    
+    // 更新进度条 (0-3000m)
+    const progressFill = card.querySelector('.card-progress-bar .progress-fill');
+    if (progressFill) {
+        const percentage = Math.max(0, Math.min(100, (altitudeNum / 3000) * 100));
+        progressFill.style.width = percentage + '%';
+    }
+    
+    // 更新趋势
+    updateCardTrend(card, altitudeStats, '.card-trend');
 }
 
 // 通用卡片趋势更新函数
@@ -809,65 +842,7 @@ function updateCardTrend(card, stats, trendSelector) {
     }
 }
 
-// 更新湿度详细信息
-function updateHumidityDetails() {
-    const max = humidityStats.max !== -Infinity ? humidityStats.max.toFixed(1) : '--';
-    const min = humidityStats.min !== Infinity ? humidityStats.min.toFixed(1) : '--';
 
-    const maxEl = document.getElementById('humidityMax');
-    if (maxEl) maxEl.textContent = max;
-
-    const minEl = document.getElementById('humidityMin');
-    if (minEl) minEl.textContent = min;
-}
-
-// 更新风速详细信息
-function updateWindSpeedDetails() {
-    const max = windSpeedStats.max !== -Infinity ? windSpeedStats.max.toFixed(1) : '--';
-    const min = windSpeedStats.min !== Infinity ? windSpeedStats.min.toFixed(1) : '--';
-
-    const maxEl = document.getElementById('windSpeedMax');
-    if (maxEl) maxEl.textContent = max;
-
-    const minEl = document.getElementById('windSpeedMin');
-    if (minEl) minEl.textContent = min;
-}
-
-// 更新光照强度详细信息
-function updateIlluminationDetails() {
-    const max = illuminationStats.max !== -Infinity ? illuminationStats.max.toFixed(1) : '--';
-    const min = illuminationStats.min !== Infinity ? illuminationStats.min.toFixed(1) : '--';
-
-    const maxEl = document.getElementById('illuminationMax');
-    if (maxEl) maxEl.textContent = max;
-
-    const minEl = document.getElementById('illuminationMin');
-    if (minEl) minEl.textContent = min;
-}
-
-// 更新PM2.5详细信息
-function updatePM25Details() {
-    const max = pm25Stats.max !== -Infinity ? pm25Stats.max.toFixed(1) : '--';
-    const min = pm25Stats.min !== Infinity ? pm25Stats.min.toFixed(1) : '--';
-
-    const maxEl = document.getElementById('PM2Max');
-    if (maxEl) maxEl.textContent = max;
-
-    const minEl = document.getElementById('PM2Min');
-    if (minEl) minEl.textContent = min;
-}
-
-// 更新紫外线强度详细信息
-function updateSunrayDetails() {
-    const max = sunrayStats.max !== -Infinity ? sunrayStats.max.toFixed(1) : '--';
-    const min = sunrayStats.min !== Infinity ? sunrayStats.min.toFixed(1) : '--';
-
-    const maxEl = document.getElementById('sunrayMax');
-    if (maxEl) maxEl.textContent = max;
-
-    const minEl = document.getElementById('sunrayMin');
-    if (minEl) minEl.textContent = min;
-}
 
 // 缓存DOM元素引用，避免重复查询
 const domCache = new Map();

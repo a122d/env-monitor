@@ -107,16 +107,6 @@
                     </div>
                 </div>
 
-                <div class="card-minmax">
-                    <div class="minmax-item">
-                        <span class="minmax-label">最高</span>
-                        <span class="minmax-value" id="tempMax">--</span>
-                    </div>
-                    <div class="minmax-item">
-                        <span class="minmax-label">最低</span>
-                        <span class="minmax-value" id="tempMin">--</span>
-                    </div>
-                </div>
             </article>
             <article class="data-card humidity-card" id="humidityCard" aria-label="湿度监测">
                 <div class="card-header">
@@ -149,16 +139,6 @@
                     </div>
                 </div>
 
-                <div class="card-minmax">
-                    <div class="minmax-item">
-                        <span class="minmax-label">最高</span>
-                        <span class="minmax-value" id="humidityMax">--</span>
-                    </div>
-                    <div class="minmax-item">
-                        <span class="minmax-label">最低</span>
-                        <span class="minmax-value" id="humidityMin">--</span>
-                    </div>
-                </div>
             </article>
             <article class="data-card wind-card" id="windSpeedCard" aria-label="风速监测">
                 <div class="card-header">
@@ -191,16 +171,6 @@
                     </div>
                 </div>
 
-                <div class="card-minmax">
-                    <div class="minmax-item">
-                        <span class="minmax-label">最高</span>
-                        <span class="minmax-value" id="windSpeedMax">--</span>
-                    </div>
-                    <div class="minmax-item">
-                        <span class="minmax-label">最低</span>
-                        <span class="minmax-value" id="windSpeedMin">--</span>
-                    </div>
-                </div>
             </article>
 
             <article class="data-card illumination-card" id="illuminationCard" aria-label="光照强度监测">
@@ -234,16 +204,6 @@
                     </div>
                 </div>
 
-                <div class="card-minmax">
-                    <div class="minmax-item">
-                        <span class="minmax-label">最高</span>
-                        <span class="minmax-value" id="illuminationMax">--</span>
-                    </div>
-                    <div class="minmax-item">
-                        <span class="minmax-label">最低</span>
-                        <span class="minmax-value" id="illuminationMin">--</span>
-                    </div>
-                </div>
             </article>
         
             <!-- PM2.5 数值卡片 -->
@@ -275,17 +235,6 @@
                         <span class="progress-label left">0</span>
                         <span class="progress-label center">75</span>
                         <span class="progress-label right">150</span>
-                    </div>
-                </div>
-
-                <div class="card-minmax">
-                    <div class="minmax-item">
-                        <span class="minmax-label">最高</span>
-                        <span class="minmax-value" id="PM2Max">--</span>
-                    </div>
-                    <div class="minmax-item">
-                        <span class="minmax-label">最低</span>
-                        <span class="minmax-value" id="PM2Min">--</span>
                     </div>
                 </div>
 
@@ -323,17 +272,6 @@
                     </div>
                 </div>
 
-                <div class="card-minmax">
-                    <div class="minmax-item">
-                        <span class="minmax-label">最高</span>
-                        <span class="minmax-value" id="sunrayMax">--</span>
-                    </div>
-                    <div class="minmax-item">
-                        <span class="minmax-label">最低</span>
-                        <span class="minmax-value" id="sunrayMin">--</span>
-                    </div>
-                </div>
-
             </article>
 
             <article class="data-card pressure-card" id="pressureCard" aria-label="大气压强监测">
@@ -341,10 +279,29 @@
                     <h3>大气压强</h3>
                     <span class="card-icon" id="pressureIcon">⏲️</span>
                 </div>
+                
                 <div class="card-main-display">
                     <div class="card-value-wrapper">
-                        <span class="card-value" id="pressure">--</span>
+                        <div class="card-value" id="pressure">--</div>
                         <span class="card-unit">KPa</span>
+                    </div>
+                    <div class="card-status">
+                        <span class="card-level" id="pressureLevel">--</span>
+                        <span class="card-trend" id="pressureTrend">→</span>
+                    </div>
+                </div>
+
+                <div class="card-progress-bar">
+                    <div class="progress-track">
+                        <div class="progress-fill" id="pressureProgress" style="width: 0%;"></div>
+                        <div class="progress-marker left" title="90KPa"></div>
+                        <div class="progress-marker middle" title="101.325KPa"></div>
+                        <div class="progress-marker right" title="110KPa"></div>
+                    </div>
+                    <div class="progress-labels">
+                        <span class="progress-label left">90</span>
+                        <span class="progress-label center">101</span>
+                        <span class="progress-label right">110</span>
                     </div>
                 </div>
             </article>
@@ -354,10 +311,29 @@
                     <h3>海拔高度</h3>
                     <span class="card-icon" id="altitudeIcon">🏔️</span>
                 </div>
+                
                 <div class="card-main-display">
                     <div class="card-value-wrapper">
-                        <span class="card-value" id="altitude">--</span>
+                        <div class="card-value" id="altitude">--</div>
                         <span class="card-unit">m</span>
+                    </div>
+                    <div class="card-status">
+                        <span class="card-level" id="altitudeLevel">--</span>
+                        <span class="card-trend" id="altitudeTrend">→</span>
+                    </div>
+                </div>
+
+                <div class="card-progress-bar">
+                    <div class="progress-track">
+                        <div class="progress-fill" id="altitudeProgress" style="width: 0%;"></div>
+                        <div class="progress-marker left" title="0m"></div>
+                        <div class="progress-marker middle" title="1500m"></div>
+                        <div class="progress-marker right" title="3000m"></div>
+                    </div>
+                    <div class="progress-labels">
+                        <span class="progress-label left">0</span>
+                        <span class="progress-label center">1500</span>
+                        <span class="progress-label right">3000</span>
                     </div>
                 </div>
             </article>

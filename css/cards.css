@@ -35,6 +35,8 @@
 .data-card:nth-child(4) { animation-delay: 0.2s; }
 .data-card:nth-child(5) { animation-delay: 0.25s; }
 .data-card:nth-child(6) { animation-delay: 0.3s; }
+.data-card:nth-child(7) { animation-delay: 0.35s; }
+.data-card:nth-child(8) { animation-delay: 0.4s; }
 
 .data-card::before {
     content: '';
@@ -115,8 +117,8 @@
     padding: 28px 24px !important;
     position: relative;
     overflow: hidden;
-    /* 优化过渡效果 */
-    transition: all var(--transition-normal) var(--ease-out-expo) !important;
+    /* 使用与其他卡片相同的过渡效果 */
+    transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
 }
 
 .temp-card::before {
@@ -153,7 +155,7 @@
 
 .temp-icon {
     font-size: 24px;
-    animation: float 2.5s ease-in-out infinite;
+    animation: float 3s ease-in-out infinite;
     /* 优化动画性能 */
     transform: translate3d(0, 0, 0);
 }
@@ -704,7 +706,9 @@
 .sunray-card,
 .humidity-card,
 .wind-card,
-.illumination-card {
+.illumination-card,
+.pressure-card,
+.altitude-card {
     padding: 28px 24px !important;
     position: relative;
     overflow: hidden;
@@ -715,7 +719,9 @@
 .sunray-card::before,
 .humidity-card::before,
 .wind-card::before,
-.illumination-card::before {
+.illumination-card::before,
+.pressure-card::before,
+.altitude-card::before {
     content: '';
     position: absolute;
     top: -50%;
@@ -732,7 +738,9 @@
 .sunray-card:hover::before,
 .humidity-card:hover::before,
 .wind-card:hover::before,
-.illumination-card:hover::before {
+.illumination-card:hover::before,
+.pressure-card:hover::before,
+.altitude-card:hover::before {
     opacity: 1;
 }
 
@@ -754,6 +762,8 @@
 .card-icon {
     font-size: 24px;
     animation: float 3s ease-in-out infinite;
+    /* 优化动画性能 */
+    transform: translate3d(0, 0, 0);
 }
 
 /* 卡片主显示 */
@@ -807,7 +817,7 @@
 
 .card-trend {
     font-size: 20px;
-    transition: transform 0.4s ease;
+    transition: transform var(--transition-normal) var(--ease-out-expo);
     display: inline-block;
 }
 
@@ -826,36 +836,7 @@
     transform: rotate(0deg);
 }
 
-/* 卡片最高最低值显示 */
-.card-minmax {
-    display: flex;
-    justify-content: space-between;
-    gap: 16px;
-    margin-top: 16px;
-}
 
-.minmax-item {
-    flex: 1;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 12px;
-    background: rgba(255, 255, 255, 0.5);
-    border-radius: 8px;
-    font-size: 13px;
-}
-
-.minmax-label {
-    color: #64748b;
-    font-weight: 600;
-    letter-spacing: 0.3px;
-}
-
-.minmax-value {
-    color: #1f2937;
-    font-weight: 700;
-    font-size: 14px;
-}
 
 
 
@@ -952,80 +933,44 @@
 /*-----------------------------------------------------------*/
 
 /* 大气压强卡片：清新蓝绿色调 */
+/* 大气压强卡片颜色 */
 #pressureCard {
-    padding: 28px 24px !important;
-    position: relative;
-    overflow: hidden;
-    transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
     background: linear-gradient(135deg, #e0f7fa 0%, #b2ebf2 100%);
-    box-shadow: 0 10px 30px rgba(0, 188, 212, 0.13),
-                0 0 40px rgba(0, 188, 212, 0.08);
-    border: 2px solid rgba(255, 255, 255, 0.85) !important;
+    box-shadow: 0 10px 30px rgba(0, 188, 212, 0.25), 
+                0 0 40px rgba(0, 188, 212, 0.15);
 }
 
-#pressureCard .card-header h3 {
+#pressureCard .card-header h3,
+#pressureCard .card-level {
     color: #0097a7;
-    letter-spacing: 1px;
 }
-#pressureCard .card-icon {
-    font-size: 32px;
-}
-#pressureCard .card-value-wrapper {
-    display: block;
-    width: 100%;
-}
+
 #pressureCard .card-value {
-    color: #0097a7;
-    font-size: 48px;
-    font-weight: 800;
-    display: block;
-    text-align: center;
-    margin-top: 32px;
-}
-#pressureCard .card-unit {
-    font-size: 28px;
-    display: block;
-    text-align: right;
-    margin-top: 32px;
-    margin-right: 10px;
+    color: #00acc1;
 }
 
-/* 海拔高度卡片：清新紫蓝色调 */
+#pressureCard .progress-fill {
+    background: linear-gradient(90deg, #4dd0e1 0%, #00bcd4 50%, #0097a7 100%);
+}
+
+/* 海拔高度卡片颜色 */
 #altitudeCard {
-    padding: 28px 24px !important;
-    position: relative;
-    overflow: hidden;
-    transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
-    background: linear-gradient(135deg, #ede7f6 0%, #b3c6f7 100%);
-    box-shadow: 0 10px 30px rgba(103, 58, 183, 0.13),
-                0 0 40px rgba(33, 150, 243, 0.08);
-    border: 2px solid rgba(255, 255, 255, 0.85) !important;
+    background: linear-gradient(135deg, #ede7f6 0%, #d1c4e9 100%);
+    box-shadow: 0 10px 30px rgba(103, 58, 183, 0.25), 
+                0 0 40px rgba(103, 58, 183, 0.15);
 }
-#altitudeCard .card-header h3 {
+
+#altitudeCard .card-header h3,
+#altitudeCard .card-level {
     color: #3949ab;
-    letter-spacing: 1px;
 }
-#altitudeCard .card-icon {
-    font-size: 32px;
-}
-#altitudeCard .card-value-wrapper {
-    display: block;
-    width: 100%;
-}
+
 #altitudeCard .card-value {
-    color: #3949ab;
-    font-size: 48px;
-    font-weight: 800;
-    display: block;
-    text-align: center;
-    margin-top: 32px;
+    color: #5e35b1;
 }
-#altitudeCard .card-unit {
-    font-size: 36px;
-    display: block;
-    text-align: right;
-    margin-top: 32px;
-    margin-right: 12px;
+
+#altitudeCard .progress-fill {
+    background: linear-gradient(90deg, #b39ddb 0%, #7e57c2 50%, #5e35b1 100%);
 }
 
 /* 移动端适配 */
@@ -1037,7 +982,9 @@
     .temp-card,
     .humidity-card,
     .wind-card,
-    .illumination-card {
+    .illumination-card,
+    .pressure-card,
+    .altitude-card {
         padding: 18px 12px !important; 
     }
     .temp-value,
@@ -1099,49 +1046,10 @@
     .progress-labels {
         font-size: 10px;
     }
-    .card-minmax {
-        gap: 8px;
-        margin-top: 10px;
-    }
-    .minmax-item {
-        padding: 6px 8px;
-        font-size: 11px;
-    }
-    .minmax-value {
-        font-size: 12px;
-    }
+
 }
 
-@media (max-width: 767px) {
-    /* 设置大气压强 海拔 卡片 */
-    .pressure-card,
-    .altitude-card {
-        padding: 18px 14px !important; 
-    }
-    .pressure-card .card-header h3,
-    .altitude-card .card-header h3 {
-        font-size: 16px;
-    }
-    .pressure-card .card-icon,
-    .altitude-card .card-icon {
-        font-size: 20px; 
-    }
-    #pressureCard .card-value,
-    #altitudeCard .card-value {
-        font-size: clamp(28px, 8vw, 32px);
-        margin-top: 6px;
-    }
-    #pressureCard .card-unit {
-        font-size: 20px;
-        margin-top: 16px;
-        margin-right: 8px;
-    }
-    #altitudeCard .card-unit {
-        font-size: 24px;
-        margin-top: 14px;
-        margin-right: 6px;
-    }
-}
+
 
 /* ===== 数据卡片加载骨架屏 ===== */
 .data-card.loading {  
