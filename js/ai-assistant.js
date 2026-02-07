@@ -124,16 +124,16 @@ function bindAIEvents() {
     const configClose = document.getElementById('aiConfigClose');
     
     settingsBtn?.addEventListener('click', () => {
-        aiConfigModal.classList.add('show');
+        if (window.ModalHelper) window.ModalHelper.open(aiConfigModal);
     });
     
     configClose?.addEventListener('click', () => {
-        aiConfigModal.classList.remove('show');
+        if (window.ModalHelper) window.ModalHelper.close(aiConfigModal);
     });
 
     // 点击遮罩关闭
     aiConfigModal?.querySelector('.modal-mask')?.addEventListener('click', () => {
-        aiConfigModal.classList.remove('show');
+        if (window.ModalHelper) window.ModalHelper.close(aiConfigModal);
     });
 
     // 保存配置
@@ -142,7 +142,7 @@ function bindAIEvents() {
         if (window.ToastAlert) {
             ToastAlert.show('配置已保存！');
         }
-        aiConfigModal.classList.remove('show');
+        if (window.ModalHelper) window.ModalHelper.close(aiConfigModal);
     });
 
     // 测试连接
@@ -337,7 +337,7 @@ function getAPIFromModal() {
     aiModalApiBtn.innerHTML = '<span>⏳ 处理中...</span>';
     // 显示loading遮罩
     const loadingMask = document.getElementById('aiConfigLoadingMask');
-    if (loadingMask) loadingMask.style.display = 'flex';
+    if (loadingMask) loadingMask.classList.remove('is-hidden');
 
     const topic = (window.MQTT_DEFAULT_CONFIG && window.MQTT_DEFAULT_CONFIG.aiResponseTopic) || 'Set/AI_API';
     let timeoutId = null;
@@ -361,7 +361,7 @@ function getAPIFromModal() {
         aiModalApiBtn.innerHTML = originalText;
         // 隐藏loading遮罩
         const loadingMask = document.getElementById('aiConfigLoadingMask');
-        if (loadingMask) loadingMask.style.display = 'none';
+        if (loadingMask) loadingMask.classList.add('is-hidden');
     }
 
     try {

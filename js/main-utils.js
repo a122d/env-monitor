@@ -1,5 +1,43 @@
 // ===== 工具函数  =====
 
+// 弹窗管理工具 - 基于原生 <dialog> 元素
+const ModalHelper = {
+    /**
+     * 打开弹窗
+     * @param {HTMLDialogElement} dialog
+     */
+    open(dialog) {
+        if (!dialog || dialog.open) return;
+        dialog.showModal();
+        // 下一帧添加动画类，确保 opacity 过渡生效
+        requestAnimationFrame(() => dialog.classList.add('show'));
+        ScrollLock.lock();
+    },
+    /**
+     * 关闭弹窗（带过渡动画）
+     * @param {HTMLDialogElement} dialog
+     */
+    close(dialog) {
+        if (!dialog || !dialog.open) return;
+        dialog.classList.remove('show');
+        ScrollLock.unlock();
+        // 等待 CSS 过渡完成后关闭 dialog
+        setTimeout(() => { if (dialog.open) dialog.close(); }, 350);
+    },
+    /**
+     * 初始化所有 dialog 的原生 Escape 键拦截
+     */
+    initAll() {
+        document.querySelectorAll('dialog').forEach(dialog => {
+            dialog.addEventListener('cancel', (e) => {
+                e.preventDefault();
+                ModalHelper.close(dialog);
+            });
+        });
+    }
+};
+window.ModalHelper = ModalHelper;
+
 // 防抖函数 - 用于减少频繁触发的操作
 function debounce(func, wait, immediate = false) {
     let timeout;
@@ -184,6 +222,9 @@ function proceedWithInit() {
     const scheduleInit = window.requestIdleCallback || ((cb) => setTimeout(cb, delay));
     
     scheduleInit(() => {
+        // 初始化所有 dialog 的 Escape 键拦截
+        ModalHelper.initAll();
+
         if (typeof initCharts === 'function') {
             initCharts();
         } else {

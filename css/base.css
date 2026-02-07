@@ -1,3 +1,28 @@
+/* ===== Dialog 元素重置 ===== */
+dialog {
+    border: none;
+    padding: 0;
+    background: transparent;
+    max-width: none;
+    max-height: none;
+    margin: 0;
+    overflow: visible;
+    color: inherit;
+}
+dialog::backdrop {
+    background: transparent; /* 使用内部 .modal-mask 作为遮罩层 */
+}
+
+/* 工具类 - 隐藏元素 */
+.is-hidden {
+    display: none !important;
+}
+
+/* 元素默认 display 值（配合 .is-hidden 切换） */
+#logoutBtn { display: flex; }
+#loginPromptBtn { display: inline-flex; }
+#userLoginPrompt { display: flex; }
+
 /* 无障碍隐藏文本 - 仅屏幕阅读器可读 */
 .sr-only {
     position: absolute;

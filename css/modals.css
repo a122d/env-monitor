@@ -9,19 +9,13 @@
     height: 100%;
     z-index: 9600;
     opacity: 0;
-    visibility: hidden;
     transform: translateZ(0);
-    transition: opacity var(--transition-normal) var(--ease-smooth), 
-                visibility 0s linear var(--transition-normal);
-    /* 性能优化 */
+    transition: opacity var(--transition-normal) var(--ease-smooth);
     contain: layout style paint;
 }
 
 .mqtt-config-modal.show {
     opacity: 1;
-    visibility: visible;
-    transition: opacity var(--transition-normal) var(--ease-smooth), 
-                visibility 0s linear 0s;
 }
 
 /* 图表设置弹窗样式（采用与 about-modal 相同的布局和交互） */
@@ -35,19 +29,13 @@
     height: 100%;
     z-index: 9600;
     opacity: 0;
-    visibility: hidden;
     transform: translateZ(0);
-    transition: opacity var(--transition-normal) var(--ease-smooth), 
-                visibility 0s linear var(--transition-normal);
-    /* 性能优化 */
+    transition: opacity var(--transition-normal) var(--ease-smooth);
     contain: layout style paint;
 }
 
 .chart-settings-modal.show { 
     opacity: 1;
-    visibility: visible;
-    transition: opacity var(--transition-normal) var(--ease-smooth), 
-                visibility 0s linear 0s;
 }
 
 .chart-settings-modal .modal-content {
@@ -980,17 +968,14 @@ select:not(.custom-select) option {
     height: 100%;
     z-index: 9600;
     opacity: 0;
-    visibility: hidden;
     transform: translateZ(0);
-    transition: opacity 0.3s ease, visibility 0s linear 0.3s;
+    transition: opacity 0.3s ease;
     contain: layout style paint;
-    will-change: opacity, visibility;
+    will-change: opacity;
 }
 
 .about-modal.show {
     opacity: 1;
-    visibility: visible;
-    transition: opacity 0.3s ease, visibility 0s linear 0s;
 }
 
 .about-modal .modal-content {
@@ -1184,17 +1169,14 @@ select:not(.custom-select) option {
     height: 100%;
     z-index: 9600;
     opacity: 0;
-    visibility: hidden;
     transform: translateZ(0);
-    transition: opacity 0.3s ease, visibility 0s linear 0.3s;
+    transition: opacity 0.3s ease;
     contain: layout style paint;
-    will-change: opacity, visibility;
+    will-change: opacity;
 }
 
 .device-version-modal.show {
     opacity: 1;
-    visibility: visible;
-    transition: opacity 0.3s ease, visibility 0s linear 0s;
 }
 
 .device-version-modal .modal-content {
@@ -2099,17 +2081,14 @@ select:not(.custom-select) option {
     height: 100%;
     z-index: 9600;
     opacity: 0;
-    visibility: hidden;
     transform: translateZ(0);
-    transition: opacity 0.3s ease, visibility 0s linear 0.3s;
+    transition: opacity 0.3s ease;
     contain: layout style paint;
-    will-change: opacity, visibility;
+    will-change: opacity;
 }
 
 .user-center-modal.show {
     opacity: 1;
-    visibility: visible;
-    transition: opacity 0.3s ease, visibility 0s linear 0s;
 }
 
 /* 用户中心弹窗专用样式 - 采用蓝色渐变背景 */

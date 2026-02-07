@@ -96,15 +96,13 @@ function initDeviceControlPanel() {
     // 关闭按钮事件
     if (closeBtn) {
         closeBtn.addEventListener('click', () => {
-            deviceControlModal.classList.remove('show');
-            ScrollLock.unlock();
+            window.ModalHelper.close(deviceControlModal);
         });
     }
     
     if (deviceControlClose) {
         deviceControlClose.addEventListener('click', () => {
-            deviceControlModal.classList.remove('show');
-            ScrollLock.unlock();
+            window.ModalHelper.close(deviceControlModal);
         });
     }
     
@@ -112,8 +110,7 @@ function initDeviceControlPanel() {
     const modalMask = deviceControlModal.querySelector('.modal-mask');
     if (modalMask) {
         modalMask.addEventListener('click', () => {
-            deviceControlModal.classList.remove('show');
-            ScrollLock.unlock();
+            window.ModalHelper.close(deviceControlModal);
         });
     }
     
@@ -238,10 +235,10 @@ function updateUserCenterDisplay() {
     // 检查用户是否已登录
     if (window.currentUser && window.currentUser.username) {
         // 已登录，显示用户信息
-        userInfoSection.style.display = 'block';
-        userLoginPrompt.style.display = 'none';
-        if (logoutBtn) logoutBtn.style.display = 'flex';
-        if (loginPromptBtn) loginPromptBtn.style.display = 'none';
+        userInfoSection.classList.remove('is-hidden');
+        userLoginPrompt.classList.add('is-hidden');
+        if (logoutBtn) logoutBtn.classList.remove('is-hidden');
+        if (loginPromptBtn) loginPromptBtn.classList.add('is-hidden');
         
         if (userCenterUsername) {
             userCenterUsername.textContent = window.currentUser.username;
@@ -255,10 +252,10 @@ function updateUserCenterDisplay() {
         }
     } else {
         // 未登录，显示登录提示
-        userInfoSection.style.display = 'none';
-        userLoginPrompt.style.display = 'flex';
-        if (logoutBtn) logoutBtn.style.display = 'none';
-        if (loginPromptBtn) loginPromptBtn.style.display = 'inline-flex';
+        userInfoSection.classList.add('is-hidden');
+        userLoginPrompt.classList.remove('is-hidden');
+        if (logoutBtn) logoutBtn.classList.add('is-hidden');
+        if (loginPromptBtn) loginPromptBtn.classList.remove('is-hidden');
     }
 }
 
@@ -278,8 +275,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // 用户中心关闭按钮
     if (userCenterClose) {
         userCenterClose.addEventListener('click', () => {
-            userCenterModal.classList.remove('show');
-            ScrollLock.unlock();
+            window.ModalHelper.close(userCenterModal);
         });
     }
 
@@ -287,7 +283,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (loginPromptBtn) {
         loginPromptBtn.addEventListener('click', () => {
             // 关闭用户中心弹窗
-            userCenterModal.classList.remove('show');
+            window.ModalHelper.close(userCenterModal);
             // 打开登录弹窗
             if (window.openMqttConfig && typeof window.openMqttConfig === 'function') {
                 window.openMqttConfig();
@@ -299,8 +295,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (logoutBtn) {
         logoutBtn.addEventListener('click', () => {
             // 使用自定义确认弹窗而非浏览器默认confirm
-            const confirmLogout = document.createElement('div');
-            confirmLogout.className = 'toast-alert-modal show';
+            const confirmLogout = document.createElement('dialog');
+            confirmLogout.className = 'toast-alert-modal';
             confirmLogout.innerHTML = `
                 <div class="modal-mask"></div>
                 <div class="toast-alert-content">
@@ -316,21 +312,26 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
             `;
             document.body.appendChild(confirmLogout);
+            confirmLogout.showModal();
+            requestAnimationFrame(() => confirmLogout.classList.add('show'));
             
             const cancelBtn = confirmLogout.querySelector('.btn-test');
             const confirmBtn = confirmLogout.querySelector('.btn-save');
             
             cancelBtn.addEventListener('click', () => {
+                confirmLogout.close();
                 confirmLogout.remove();
             });
             
             confirmBtn.addEventListener('click', () => {
+                confirmLogout.close();
                 confirmLogout.remove();
                 location.reload();
             });
             
             // 点击遮罩关闭
             confirmLogout.querySelector('.modal-mask').addEventListener('click', () => {
+                confirmLogout.close();
                 confirmLogout.remove();
             });
         });
@@ -339,8 +340,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // 点击用户中心弹窗背景关闭
     if (userCenterModal) {
         userCenterModal.addEventListener('click', () => {
-            userCenterModal.classList.remove('show');
-            ScrollLock.unlock();
+            window.ModalHelper.close(userCenterModal);
         });
         const userCenterContent = userCenterModal.querySelector('.modal-content');
         if (userCenterContent) {
@@ -366,24 +366,21 @@ document.addEventListener('DOMContentLoaded', () => {
     // 关于系统弹窗 关闭按钮
     if (aboutModalClose) {
         aboutModalClose.addEventListener('click', () => {
-            aboutModal.classList.remove('show');
-            ScrollLock.unlock();
+            window.ModalHelper.close(aboutModal);
         });
     }
 
     // 设备版本弹窗 关闭按钮
     if (deviceVersionModalClose) {
         deviceVersionModalClose.addEventListener('click', () => {
-            deviceVersionModal.classList.remove('show');
-            ScrollLock.unlock();
+            window.ModalHelper.close(deviceVersionModal);
         });
     }
 
     // 点击设备版本弹窗背景关闭
     if (deviceVersionModal) {
         deviceVersionModal.addEventListener('click', () => {
-            deviceVersionModal.classList.remove('show');
-            ScrollLock.unlock();
+            window.ModalHelper.close(deviceVersionModal);
         });
         const deviceVersionModalContent = deviceVersionModal.querySelector('.modal-content');
         if (deviceVersionModalContent) {
@@ -412,8 +409,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (dataTimeClose) dataTimeClose.addEventListener('click', () => { 
-            dataTimeModal.classList.remove('show'); 
-            ScrollLock.unlock(); 
+            window.ModalHelper.close(dataTimeModal);
         });
 
         if (dataTimeSaveBtn) dataTimeSaveBtn.addEventListener('click', () => {
@@ -435,15 +431,13 @@ document.addEventListener('DOMContentLoaded', () => {
             } catch (e) { 
                 console.warn('保存数据时间设置失败', e); 
             }
-            dataTimeModal.classList.remove('show');
-            ScrollLock.unlock();
+            window.ModalHelper.close(dataTimeModal);
         });
 
         // 点击遮罩关闭
         const dataTimeContent = dataTimeModal.querySelector('.modal-content');
         dataTimeModal.addEventListener('click', () => { 
-            dataTimeModal.classList.remove('show'); 
-            ScrollLock.unlock(); 
+            window.ModalHelper.close(dataTimeModal);
         });
         if (dataTimeContent) dataTimeContent.addEventListener('click', (e) => e.stopPropagation());
 
@@ -480,7 +474,7 @@ document.addEventListener('DOMContentLoaded', () => {
             };
         }
 
-        if (chartSettingsClose) chartSettingsClose.addEventListener('click', () => { chartSettingsModal.classList.remove('show'); ScrollLock.unlock(); });
+        if (chartSettingsClose) chartSettingsClose.addEventListener('click', () => { window.ModalHelper.close(chartSettingsModal); });
 
         if (chartSettingsSaveBtn) chartSettingsSaveBtn.addEventListener('click', () => {
             const settings = gatherChartSettings();
@@ -488,13 +482,12 @@ document.addEventListener('DOMContentLoaded', () => {
             if (window.applyChartSettings && typeof window.applyChartSettings === 'function') {
                 try { window.applyChartSettings(settings); } catch (e) { console.warn('applyChartSettings 调用失败', e); }
             }
-            chartSettingsModal.classList.remove('show');
-            ScrollLock.unlock();
+            window.ModalHelper.close(chartSettingsModal);
         });
 
         // 点击遮罩关闭
         const chartSettingsContent = chartSettingsModal.querySelector('.modal-content');
-        chartSettingsModal.addEventListener('click', () => { chartSettingsModal.classList.remove('show'); ScrollLock.unlock(); });
+        chartSettingsModal.addEventListener('click', () => { window.ModalHelper.close(chartSettingsModal); });
         if (chartSettingsContent) chartSettingsContent.addEventListener('click', (e) => e.stopPropagation());
 
         // 初始化时填充表单
@@ -504,8 +497,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // 点击背景关闭弹窗
     if (aboutModal) {
         aboutModal.addEventListener('click', () => {
-            aboutModal.classList.remove('show');
-            ScrollLock.unlock();
+            window.ModalHelper.close(aboutModal);
         });
     }
     // 点击关于系统弹窗内容区域阻止关闭
@@ -530,8 +522,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (userCenterModal) {
                         // 更新用户信息显示
                         updateUserCenterDisplay();
-                        userCenterModal.classList.add('show');
-                        ScrollLock.lock();
+                        window.ModalHelper.open(userCenterModal);
                     } else {
                         ToastAlert.show('用户中心尚未就绪');
                     }
@@ -550,8 +541,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     
                     const deviceControlModal = document.getElementById('deviceControlModal');
                     if (deviceControlModal) {
-                        deviceControlModal.classList.add('show');
-                        ScrollLock.lock();
+                        window.ModalHelper.open(deviceControlModal);
                         // 初始化设备控制面板
                         initDeviceControlPanel();
                     } else {
@@ -579,8 +569,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     // 打开历史数据时间设置弹窗
                     const dataTimeModal = document.getElementById('dataTimeModal');
                     if (dataTimeModal) {
-                        dataTimeModal.classList.add('show');
-                        ScrollLock.lock();
+                        window.ModalHelper.open(dataTimeModal);
                     } else {
                         ToastAlert.show('历史数据时间设置尚未就绪');
                     }
@@ -592,8 +581,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     // 打开图表显示设置弹窗
                     const chartSettingsModal = document.getElementById('chartSettingsModal');
                     if (chartSettingsModal) {
-                        chartSettingsModal.classList.add('show');
-                        ScrollLock.lock();
+                        window.ModalHelper.open(chartSettingsModal);
                     } else {
                         ToastAlert.show('图表显示设置尚未就绪');
                     }
@@ -610,8 +598,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'device-version':
                     // 打开设备版本弹窗
                     if (deviceVersionModal) {
-                        deviceVersionModal.classList.add('show');
-                        ScrollLock.lock();
+                        window.ModalHelper.open(deviceVersionModal);
                         // 更新版本信息
                         updateDeviceVersionDisplay();
                     } else {
@@ -623,8 +610,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     break;
                 case 'about':
                     // 打开关于系统弹窗
-                    aboutModal.classList.add('show');
-                    ScrollLock.lock();
+                    window.ModalHelper.open(aboutModal);
                     // 关闭汉堡菜单
                     hamburgerMenu.classList.remove('active');
                     dropdownMenu.classList.remove('show');

@@ -31,14 +31,13 @@ window.ToastAlert = (function() {
         // 保存回调
         onConfirmCallback = onConfirm;
         
-        // 显示弹窗
-        modal.classList.add('show');
-        isShown = true;
-        
-        // 禁用背景滚动
-        if (window.ScrollLock) {
-            window.ScrollLock.lock();
+        // 显示弹窗（使用 ModalHelper 或兼容逻辑）
+        if (window.ModalHelper) {
+            window.ModalHelper.open(modal);
+        } else {
+            modal.classList.add('show');
         }
+        isShown = true;
         
         // 获焦到确定按钮
         if (confirmBtn) {
@@ -53,13 +52,12 @@ window.ToastAlert = (function() {
         if (!modal) return;
         
         // 隐藏弹窗
-        modal.classList.remove('show');
-        isShown = false;
-        
-        // 恢复背景滚动
-        if (window.ScrollLock) {
-            window.ScrollLock.unlock();
+        if (window.ModalHelper) {
+            window.ModalHelper.close(modal);
+        } else {
+            modal.classList.remove('show');
         }
+        isShown = false;
         
         // 执行回调
         if (typeof onConfirmCallback === 'function') {
@@ -93,12 +91,7 @@ window.ToastAlert = (function() {
             });
         }
         
-        // Escape 键关闭
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && isShown) {
-                close();
-            }
-        });
+        // Escape 键由 ModalHelper.initAll() 统一处理
     }
     
     // DOM 加载完成后初始化

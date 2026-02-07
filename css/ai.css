@@ -603,17 +603,14 @@
     height: 100%;
     z-index: 100;
     opacity: 0;
-    visibility: hidden;
     transform: translateZ(0);
-    transition: opacity 0.3s ease, visibility 0s linear 0.3s;
+    transition: opacity 0.3s ease;
     contain: layout style paint;
-    will-change: opacity, visibility;
+    will-change: opacity;
 }
 
 .ai-config-modal.show {
     opacity: 1;
-    visibility: visible;
-    transition: opacity 0.3s ease, visibility 0s linear 0s;
 }
 
 .ai-config-modal .modal-content {

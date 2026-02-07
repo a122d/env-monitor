@@ -44,8 +44,8 @@
         </div>
 
         <!-- 原有内容：标题/菜单/数据卡片/图表 -->
-        <div class="title-container" id="titleContainer">
-            <div class="menu-container">
+        <header class="title-container" id="titleContainer">
+            <nav class="menu-container">
                 <div class="hamburger-menu" id="hamburgerMenu">
                     <span class="hamburger-line"></span>
                     <span class="hamburger-line"></span>
@@ -54,7 +54,7 @@
                 <ul class="dropdown-menu" id="dropdownMenu">
                     <li class="dropdown-item" data-action="user-center">用户中心</li>
                     <li class="dropdown-divider"></li>
-                    <li class="dropdown-item admin-only" id="menuDeviceControl" data-action="device-control" style="display: none;">环境设备控制</li>
+                    <li class="dropdown-item admin-only is-hidden" id="menuDeviceControl" data-action="device-control">环境设备控制</li>
                     <li class="dropdown-item" data-action="chart-setting">图表显示设置</li>
                     <li class="dropdown-item" data-action="data-time">设置历史时间</li>
                     <li class="dropdown-item" data-action="data-export">导出监控数据</li>
@@ -62,7 +62,7 @@
                     <li class="dropdown-item" data-action="device-version">设备版本</li>
                     <li class="dropdown-item" data-action="about">关于系统</li>
                 </ul>
-            </div>
+            </nav>
             <div class="title-wrapper">
                 <h1 class="main-title">环境数据</h1>
             </div>
@@ -70,10 +70,10 @@
                 <div class="combined-status" id="combined-status">
                     <span class="status-dot"></span>
                     <span class="status-text" id="status-text">未登录</span>
-                    <span class="user-name" id="user-name" style="display: none;"></span>
+                    <span class="user-name is-hidden" id="user-name"></span>
                 </div>
             </div>
-        </div>
+        </header>
 
         <main class="data-grid" role="main">
             <article class="data-card temp-card temp-normal" id="temperatureCard" aria-label="温度监测">
@@ -405,7 +405,7 @@
     </div>
 
     <!-- 新增：用户登录弹窗 -->
-    <div class="mqtt-config-modal" id="mqttConfigModal">
+    <dialog class="mqtt-config-modal" id="mqttConfigModal">
         <div class="modal-mask"></div>
         <div class="modal-content login-card" role="dialog" aria-modal="true">
             <button type="button" class="modal-close" id="modalClose" aria-label="关闭">×</button>
@@ -449,7 +449,7 @@
                                     <path d="M2 12C2 12 5 5 12 5C19 5 22 12 22 12C22 12 19 19 12 19C5 19 2 12 2 12Z" stroke="currentColor" stroke-width="2"/>
                                     <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/>
                                 </svg>
-                                <svg class="eye-off-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" style="display: none;">
+                                <svg class="eye-off-icon is-hidden" width="20" height="20" viewBox="0 0 24 24" fill="none">
                                     <path d="M2 12C2 12 5 5 12 5C19 5 22 12 22 12C22 12 19 19 12 19C5 19 2 12 2 12Z" stroke="currentColor" stroke-width="2"/>
                                     <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/>
                                     <line x1="3" y1="3" x2="21" y2="21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
@@ -467,10 +467,10 @@
                 </form>
             </div>
         </div>
-    </div>
+    </dialog>
 
     <!-- 用户中心弹窗 -->
-    <div class="user-center-modal" id="userCenterModal">
+    <dialog class="user-center-modal" id="userCenterModal">
         <div class="modal-mask"></div>
         <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="userCenterTitle">
             <div class="modal-header">
@@ -478,7 +478,7 @@
                 <button type="button" class="modal-close" id="userCenterClose" aria-label="关闭对话框">×</button>
             </div>
             <div class="modal-body">
-                <div class="user-info-section" id="userInfoSection" style="display: none;">
+                <div class="user-info-section is-hidden" id="userInfoSection">
                     <div class="settings-row user-info-row">
                         <label class="settings-label">用户名</label>
                         <div class="settings-value" id="userCenterUsername">--</div>
@@ -501,7 +501,7 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-logout" id="logoutBtn" style="display: none;">
+                <button type="button" class="btn btn-logout is-hidden" id="logoutBtn">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
                         <polyline points="16 17 21 12 16 7"/>
@@ -509,13 +509,13 @@
                     </svg>
                     退出登录
                 </button>
-                <button type="button" class="btn btn-login-prompt" id="loginPromptBtn" style="display: none;">立即登录</button>
+                <button type="button" class="btn btn-login-prompt is-hidden" id="loginPromptBtn">立即登录</button>
             </div>
         </div>
-    </div>
+    </dialog>
 
     <!-- 设备版本弹窗 -->
-    <div class="device-version-modal" id="deviceVersionModal">
+    <dialog class="device-version-modal" id="deviceVersionModal">
         <div class="modal-mask"></div>
         <div class="modal-content" role="dialog" aria-modal="true">
             <button type="button" class="modal-close" id="deviceVersionModalClose" aria-label="关闭">×</button>
@@ -573,10 +573,10 @@
                 </div>
             </div>
         </div>
-    </div>
+    </dialog>
 
     <!-- 关于系统弹窗 -->
-    <div class="about-modal" id="aboutModal">
+    <dialog class="about-modal" id="aboutModal">
         <div class="modal-mask"></div>
         <div class="modal-content" role="dialog" aria-modal="true">
             <button type="button" class="modal-close" id="aboutModalClose" aria-label="关闭">×</button>
@@ -635,10 +635,10 @@
                 </div>
             </div>
         </div>
-    </div>
+    </dialog>
 
     <!-- 图表显示设置弹窗 -->
-    <div class="chart-settings-modal" id="chartSettingsModal">
+    <dialog class="chart-settings-modal" id="chartSettingsModal">
         <div class="modal-mask"></div>
         <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="chartSettingsTitle">
             <div class="modal-header">
@@ -671,10 +671,10 @@
                 <button type="button" class="btn btn-save" id="chartSettingsSaveBtn" title="保存并立即应用设置">保存</button>
             </div>
         </div>
-    </div>
+    </dialog>
 
     <!-- 历史数据时间设置弹窗 -->
-    <div class="chart-settings-modal" id="dataTimeModal">
+    <dialog class="chart-settings-modal" id="dataTimeModal">
         <div class="modal-mask"></div>
         <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="dataTimeTitle">
             <div class="modal-header">
@@ -699,7 +699,7 @@
                 <button type="button" class="btn btn-save" id="dataTimeSaveBtn" title="保存设置">保存</button>
             </div>
         </div>
-    </div>
+    </dialog>
 
     <!-- AI对话侧边栏 -->
     <div class="ai-sidebar" id="aiSidebar">
@@ -779,9 +779,9 @@
     </div>
 
     <!-- AI设置弹窗 -->
-    <div class="ai-config-modal" id="aiConfigModal">
+    <dialog class="ai-config-modal" id="aiConfigModal">
         <div class="modal-mask"></div>
-        <div class="modal-loading-mask" id="aiConfigLoadingMask" style="display:none;">
+        <div class="modal-loading-mask is-hidden" id="aiConfigLoadingMask">
             <div class="modal-loading-spinner"></div>
         </div>
         <div class="modal-content" role="dialog" aria-modal="true">
@@ -819,10 +819,10 @@
                 <button type="button" class="btn btn-save" id="aiSaveBtn">保存配置</button>
             </div>
         </div>
-    </div>
+    </dialog>
 
     <!-- 环境设备控制弹窗 (仅管理员可见) -->
-    <div class="chart-settings-modal device-control-modal" id="deviceControlModal">
+    <dialog class="chart-settings-modal device-control-modal" id="deviceControlModal">
         <div class="modal-mask"></div>
         <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="deviceControlTitle">
             <div class="modal-header">
@@ -866,10 +866,10 @@
                 <button type="button" class="btn btn-save" id="deviceControlCloseBtn">关闭</button>
             </div>
         </div>
-    </div>
+    </dialog>
 
     <!-- 自定义提示弹窗 -->
-    <div class="toast-alert-modal" id="toastAlertModal">
+    <dialog class="toast-alert-modal" id="toastAlertModal">
         <div class="modal-mask"></div>
         <div class="toast-alert-content">
             <div class="toast-alert-body">
@@ -879,14 +879,12 @@
                 <button type="button" class="btn btn-save" id="toastAlertBtn">确定</button>
             </div>
         </div>
-    </div>
+    </dialog>
 
     <!-- 引入JS文件 -->
     <script src="js/toast-alert.js"></script>
-    <script src="js/mqtt-config.js"></script>
-    <script src="js/mqtt-client.js"></script>
-    <script src="js/chart-utils.js"></script>
-    <script src="js/chart-legend.js"></script>
+    <script src="js/mqtt.js"></script>
+    <script src="js/chart.js"></script>
     <script src="js/menu-utils.js"></script>
     <script src="js/main-utils.js"></script>
     <script src="js/ai-assistant.js"></script>
