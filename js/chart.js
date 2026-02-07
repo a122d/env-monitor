@@ -2,17 +2,52 @@
  * 图表数据管理与交互 (合并自 chart-utils.js + chart-legend.js)
  */
 // 图表数据与实例
-window.chartData = {
-    time: [],
-    temperature: [],
-    humidity: [],
-    windSpeed: [],
-    illumination: [],
-    PM2: [],
-    sunray: []
-};
+function createEmptyChartData() {
+    return { time: [], temperature: [], humidity: [], windSpeed: [], illumination: [], PM2: [], sunray: [] };
+}
+window.chartData = createEmptyChartData();
 
 let combinedChart;
+
+// ===== 图表传感器配置表 =====
+const SERIES_NAMES = ['温度', '湿度', '风速', '光照', 'PM2.5', '紫外线'];
+const CHART_SENSOR_KEYS = ['temperature', 'humidity', 'windSpeed', 'illumination', 'PM2', 'sunray'];
+const SENSOR_RANGES = [
+    { key: 'temperature', min: -10, max: 36 },  // ℃
+    { key: 'humidity',    min: 0,   max: 100 },  // % (直接使用)
+    { key: 'windSpeed',   min: 0,   max: 20 },   // m/s
+    { key: 'illumination', min: 0,  max: 1000 },  // lux
+    { key: 'PM2',         min: 0,   max: 150 },   // μg/m³
+    { key: 'sunray',      min: 0,   max: 10 }     // UVI
+];
+
+// 传感器值解析配置（与 mqtt.js 的 DATA_PARSE_CONFIG 对应）
+const CHART_PARSE_CONFIG = [
+    { field: 'temperature',  parse: v => parseFloat(parseFloat(v) / 10).toFixed(1), default: '0' },
+    { field: 'humidity',     parse: v => parseFloat(parseFloat(v) / 10).toFixed(1), default: '0' },
+    { field: 'windSpeed',    parse: v => parseFloat(parseFloat(v) / 10).toFixed(1), default: '0' },
+    { field: 'illumination', parse: v => parseInt(v),                                default: 0 },
+    { field: 'pm25',         parse: v => parseInt(v),                                default: 0,  chartKey: 'PM2' },
+    { field: 'sunray',       parse: v => parseFloat(parseFloat(v) / 10).toFixed(1), default: '0' }
+];
+
+/**
+ * 计算所有传感器的百分比数据 + 构建 series 数据
+ * @param {boolean} lazyUpdate - 是否懒更新
+ * @returns {{ xData: string[], seriesData: Array, lazyUpdate: boolean }}
+ */
+function computeChartSeriesData(lazyUpdate = true) {
+    const xData = window.chartData.time;
+    const seriesData = SENSOR_RANGES.map(range => {
+        const rawData = window.chartData[range.key];
+        // 湿度已经是百分比，直接使用
+        const data = range.key === 'humidity'
+            ? rawData
+            : rawData.map(v => calculatePercentage(v, range.min, range.max));
+        return { data };
+    });
+    return { xData, seriesData, lazyUpdate };
+}
 // 全局控制
 window.CHART_MAX_LEN = 25; // 实时视图默认保留点数（历史数据+1条实时）
 
@@ -478,40 +513,14 @@ function calculatePercentage(value, min, max) {
 
 // 批量更新图表（使用RAF优化）
 function batchUpdateCharts() {
-    if (!combinedChart) {
-        return;
-    }
-    
-    const xData = window.chartData.time;
-    
-    // 计算各项数据的百分比
-    // 温度: -10°C 到 36°C
-    const tempPercent = window.chartData.temperature.map(t => calculatePercentage(t, -10, 36));
-    // 湿度: 0% 到 100%
-    const humidityPercent = window.chartData.humidity.map(h => h); // 已经是百分比
-    // 风速: 0 m/s 到 20 m/s
-    const windPercent = window.chartData.windSpeed.map(w => calculatePercentage(w, 0, 20));
-    // 光照: 0 lux 到 1000 lux
-    const lightPercent = window.chartData.illumination.map(l => calculatePercentage(l, 0, 1000));
-    // PM2.5: 0 到 150 μg/m³
-    const pm25Percent = window.chartData.PM2.map(p => calculatePercentage(p, 0, 150));
-    // 紫外线: 0 到 10 UVI
-    const sunrayPercent = window.chartData.sunray.map(s => calculatePercentage(s, 0, 10));
-    
-    // 使用requestAnimationFrame确保在下一帧渲染
+    if (!combinedChart) return;
+
+    const { xData, seriesData } = computeChartSeriesData(true);
     requestAnimationFrame(() => {
         combinedChart.setOption({
             xAxis: { data: xData },
-            series: [
-                { data: tempPercent },
-                { data: humidityPercent },
-                { data: windPercent },
-                { data: lightPercent },
-                { data: pm25Percent },
-                { data: sunrayPercent }
-            ]
+            series: seriesData
         }, { notMerge: false, lazyUpdate: true });
-        
         chartUpdatePending = false;
     });
 }
@@ -526,25 +535,13 @@ window.updateChartData = function(data) {
 
     const now = new Date().toLocaleTimeString();
     
-    // 解析数据值
-    const tempVal = data.temperature !== undefined && data.temperature !== null
-        ? parseFloat(parseFloat(data.temperature) / 10).toFixed(1)
-        : '0';
-    const humVal = data.humidity !== undefined && data.humidity !== null
-        ? parseFloat(parseFloat(data.humidity) / 10).toFixed(1)
-        : '0';
-    const windVal = data.windSpeed !== undefined && data.windSpeed !== null
-        ? parseFloat(parseFloat(data.windSpeed) / 10).toFixed(1)
-        : '0';
-    const lightVal = data.illumination !== undefined && data.illumination !== null
-        ? parseInt(data.illumination)
-        : 0;
-    const PM2Val = data.pm25 !== undefined && data.pm25 !== null
-        ? parseInt(data.pm25)
-        : 0;
-    const sunrayVal = data.sunray !== undefined && data.sunray !== null
-        ? parseFloat(parseFloat(data.sunray) / 10).toFixed(1)
-        : '0';
+    // 解析数据值（配置驱动）
+    const parsedValues = {};
+    for (const cfg of CHART_PARSE_CONFIG) {
+        const raw = data[cfg.field];
+        const key = cfg.chartKey || cfg.field;
+        parsedValues[key] = (raw !== undefined && raw !== null) ? cfg.parse(raw) : cfg.default;
+    }
 
     // 获取历史数据条数（如果已设置）
     const historyCount = window.chartHistoryCount || 0;
@@ -554,21 +551,15 @@ window.updateChartData = function(data) {
         // 已有历史数据 + 实时数据，覆盖最后一条实时数据
         const lastIdx = currentLen - 1;
         window.chartData.time[lastIdx] = now;
-        window.chartData.temperature[lastIdx] = Number(tempVal);
-        window.chartData.humidity[lastIdx] = Number(humVal);
-        window.chartData.windSpeed[lastIdx] = Number(windVal);
-        window.chartData.illumination[lastIdx] = lightVal;
-        window.chartData.PM2[lastIdx] = PM2Val;
-        window.chartData.sunray[lastIdx] = sunrayVal;
+        for (const key of CHART_SENSOR_KEYS) {
+            window.chartData[key][lastIdx] = Number(parsedValues[key]);
+        }
     } else {
         // 无历史数据或首次添加实时数据，直接追加
         window.chartData.time.push(now);
-        window.chartData.temperature.push(Number(tempVal));
-        window.chartData.humidity.push(Number(humVal));
-        window.chartData.windSpeed.push(Number(windVal));
-        window.chartData.illumination.push(lightVal);
-        window.chartData.PM2.push(PM2Val);
-        window.chartData.sunray.push(sunrayVal);
+        for (const key of CHART_SENSOR_KEYS) {
+            window.chartData[key].push(Number(parsedValues[key]));
+        }
         
         // 限制最大长度（无历史数据时的fallback）
         const maxLen = window.CHART_MAX_LEN || 25;
@@ -599,15 +590,7 @@ window.updateChartData = function(data) {
 
 // 清空图表数据
 window.clearChartData = function() {
-    window.chartData = {
-        time: [],
-        temperature: [],
-        humidity: [],
-        windSpeed: [],
-        illumination: [],
-        PM2: [],
-        sunray: []
-    };
+    window.chartData = createEmptyChartData();
 
     const emptyXAxis = ['暂无数据'];
 
@@ -638,33 +621,10 @@ window.refreshChartFromData = function() {
         return;
     }
     
-    const xData = window.chartData.time;
-    
-    // 计算各项数据的百分比
-    // 温度: -10°C 到 36°C
-    const tempPercent = window.chartData.temperature.map(t => calculatePercentage(t, -10, 36));
-    // 湿度: 0% 到 100%
-    const humidityPercent = window.chartData.humidity.map(h => h); // 已经是百分比
-    // 风速: 0 m/s 到 20 m/s
-    const windPercent = window.chartData.windSpeed.map(w => calculatePercentage(w, 0, 20));
-    // 光照: 0 lux 到 1000 lux
-    const lightPercent = window.chartData.illumination.map(l => calculatePercentage(l, 0, 1000));
-    // PM2.5: 0 到 150 μg/m³
-    const pm25Percent = window.chartData.PM2.map(p => calculatePercentage(p, 0, 150));
-    // 紫外线: 0 到 10 UVI
-    const sunrayPercent = window.chartData.sunray.map(s => calculatePercentage(s, 0, 10));
-    
-    // 更新图表
+    const { xData, seriesData } = computeChartSeriesData(false);
     combinedChart.setOption({
         xAxis: { data: xData },
-        series: [
-            { data: tempPercent },
-            { data: humidityPercent },
-            { data: windPercent },
-            { data: lightPercent },
-            { data: pm25Percent },
-            { data: sunrayPercent }
-        ]
+        series: seriesData
     }, { notMerge: false, lazyUpdate: false });
     
     // 重置缩放到显示全部数据
@@ -742,7 +702,6 @@ window.applyChartSettings = function(settings) {
     
     // 更新所有系列的配置
     const seriesUpdate = [];
-    const seriesNames = ['温度', '湿度', '风速', '光照', 'PM2.5', '紫外线'];
     const seriesColors = ['#ef4444', '#0891b2', '#8b5cf6', '#f59e0b', '#10b981', '#3b82f6'];
     
     for (let i = 0; i < 6; i++) {
@@ -823,8 +782,6 @@ document.addEventListener('DOMContentLoaded', () => {
             'sunray': 5
         };
         
-        const seriesNames = ['温度', '湿度', '风速', '光照', 'PM2.5', '紫外线'];
-        
         legendItems.forEach(item => {
             item.addEventListener('click', function() {
                 const seriesName = this.getAttribute('data-series');
@@ -840,7 +797,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (chartInstance) {
                         chartInstance.dispatchAction({
                             type: 'legendToggleSelect',
-                            name: seriesNames[seriesIndex]
+                            name: SERIES_NAMES[seriesIndex]
                         });
                     }
                 }

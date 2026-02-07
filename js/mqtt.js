@@ -6,7 +6,7 @@
 
 // ============ 应用版本号 ============
 // 统一版本号管理
-const APP_VERSION = 'V6.3.1';
+const APP_VERSION = 'V6.4.1';
 
 // 暴露全局版本号
 window.APP_VERSION = APP_VERSION;
@@ -345,108 +345,190 @@ let reconnectTimer = null;
 const RECONNECT_INTERVAL = 5000;
 let baseClientId = 'env-monitor-' + Math.random().toString(16);
 
-// 温度统计数据
-let temperatureStats = {
-    current: 0,
-    sum: 0,
-    count: 0,
-    history: [],           // 保存最近10次数据用于趋势计算
-    lastUpdateTime: null  // 上次更新时间
-};
-
-// 湿度统计数据
-let humidityStats = {
-    current: 0,
-    sum: 0,
-    count: 0,
-    history: [],
-    lastUpdateTime: null
-};
-
-// 风速统计数据
-let windSpeedStats = {
-    current: 0,
-    sum: 0,
-    count: 0,
-    history: [],
-    lastUpdateTime: null
-};
-
-// 光照强度统计数据
-let illuminationStats = {
-    current: 0,
-    sum: 0,
-    count: 0,
-    history: [],
-    lastUpdateTime: null
-};
-
-// PM2.5统计数据
-let pm25Stats = {
-    current: 0,
-    sum: 0,
-    count: 0,
-    history: [],
-    lastUpdateTime: null
-};
-
-// 紫外线强度统计数据
-let sunrayStats = {
-    current: 0,
-    sum: 0,
-    count: 0,
-    history: [],
-    lastUpdateTime: null
-};
-
-// 大气压强统计数据
-let pressureStats = {
-    current: 0,
-    sum: 0,
-    count: 0,
-    history: [],
-    lastUpdateTime: null
-};
-
-// 海拔高度统计数据
-let altitudeStats = {
-    current: 0,
-    sum: 0,
-    count: 0,
-    history: [],
-    lastUpdateTime: null
-};
-
-// 获取温度等级描述
-function getTempLevel(temp) {
-    if (temp < 0) return '严寒';
-    if (temp < 7) return '寒冷';
-    if (temp < 16) return '冷';
-    if (temp < 20) return '凉爽';
-    if (temp < 25) return '舒适';
-    if (temp < 30) return '温暖';
-    if (temp < 35) return '炎热';
-    return '酷热';
+// ===== 传感器统计数据工厂 =====
+function createSensorStats() {
+    return { current: 0, sum: 0, count: 0, history: [], lastUpdateTime: null };
 }
 
-// 计算温度变化趋势
-function calculateTempTrend() {
-    const history = temperatureStats.history;
-    if (history.length < 2) {
-        return { trend: '→'};
+const sensorStats = {
+    temperature: createSensorStats(),
+    humidity: createSensorStats(),
+    windSpeed: createSensorStats(),
+    illumination: createSensorStats(),
+    pm25: createSensorStats(),
+    sunray: createSensorStats(),
+    pressure: createSensorStats(),
+    altitude: createSensorStats()
+};
+
+// ===== 通用阈值分类函数 =====
+// rules: [{ max, ... }, ...] — 值 < max 则命中该规则，最后一条为兜底
+function classifyValue(value, rules) {
+    for (const rule of rules) {
+        if (value < rule.max) return rule;
     }
-    
-    // 计算最近变化
-    const current = history[history.length - 1];
-    const previous = history[Math.max(0, history.length - 5)];
-    const change = current - previous;
-    
-    let trend = '→';
-    if (change > 0.1) trend = '↑';
-    if (change < -0.1) trend = '↓';
-    
-    return { trend };
+    return rules[rules.length - 1];
 }
+
+// ===== 传感器卡片配置表 =====
+const SENSOR_CARD_CONFIG = {
+    temperature: {
+        cardId: 'temperatureCard',
+        stateRules: [
+            { max: 7, cls: 'temp-cold' },
+            { max: 25.1, cls: 'temp-normal' },
+            { max: Infinity, cls: 'temp-hot' }
+        ],
+        levelRules: [
+            { max: 0, label: '严寒' },
+            { max: 7, label: '寒冷' },
+            { max: 16, label: '冷' },
+            { max: 20, label: '凉爽' },
+            { max: 25, label: '舒适' },
+            { max: 30, label: '温暖' },
+            { max: 35, label: '炎热' },
+            { max: Infinity, label: '酷热' }
+        ],
+        levelSelector: '.temp-level',
+        trendSelector: '.temp-trend',
+        progressById: 'tempProgress',
+        progressFn: val => ((val + 10) / 46) * 100,
+        iconConfig: {
+            selector: '.temp-icon',
+            rules: [
+                { max: 7, icon: '❄️' },
+                { max: 28.1, icon: '🌡️' },
+                { max: Infinity, icon: '🔥' }
+            ]
+        },
+        useRAF: true
+    },
+    humidity: {
+        cardId: 'humidityCard',
+        stateRules: [
+            { max: 30, cls: 'humidity-dry' },
+            { max: 70, cls: 'humidity-comfort' },
+            { max: Infinity, cls: 'humidity-wet' }
+        ],
+        levelRules: [
+            { max: 30, label: '干燥' },
+            { max: 70, label: '舒适' },
+            { max: Infinity, label: '潮湿' }
+        ],
+        progressFn: val => val
+    },
+    windSpeed: {
+        cardId: 'windSpeedCard',
+        stateRules: [
+            { max: 5.4, cls: 'wind-calm' },
+            { max: 10.8, cls: 'wind-moderate' },
+            { max: Infinity, cls: 'wind-strong' }
+        ],
+        levelRules: [
+            { max: 2, label: '平静' },
+            { max: 5.4, label: '温和' },
+            { max: 10.8, label: '较强' },
+            { max: 17.2, label: '强风' },
+            { max: Infinity, label: '狂风' }
+        ],
+        progressFn: val => val * 5
+    },
+    illumination: {
+        cardId: 'illuminationCard',
+        stateRules: [
+            { max: 200, cls: 'illumination-dim' },
+            { max: 500, cls: 'illumination-moderate' },
+            { max: Infinity, cls: 'illumination-bright' }
+        ],
+        levelRules: [
+            { max: 10, label: '黑暗' },
+            { max: 50, label: '微弱' },
+            { max: 200, label: '稍暗' },
+            { max: 500, label: '适中' },
+            { max: 1000, label: '明亮' },
+            { max: Infinity, label: '强光' }
+        ],
+        progressFn: val => val / 10
+    },
+    pm25: {
+        cardId: 'PM2card',
+        stateRules: [
+            { max: 36, cls: 'pm25-excellent' },
+            { max: 76, cls: 'pm25-good' },
+            { max: 116, cls: 'pm25-mild' },
+            { max: 151, cls: 'pm25-moderate' },
+            { max: Infinity, cls: 'pm25-heavy' }
+        ],
+        levelRules: [
+            { max: 36, label: '优' },
+            { max: 76, label: '良' },
+            { max: 116, label: '轻度污染', extraClass: 'pollution-level' },
+            { max: 151, label: '中度污染', extraClass: 'pollution-level' },
+            { max: Infinity, label: '重度污染', extraClass: 'pollution-level' }
+        ],
+        progressFn: val => (val / 3) * 2
+    },
+    sunray: {
+        cardId: 'sunrayCard',
+        stateRules: [
+            { max: 3, cls: 'uvi-weak' },
+            { max: 6, cls: 'uvi-moderate' },
+            { max: 8, cls: 'uvi-strong' },
+            { max: Infinity, cls: 'uvi-very-strong' }
+        ],
+        levelRules: [
+            { max: 3, label: '弱' },
+            { max: 6, label: '中等' },
+            { max: 8, label: '强' },
+            { max: 11, label: '很强' },
+            { max: Infinity, label: '极强' }
+        ],
+        progressFn: val => val * 10
+    },
+    pressure: {
+        cardId: 'pressureCard',
+        stateRules: [
+            { max: 100, cls: 'pressure-low' },
+            { max: 103, cls: 'pressure-normal' },
+            { max: Infinity, cls: 'pressure-high' }
+        ],
+        levelRules: [
+            { max: 100, label: '偏低' },
+            { max: 103, label: '正常' },
+            { max: Infinity, label: '偏高' }
+        ],
+        progressFn: val => ((val - 90) / 20) * 100,
+        valueFormat: val => val.toFixed(2)
+    },
+    altitude: {
+        cardId: 'altitudeCard',
+        stateRules: [
+            { max: 500, cls: 'altitude-low' },
+            { max: 1500, cls: 'altitude-medium' },
+            { max: Infinity, cls: 'altitude-high' }
+        ],
+        levelRules: [
+            { max: 500, label: '低海拔' },
+            { max: 1500, label: '中海拔' },
+            { max: 3000, label: '高海拔' },
+            { max: Infinity, label: '超高海拔' }
+        ],
+        progressFn: val => (val / 3000) * 100,
+        valueFormat: val => val.toFixed(1)
+    }
+};
+
+// ===== 数据解析配置表（÷10等处理规则） =====
+const DATA_PARSE_CONFIG = [
+    { key: 'temperature', parse: v => (parseFloat(v) / 10).toFixed(1), displayId: 'temperature' },
+    { key: 'humidity',    parse: v => (parseFloat(v) / 10).toFixed(1), displayId: 'humidity' },
+    { key: 'windSpeed',   parse: v => (parseFloat(v) / 10).toFixed(1), displayId: 'windSpeed' },
+    { key: 'illumination', parse: v => parseInt(v),                     displayId: 'illumination' },
+    { key: 'pm25',        parse: v => parseInt(v),                      displayId: 'PM2' },
+    { key: 'sunray',      parse: v => (parseFloat(v) / 10).toFixed(1), displayId: 'sunray' },
+    { key: 'pressure',    parse: v => (parseFloat(v) / 1000).toFixed(3) },
+    { key: 'altitude',    parse: v => (parseFloat(v) / 10).toFixed(1) }
+];
 
 // MQTT配置（优先从本地存储加载，否则使用全局默认配置）
 let mqttConfig = (() => {
@@ -542,14 +624,7 @@ function reconnect() {
 }
 
 // 缓存上次状态避免重复更新
-let lastCardStates = {
-    temperature: null,
-    humidity: null,
-    windSpeed: null,
-    illumination: null,
-    pm25: null,
-    sunray: null
-};
+let lastCardStates = {};
 
 // 重置所有数据卡片为未连接状态（显示--）
 function resetAllDataCards() {
@@ -622,536 +697,86 @@ function resetAllDataCards() {
     if (altitudeEl) altitudeEl.textContent = '--';
 }
 
-// 更新数据卡片
-// 温/湿/风/海拔÷10保留1位小数  大气压÷10000保留3位小数
+// 更新数据卡片（配置驱动）
 function updateDataCards(data) {
-    // 保存完整数据到全局变量供其他功能使用（如设备版本显示）
-    if (!window.latestData) {
-        window.latestData = {};
-    }
+    if (!window.latestData) window.latestData = {};
     Object.assign(window.latestData, data);
-    
-    // 温度：÷10保留1位小数，更新统计信息和颜色
-    if (data.temperature !== undefined) {
-        const tempValue = (parseFloat(data.temperature) / 10).toFixed(1);
-        updateTemperatureCard(tempValue);
-        updateDataValue('temperature', tempValue);
-    }
-    // 湿度：÷10保留1位小数
-    if (data.humidity !== undefined) {
-        const humiValue = (parseFloat(data.humidity) / 10).toFixed(1);
-        updateHumidityCard(humiValue);
-        updateDataValue('humidity', humiValue);
-    }
-    // 风速：÷10保留1位小数
-    if (data.windSpeed !== undefined) {
-        const windValue = (parseFloat(data.windSpeed) / 10).toFixed(1);
-        updateWindSpeedCard(windValue);
-        updateDataValue('windSpeed', windValue);
-    }
-    // 光照：保持整数
-    if (data.illumination !== undefined) {
-        const illuminationValue = parseInt(data.illumination);
-        updateIlluminationCard(illuminationValue);
-        updateDataValue('illumination', illuminationValue);
-    }
-    // PM2.5：保持整数
-    if (data.pm25 !== undefined) {
-        const pm25Value = parseInt(data.pm25);
-        updateDataValue('PM2', pm25Value);
-        updatePM25Card(pm25Value);
-    }
-    // 紫外线强度：÷10保留1位小数 UVI
-    if (data.sunray !== undefined) {
-        const sunrayValue = (parseFloat(data.sunray) / 10).toFixed(1);
-        updateDataValue('sunray', sunrayValue);
-        updateSunrayCard(sunrayValue);
-    }
-    // 大气压强：÷1000保留3位小数，单位KPa
-    if (data.pressure !== undefined) {
-        const pressureValue = (parseFloat(data.pressure) / 1000).toFixed(3);
-        updatePressureCard(pressureValue);
-    }
-    // 海拔高度：÷10保留1位小数，单位m
-    if (data.altitude !== undefined) {
-        const altitudeValue = (parseFloat(data.altitude) / 10).toFixed(1);
-        updateAltitudeCard(altitudeValue);
+
+    for (const cfg of DATA_PARSE_CONFIG) {
+        if (data[cfg.key] === undefined) continue;
+        const value = cfg.parse(data[cfg.key]);
+        updateSensorCard(cfg.key, value);
+        if (cfg.displayId) updateDataValue(cfg.displayId, value);
     }
 }
 
-// 更新温度卡片（增强版 + 性能优化）
-function updateTemperatureCard(tempValue) {
-    const tempNum = parseFloat(tempValue);
-    const card = document.getElementById('temperatureCard');
+// ===== 通用传感器卡片更新函数 =====
+function updateSensorCard(sensorKey, value) {
+    const config = SENSOR_CARD_CONFIG[sensorKey];
+    if (!config) return;
+
+    const num = parseFloat(value);
+    const card = document.getElementById(config.cardId);
     if (!card) return;
-    
-    // 保存上次更新时间
-    temperatureStats.lastUpdateTime = Date.now();
-    
-    // 更新历史数据（最多保留10个）
-    temperatureStats.history.push(tempNum);
-    if (temperatureStats.history.length > 10) {
-        temperatureStats.history.shift();
-    }
-    
-    // 更新温度统计
-    temperatureStats.current = tempNum;
-    temperatureStats.sum += tempNum;
-    temperatureStats.count++;
-    
-    // 确定新状态
-    let newState;
-    if (tempNum < 7) {
-        newState = 'temp-cold';
-    } else if (tempNum > 25) {
-        newState = 'temp-hot';
-    } else {
-        newState = 'temp-normal';
-    }
-    
-    // 使用RAF批量更新DOM，避免多次重排
-    requestAnimationFrame(() => {
-        // 只在状态变化时才更新类名
-        if (lastCardStates.temperature !== newState) {
-            card.classList.remove('temp-cold', 'temp-normal', 'temp-hot');
-            card.classList.add(newState);
-            lastCardStates.temperature = newState;
+
+    // 更新统计数据
+    const stats = sensorStats[sensorKey];
+    stats.lastUpdateTime = Date.now();
+    stats.history.push(num);
+    if (stats.history.length > 10) stats.history.shift();
+    stats.current = num;
+    stats.sum += num;
+    stats.count++;
+
+    // DOM 更新逻辑（可选 RAF 包裹）
+    const applyUpdate = () => {
+        // 状态类名（仅在变化时更新）
+        const stateRule = classifyValue(num, config.stateRules);
+        if (lastCardStates[sensorKey] !== stateRule.cls) {
+            card.classList.remove(...config.stateRules.map(r => r.cls));
+            card.classList.add(stateRule.cls);
+            lastCardStates[sensorKey] = stateRule.cls;
         }
-        
-        // 缓存DOM元素引用
-        const icon = card.querySelector('.temp-icon');
-        const levelEl = card.querySelector('.temp-level');
-        const trendEl = card.querySelector('.temp-trend');
-        
-        // 更新温度图标和等级
-        if (icon) {
-            if (tempNum < 7) {
-                icon.textContent = '❄️';
-            } else if (tempNum > 28) {
-                icon.textContent = '🔥';
-            } else {
-                icon.textContent = '🌡️';
+
+        // 图标更新（仅温度等配置了 iconConfig 的卡片）
+        if (config.iconConfig) {
+            const iconEl = card.querySelector(config.iconConfig.selector);
+            if (iconEl) {
+                const iconRule = classifyValue(num, config.iconConfig.rules);
+                iconEl.textContent = iconRule.icon;
             }
         }
-        
+
+        // 等级标签
+        const levelSelector = config.levelSelector || '.card-level';
+        const levelEl = card.querySelector(levelSelector);
         if (levelEl) {
-            levelEl.textContent = getTempLevel(tempNum);
+            const levelRule = classifyValue(num, config.levelRules);
+            levelEl.textContent = levelRule.label;
+            if (levelRule.extraClass) levelEl.classList.add(levelRule.extraClass);
         }
-        
-        // 更新进度条
-        updateProgressBar(tempNum);
-        
-        // 更新趋势显示
-        if (trendEl) {
-            const trendData = calculateTempTrend();
-            trendEl.textContent = trendData.trend;
-            trendEl.classList.remove('up', 'down', 'stable');
-            if (trendData.trend === '↑') {
-                trendEl.classList.add('up');
-            } else if (trendData.trend === '↓') {
-                trendEl.classList.add('down');
-            } else {
-                trendEl.classList.add('stable');
-            }
+
+        // 数值显示（大气压/海拔等需要格式化的卡片）
+        if (config.valueFormat) {
+            const valueEl = card.querySelector('.card-value');
+            if (valueEl) valueEl.textContent = config.valueFormat(num);
         }
-        
-    });
-}
 
-// 更新进度条位置
-function updateProgressBar(tempNum) {
-    const progressFill = document.getElementById('tempProgress');
-    if (!progressFill) return;
-    
-    // 将温度映射到0-100%
-    // -10℃ = 0%, 13℃ = 50%, 36℃ = 100%
-    const percentage = Math.max(0, Math.min(100, ((tempNum + 10) / 46) * 100));
-    progressFill.style.width = percentage + '%';
-}
-
-
-
-// 更新湿度卡片
-function updateHumidityCard(humidityValue) {
-    const humidityNum = parseFloat(humidityValue);
-    const card = document.getElementById('humidityCard');
-    if (!card) return;
-    
-    humidityStats.lastUpdateTime = Date.now();
-    humidityStats.history.push(humidityNum);
-    if (humidityStats.history.length > 10) {
-        humidityStats.history.shift();
-    }
-    
-    humidityStats.current = humidityNum;
-    humidityStats.sum += humidityNum;
-    humidityStats.count++;
-    
-    // 更新颜色类
-    card.classList.remove('humidity-dry', 'humidity-comfort', 'humidity-wet');
-    if (humidityNum < 30) {
-        card.classList.add('humidity-dry');
-    } else if (humidityNum < 70) {
-        card.classList.add('humidity-comfort');
-    } else {
-        card.classList.add('humidity-wet');
-    }
-    
-    // 更新湿度等级标签
-    const levelEl = card.querySelector('.card-level');
-    if (levelEl) {
-        if (humidityNum < 30) {
-            levelEl.textContent = '干燥';
-        } else if (humidityNum < 70) {
-            levelEl.textContent = '舒适';
-        } else {
-            levelEl.textContent = '潮湿';
+        // 进度条
+        const progressFill = config.progressById
+            ? document.getElementById(config.progressById)
+            : card.querySelector('.card-progress-bar .progress-fill');
+        if (progressFill) {
+            const pct = Math.max(0, Math.min(100, config.progressFn(num)));
+            progressFill.style.width = pct + '%';
         }
-    }
-    
-    // 更新进度条
-    const progressFill = card.querySelector('.card-progress-bar .progress-fill');
-    if (progressFill) {
-        const percentage = Math.max(0, Math.min(100, humidityNum));
-        progressFill.style.width = percentage + '%';
-    }
-    
-    // 更新趋势
-    updateCardTrend(card, humidityStats, '.card-trend');
-    
-}
 
+        // 趋势
+        const trendSelector = config.trendSelector || '.card-trend';
+        updateCardTrend(card, stats, trendSelector);
+    };
 
-// 更新风速卡片
-function updateWindSpeedCard(windSpeedValue) {
-    const windNum = parseFloat(windSpeedValue);
-    const card = document.getElementById('windSpeedCard');
-    if (!card) return;
-    
-    windSpeedStats.lastUpdateTime = Date.now();
-    windSpeedStats.history.push(windNum);
-    if (windSpeedStats.history.length > 10) {
-        windSpeedStats.history.shift();
-    }
-    
-    windSpeedStats.current = windNum;
-    windSpeedStats.sum += windNum;
-    windSpeedStats.count++;
-    
-    // 更新颜色类
-    card.classList.remove('wind-calm', 'wind-moderate', 'wind-strong');
-    if (windNum < 5.4) {
-        card.classList.add('wind-calm');
-    } else if (windNum < 10.8) {
-        card.classList.add('wind-moderate');
-    } else {
-        card.classList.add('wind-strong');
-    }
-    
-    // 更新风速等级标签
-    const levelEl = card.querySelector('.card-level');
-    if (levelEl) {
-        if (windNum < 2) {
-            levelEl.textContent = '平静';
-        } else if (windNum < 5.4) {
-            levelEl.textContent = '温和';
-        } else if (windNum < 10.8) {
-            levelEl.textContent = '较强';
-        } else if (windNum < 17.2) {
-            levelEl.textContent = '强风';
-        } else {
-            levelEl.textContent = '狂风';
-        }
-    }
-    
-    // 更新进度条
-    const progressFill = card.querySelector('.card-progress-bar .progress-fill');
-    if (progressFill) {
-        const percentage = Math.max(0, Math.min(100, windNum * 5));
-        progressFill.style.width = percentage + '%';
-    }
-    
-    // 更新趋势
-    updateCardTrend(card, windSpeedStats, '.card-trend');
-    
-}
-
-
-// 更新光照强度卡片
-function updateIlluminationCard(illuminationValue) {
-    const illuminationNum = parseFloat(illuminationValue);
-    const card = document.getElementById('illuminationCard');
-    if (!card) return;
-    
-    illuminationStats.lastUpdateTime = Date.now();
-    illuminationStats.history.push(illuminationNum);
-    if (illuminationStats.history.length > 10) {
-        illuminationStats.history.shift();
-    }
-    
-    illuminationStats.current = illuminationNum;
-    illuminationStats.sum += illuminationNum;
-    illuminationStats.count++;
-    
-    // 更新颜色类
-    card.classList.remove('illumination-dim', 'illumination-moderate', 'illumination-bright');
-    if (illuminationNum < 200) {
-        card.classList.add('illumination-dim');
-    } else if (illuminationNum < 500) {
-        card.classList.add('illumination-moderate');
-    } else {
-        card.classList.add('illumination-bright');
-    }
-    
-    // 更新光照等级标签
-    const levelEl = card.querySelector('.card-level');
-    if (levelEl) {
-        if (illuminationNum < 10) {
-            levelEl.textContent = '黑暗';
-        } else if (illuminationNum < 50) {
-            levelEl.textContent = '微弱';
-        } else if (illuminationNum < 200) {
-            levelEl.textContent = '稍暗';
-        } else if (illuminationNum < 500) {
-            levelEl.textContent = '适中';
-        } else if (illuminationNum < 1000) {
-            levelEl.textContent = '明亮';
-        } else {
-            levelEl.textContent = '强光';
-        }
-    }
-    // 更新进度条
-    const progressFill = card.querySelector('.card-progress-bar .progress-fill');
-    if (progressFill) {
-        const percentage = Math.max(0, Math.min(100, illuminationNum / 10));
-        progressFill.style.width = percentage + '%';
-    }
-    // 更新趋势
-    updateCardTrend(card, illuminationStats, '.card-trend');
-}
-
-
-// PM2.5卡片更新
-function updatePM25Card(pm25Value) {
-    const pm25Num = parseInt(pm25Value);
-    const card = document.getElementById('PM2card');
-    if (!card) return;
-    
-    pm25Stats.lastUpdateTime = Date.now();
-    pm25Stats.history.push(pm25Num);
-    if (pm25Stats.history.length > 10) {
-        pm25Stats.history.shift();
-    }
-    pm25Stats.current = pm25Num;
-    pm25Stats.sum += pm25Num;
-    pm25Stats.count++;
-    
-    // 更新颜色类
-    card.classList.remove('pm25-excellent', 'pm25-good', 'pm25-mild', 'pm25-moderate', 'pm25-heavy');
-    if (pm25Num <= 35) {
-        card.classList.add('pm25-excellent');
-    } else if (pm25Num <= 75) {
-        card.classList.add('pm25-good');
-    } else if (pm25Num <= 115) {
-        card.classList.add('pm25-mild');
-    } else if (pm25Num <= 150) {
-        card.classList.add('pm25-moderate');
-    } else {
-        card.classList.add('pm25-heavy');
-    }
-    
-    // 更新PM2.5等级标签
-    const levelEl = card.querySelector('.card-level');
-    if (levelEl) {
-        if (pm25Num <= 35) {
-            levelEl.textContent = '优';
-        } else if (pm25Num <= 75) {
-            levelEl.textContent = '良';
-        } else if (pm25Num <= 115) {
-            levelEl.textContent = '轻度污染';
-            levelEl.classList.add('pollution-level');
-        } else if (pm25Num <= 150) {
-            levelEl.textContent = '中度污染';
-            levelEl.classList.add('pollution-level');
-        } else {
-            levelEl.textContent = '重度污染';
-            levelEl.classList.add('pollution-level');
-        }
-    }
-    // 更新进度条
-    const progressFill = card.querySelector('.card-progress-bar .progress-fill');
-    if (progressFill) {
-        const percentage = Math.max(0, Math.min(100, (pm25Num / 3) * 2));
-        progressFill.style.width = percentage + '%';
-    }
-    // 更新趋势
-    updateCardTrend(card, pm25Stats, '.card-trend');
-}
-
-
-// 更新紫外线强度卡片
-function updateSunrayCard(sunrayValue) {
-    const sunrayNum = parseFloat(sunrayValue);
-    const card = document.getElementById('sunrayCard');
-    if (!card) return;
-
-    sunrayStats.lastUpdateTime = Date.now();
-    sunrayStats.history.push(sunrayNum);
-    if (sunrayStats.history.length > 10) {
-        sunrayStats.history.shift();
-    }
-    sunrayStats.current = sunrayNum;
-    sunrayStats.sum += sunrayNum;
-    sunrayStats.count++;
-    
-    // 更新颜色类
-    card.classList.remove('uvi-weak', 'uvi-moderate', 'uvi-strong', 'uvi-very-strong');
-    if (sunrayNum < 3) {
-        card.classList.add('uvi-weak');
-    } else if (sunrayNum < 6) {
-        card.classList.add('uvi-moderate');
-    } else if (sunrayNum < 8) {
-        card.classList.add('uvi-strong');
-    } else {
-        card.classList.add('uvi-very-strong');
-    }
-    
-    // 更新紫外线等级标签
-    const levelEl = card.querySelector('.card-level');
-    if (levelEl) {
-        if (sunrayNum < 3) {
-            levelEl.textContent = '弱';
-        } else if (sunrayNum < 6) {
-            levelEl.textContent = '中等';
-        } else if (sunrayNum < 8) {
-            levelEl.textContent = '强';
-        } else if (sunrayNum < 11) {
-            levelEl.textContent = '很强';
-        } else {
-            levelEl.textContent = '极强';
-        }
-    }
-    // 更新进度条
-    const progressFill = card.querySelector('.card-progress-bar .progress-fill');
-    if (progressFill) {
-        const percentage = Math.max(0, Math.min(100, sunrayNum * 10));
-        progressFill.style.width = percentage + '%';
-    }
-    // 更新趋势
-    updateCardTrend(card, sunrayStats, '.card-trend');
-}
-
-
-// 更新大气压强卡片
-function updatePressureCard(pressureValue) {
-    const pressureNum = parseFloat(pressureValue);
-    const card = document.getElementById('pressureCard');
-    if (!card) return;
-    
-    pressureStats.lastUpdateTime = Date.now();
-    pressureStats.history.push(pressureNum);
-    if (pressureStats.history.length > 10) {
-        pressureStats.history.shift();
-    }
-    
-    pressureStats.current = pressureNum;
-    pressureStats.sum += pressureNum;
-    pressureStats.count++;
-    
-    // 更新颜色类
-    card.classList.remove('pressure-low', 'pressure-normal', 'pressure-high');
-    if (pressureNum < 100) {
-        card.classList.add('pressure-low');
-    } else if (pressureNum < 103) {
-        card.classList.add('pressure-normal');
-    } else {
-        card.classList.add('pressure-high');
-    }
-    
-    // 更新等级标签
-    const levelEl = card.querySelector('.card-level');
-    if (levelEl) {
-        if (pressureNum < 100) {
-            levelEl.textContent = '偏低';
-        } else if (pressureNum < 103) {
-            levelEl.textContent = '正常';
-        } else {
-            levelEl.textContent = '偏高';
-        }
-    }
-    
-    // 更新数值
-    const valueEl = card.querySelector('.card-value');
-    if (valueEl) {
-        valueEl.textContent = pressureNum.toFixed(2);
-    }
-    
-    // 更新进度条 (90-110 KPa)
-    const progressFill = card.querySelector('.card-progress-bar .progress-fill');
-    if (progressFill) {
-        const percentage = Math.max(0, Math.min(100, ((pressureNum - 90) / 20) * 100));
-        progressFill.style.width = percentage + '%';
-    }
-    
-    // 更新趋势
-    updateCardTrend(card, pressureStats, '.card-trend');
-}
-
-// 更新海拔高度卡片
-function updateAltitudeCard(altitudeValue) {
-    const altitudeNum = parseFloat(altitudeValue);
-    const card = document.getElementById('altitudeCard');
-    if (!card) return;
-    
-    altitudeStats.lastUpdateTime = Date.now();
-    altitudeStats.history.push(altitudeNum);
-    if (altitudeStats.history.length > 10) {
-        altitudeStats.history.shift();
-    }
-    
-    altitudeStats.current = altitudeNum;
-    altitudeStats.sum += altitudeNum;
-    altitudeStats.count++;
-    
-    // 更新颜色类
-    card.classList.remove('altitude-low', 'altitude-medium', 'altitude-high');
-    if (altitudeNum < 500) {
-        card.classList.add('altitude-low');
-    } else if (altitudeNum < 1500) {
-        card.classList.add('altitude-medium');
-    } else {
-        card.classList.add('altitude-high');
-    }
-    
-    // 更新等级标签
-    const levelEl = card.querySelector('.card-level');
-    if (levelEl) {
-        if (altitudeNum < 500) {
-            levelEl.textContent = '低海拔';
-        } else if (altitudeNum < 1500) {
-            levelEl.textContent = '中海拔';
-        } else if (altitudeNum < 3000) {
-            levelEl.textContent = '高海拔';
-        } else {
-            levelEl.textContent = '超高海拔';
-        }
-    }
-    
-    // 更新数值
-    const valueEl = card.querySelector('.card-value');
-    if (valueEl) {
-        valueEl.textContent = altitudeNum.toFixed(1);
-    }
-    
-    // 更新进度条 (0-3000m)
-    const progressFill = card.querySelector('.card-progress-bar .progress-fill');
-    if (progressFill) {
-        const percentage = Math.max(0, Math.min(100, (altitudeNum / 3000) * 100));
-        progressFill.style.width = percentage + '%';
-    }
-    
-    // 更新趋势
-    updateCardTrend(card, altitudeStats, '.card-trend');
+    config.useRAF ? requestAnimationFrame(applyUpdate) : applyUpdate();
 }
 
 // 通用卡片趋势更新函数

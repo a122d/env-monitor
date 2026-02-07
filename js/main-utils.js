@@ -25,6 +25,25 @@ const ModalHelper = {
         setTimeout(() => { if (dialog.open) dialog.close(); }, 350);
     },
     /**
+     * 绑定点击遮罩关闭 + 内容区阻止冒泡
+     * @param {HTMLDialogElement} dialog
+     * @param {string} [contentSelector='.modal-content'] 内容区选择器
+     */
+    bindBackdropClose(dialog, contentSelector = '.modal-content') {
+        if (!dialog) return;
+        dialog.addEventListener('click', () => ModalHelper.close(dialog));
+        const content = dialog.querySelector(contentSelector);
+        if (content) content.addEventListener('click', e => e.stopPropagation());
+    },
+    /**
+     * 绑定关闭按钮
+     * @param {HTMLElement} btn
+     * @param {HTMLDialogElement} dialog
+     */
+    bindCloseBtn(btn, dialog) {
+        if (btn && dialog) btn.addEventListener('click', () => ModalHelper.close(dialog));
+    },
+    /**
      * 初始化所有 dialog 的原生 Escape 键拦截
      */
     initAll() {

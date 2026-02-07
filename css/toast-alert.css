@@ -24,9 +24,9 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.45);
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
+    background: var(--modal-mask-bg);
+    backdrop-filter: var(--modal-mask-blur);
+    -webkit-backdrop-filter: var(--modal-mask-blur);
     transition: opacity var(--transition-normal) var(--ease-smooth);
     cursor: pointer;
     opacity: 0;
@@ -45,7 +45,7 @@
     transform: translate3d(-50%, -46%, 0) scale3d(0.96, 0.96, 1);
     width: 90%;
     max-width: 380px;
-    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    background: var(--gradient-surface);
     border-radius: 16px;
     box-shadow: 0 20px 60px rgba(0,0,0,0.15), 
                 0 0 40px rgba(37, 99, 235, 0.08);

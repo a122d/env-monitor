@@ -131,10 +131,10 @@ function bindAIEvents() {
         if (window.ModalHelper) window.ModalHelper.close(aiConfigModal);
     });
 
-    // 点击遮罩关闭
-    aiConfigModal?.querySelector('.modal-mask')?.addEventListener('click', () => {
-        if (window.ModalHelper) window.ModalHelper.close(aiConfigModal);
-    });
+    // 点击遮罩关闭 + 内容区阻止冒泡
+    if (window.ModalHelper && aiConfigModal) {
+        window.ModalHelper.bindBackdropClose(aiConfigModal);
+    }
 
     // 保存配置
     document.getElementById('aiSaveBtn')?.addEventListener('click', () => {

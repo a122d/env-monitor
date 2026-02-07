@@ -42,63 +42,15 @@
     overflow: visible;
 }
 
-.chart-settings-modal .modal-close {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    font-size: 28px;
-    color: #64748b;
-    cursor: pointer;
-    width: 36px;
-    height: 36px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    /* 优化过渡动画 */
-    transition: transform var(--transition-normal) var(--ease-spring), 
-                background var(--transition-fast) var(--ease-smooth),
-                color var(--transition-fast) var(--ease-smooth),
-                box-shadow var(--transition-fast) var(--ease-smooth);
-    z-index: 10;
-    /* 性能优化 - GPU加速 */
-    transform: translate3d(0, 0, 0);
-    backface-visibility: hidden;
-}
-
-.chart-settings-modal .modal-close:hover {
-    background: linear-gradient(135deg, #ff6b6b, #ff8e53);
-    color: #ffffff;
-    transform: rotate(90deg) scale3d(1.12, 1.12, 1);
-    box-shadow: 0 8px 22px rgba(255, 107, 107, 0.35);
-}
-
-/* 聚焦态可见性支持 */
-.chart-settings-modal .modal-close:focus {
-    outline: 2px solid rgba(37,99,235,0.18);
-    outline-offset: 2px;
-}
-
-/* 强制平滑字体渲染，减少消失或闪烁 */
-.chart-settings-modal .modal-close {
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-}
-
-/* 按下时做完整旋转动画，增强交互感 */
-.chart-settings-modal .modal-close:active {
-    animation: modal-close-spin 0.5s var(--ease-out-expo);
-}
-
 .modal-mask {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.45);
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
+    background: var(--modal-mask-bg);
+    backdrop-filter: var(--modal-mask-blur);
+    -webkit-backdrop-filter: var(--modal-mask-blur);
     /* 性能优化 - GPU加速 */
     transform: translate3d(0, 0, 0);
     opacity: 0;
@@ -131,7 +83,7 @@
     width: 90%;
     max-width: 900px;
     max-height: 90vh;
-    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    background: var(--gradient-surface);
     border-radius: 16px;
     box-shadow: 0 20px 60px rgba(0,0,0,0.15), 
                 0 0 40px rgba(37, 99, 235, 0.08);
@@ -176,7 +128,7 @@
 
 .modal-header {
     padding: 24px 32px;
-    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    background: var(--gradient-surface);
     border-bottom: 2px solid #f0f2f5;
     display: flex;
     justify-content: space-between;
@@ -227,6 +179,8 @@
     /* GPU加速 */
     transform: translate3d(0, 0, 0);
     backface-visibility: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
 .modal-close:hover {
@@ -558,7 +512,7 @@
 #dataTimeRange {
     background-image: 
         url("data:image/svg+xml,%3Csvg width='14' height='9' viewBox='0 0 14 9' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L7 7L13 1' stroke='%233b82f6' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"),
-        linear-gradient(135deg, #ffffff 0%, #f8fafc 100%) !important;
+        var(--gradient-surface) !important;
     background-repeat: no-repeat, no-repeat !important;
     background-position: calc(100% - 18px) center, 0 0 !important;
     background-size: 14px auto, 100% 100% !important;
@@ -630,7 +584,7 @@ select:not(.custom-select) {
     appearance: none;
     -webkit-appearance: none;
     -moz-appearance: none;
-    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    background: var(--gradient-surface);
     border: 2px solid #e2e8f0;
     border-radius: 12px;
     padding: 11px 40px 11px 18px;
@@ -921,12 +875,6 @@ select:not(.custom-select) option {
 .modal-close:focus {
     outline: 2px solid rgba(37,99,235,0.18);
     outline-offset: 2px;
-}
-
-/* 强制平滑字体渲染，减少消失或闪烁 */
-.modal-close {
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
 }
 
 /* 按下时做完整旋转动画，增强交互感 */
@@ -1307,7 +1255,7 @@ select:not(.custom-select) option {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    background: var(--gradient-surface);
     border: 1px solid rgba(8,24,41,0.06);
     box-shadow: 0 8px 20px rgba(11,20,30,0.08);
     color: #334155;

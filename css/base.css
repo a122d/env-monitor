@@ -131,7 +131,7 @@ body {
 .container {
     width: 95%;
     max-width: 1440px;
-    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    background: var(--gradient-surface);
     padding: clamp(15px, 4vw, 30px) clamp(12px, 3vw, 25px);
     margin: 0 auto;
     border-radius: clamp(12px, 2vw, 16px);

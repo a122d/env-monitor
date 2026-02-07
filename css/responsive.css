@@ -189,7 +189,7 @@
 @media (max-width: 480px) {
     body {
         padding: 0;
-        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+        background: var(--gradient-surface);
     }
     
     .container {

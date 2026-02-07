@@ -94,33 +94,11 @@ function initDeviceControlPanel() {
     }
     
     // 关闭按钮事件
-    if (closeBtn) {
-        closeBtn.addEventListener('click', () => {
-            window.ModalHelper.close(deviceControlModal);
-        });
-    }
-    
-    if (deviceControlClose) {
-        deviceControlClose.addEventListener('click', () => {
-            window.ModalHelper.close(deviceControlModal);
-        });
-    }
-    
-    // 点击遮罩关闭
-    const modalMask = deviceControlModal.querySelector('.modal-mask');
-    if (modalMask) {
-        modalMask.addEventListener('click', () => {
-            window.ModalHelper.close(deviceControlModal);
-        });
-    }
-    
-    // 阻止点击内容区域关闭
-    const modalContent = deviceControlModal.querySelector('.modal-content');
-    if (modalContent) {
-        modalContent.addEventListener('click', (e) => {
-            e.stopPropagation();
-        });
-    }
+    window.ModalHelper.bindCloseBtn(closeBtn, deviceControlModal);
+    window.ModalHelper.bindCloseBtn(deviceControlClose, deviceControlModal);
+
+    // 点击遮罩关闭 + 内容区阻止冒泡
+    window.ModalHelper.bindBackdropClose(deviceControlModal);
     
     // 控制按钮事件处理
     controlBtns.forEach(btn => {
@@ -272,13 +250,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const loginPromptBtn = document.getElementById('loginPromptBtn');
     const logoutBtn = document.getElementById('logoutBtn');
 
-    // 用户中心关闭按钮
-    if (userCenterClose) {
-        userCenterClose.addEventListener('click', () => {
-            window.ModalHelper.close(userCenterModal);
-        });
-    }
-
     // 用户中心登录提示按钮
     if (loginPromptBtn) {
         loginPromptBtn.addEventListener('click', () => {
@@ -338,16 +309,15 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // 点击用户中心弹窗背景关闭
-    if (userCenterModal) {
-        userCenterModal.addEventListener('click', () => {
-            window.ModalHelper.close(userCenterModal);
-        });
-        const userCenterContent = userCenterModal.querySelector('.modal-content');
-        if (userCenterContent) {
-            userCenterContent.addEventListener('click', (e) => {
-                e.stopPropagation();
-            });
-        }
+    window.ModalHelper.bindBackdropClose(userCenterModal);
+
+    // 用户中心关闭按钮
+    window.ModalHelper.bindCloseBtn(userCenterClose, userCenterModal);
+
+    // 关闭汉堡菜单工具函数
+    function closeHamburgerMenu() {
+        hamburgerMenu.classList.remove('active');
+        dropdownMenu.classList.remove('show');
     }
 
     // 点击汉堡菜单切换显隐
@@ -358,37 +328,13 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // 点击页面其他区域关闭菜单
-    document.addEventListener('click', () => {
-        hamburgerMenu.classList.remove('active');
-        dropdownMenu.classList.remove('show');
-    });
+    document.addEventListener('click', closeHamburgerMenu);
 
-    // 关于系统弹窗 关闭按钮
-    if (aboutModalClose) {
-        aboutModalClose.addEventListener('click', () => {
-            window.ModalHelper.close(aboutModal);
-        });
-    }
-
-    // 设备版本弹窗 关闭按钮
-    if (deviceVersionModalClose) {
-        deviceVersionModalClose.addEventListener('click', () => {
-            window.ModalHelper.close(deviceVersionModal);
-        });
-    }
-
-    // 点击设备版本弹窗背景关闭
-    if (deviceVersionModal) {
-        deviceVersionModal.addEventListener('click', () => {
-            window.ModalHelper.close(deviceVersionModal);
-        });
-        const deviceVersionModalContent = deviceVersionModal.querySelector('.modal-content');
-        if (deviceVersionModalContent) {
-            deviceVersionModalContent.addEventListener('click', (e) => {
-                e.stopPropagation();
-            });
-        }
-    }
+    // 关闭按钮 + 遮罩关闭
+    window.ModalHelper.bindCloseBtn(aboutModalClose, aboutModal);
+    window.ModalHelper.bindCloseBtn(deviceVersionModalClose, deviceVersionModal);
+    window.ModalHelper.bindBackdropClose(deviceVersionModal);
+    window.ModalHelper.bindBackdropClose(aboutModal);
 
     // 历史数据时间设置弹窗交互绑定
     const dataTimeModal = document.getElementById('dataTimeModal');
@@ -408,9 +354,8 @@ document.addEventListener('DOMContentLoaded', () => {
             } catch (e) { console.warn('加载数据时间设置失败', e); }
         }
 
-        if (dataTimeClose) dataTimeClose.addEventListener('click', () => { 
-            window.ModalHelper.close(dataTimeModal);
-        });
+        window.ModalHelper.bindCloseBtn(dataTimeClose, dataTimeModal);
+        window.ModalHelper.bindBackdropClose(dataTimeModal);
 
         if (dataTimeSaveBtn) dataTimeSaveBtn.addEventListener('click', () => {
             const selectedRange = dataTimeRange ? dataTimeRange.value : '6hours';
@@ -433,13 +378,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             window.ModalHelper.close(dataTimeModal);
         });
-
-        // 点击遮罩关闭
-        const dataTimeContent = dataTimeModal.querySelector('.modal-content');
-        dataTimeModal.addEventListener('click', () => { 
-            window.ModalHelper.close(dataTimeModal);
-        });
-        if (dataTimeContent) dataTimeContent.addEventListener('click', (e) => e.stopPropagation());
 
         // 初始化时填充表单
         loadDataTimeSettings();
@@ -474,7 +412,8 @@ document.addEventListener('DOMContentLoaded', () => {
             };
         }
 
-        if (chartSettingsClose) chartSettingsClose.addEventListener('click', () => { window.ModalHelper.close(chartSettingsModal); });
+        window.ModalHelper.bindCloseBtn(chartSettingsClose, chartSettingsModal);
+        window.ModalHelper.bindBackdropClose(chartSettingsModal);
 
         if (chartSettingsSaveBtn) chartSettingsSaveBtn.addEventListener('click', () => {
             const settings = gatherChartSettings();
@@ -485,27 +424,8 @@ document.addEventListener('DOMContentLoaded', () => {
             window.ModalHelper.close(chartSettingsModal);
         });
 
-        // 点击遮罩关闭
-        const chartSettingsContent = chartSettingsModal.querySelector('.modal-content');
-        chartSettingsModal.addEventListener('click', () => { window.ModalHelper.close(chartSettingsModal); });
-        if (chartSettingsContent) chartSettingsContent.addEventListener('click', (e) => e.stopPropagation());
-
         // 初始化时填充表单
         loadChartSettings();
-    }
-
-    // 点击背景关闭弹窗
-    if (aboutModal) {
-        aboutModal.addEventListener('click', () => {
-            window.ModalHelper.close(aboutModal);
-        });
-    }
-    // 点击关于系统弹窗内容区域阻止关闭
-    const aboutModalContent = aboutModal.querySelector('.modal-content');
-    if (aboutModalContent) {
-        aboutModalContent.addEventListener('click', (e) => {
-            e.stopPropagation();
-        });
     }
 
     // 菜单项点击事件处理
@@ -520,100 +440,73 @@ document.addEventListener('DOMContentLoaded', () => {
                     // 打开用户中心弹窗
                     const userCenterModal = document.getElementById('userCenterModal');
                     if (userCenterModal) {
-                        // 更新用户信息显示
                         updateUserCenterDisplay();
                         window.ModalHelper.open(userCenterModal);
                     } else {
                         ToastAlert.show('用户中心尚未就绪');
                     }
-                    // 关闭汉堡菜单
-                    hamburgerMenu.classList.remove('active');
-                    dropdownMenu.classList.remove('show');
+                    closeHamburgerMenu();
                     break;
                 case 'device-control':
-                    // 打开环境设备控制弹窗 - 仅管理员可见
+                    // 仅管理员可见
                     if (!window.currentUser || !window.currentUser.isAdmin || !window.currentUser.isAdmin()) {
                         ToastAlert.show('❌ 此功能仅限管理员使用');
-                        hamburgerMenu.classList.remove('active');
-                        dropdownMenu.classList.remove('show');
+                        closeHamburgerMenu();
                         break;
                     }
-                    
                     const deviceControlModal = document.getElementById('deviceControlModal');
                     if (deviceControlModal) {
                         window.ModalHelper.open(deviceControlModal);
-                        // 初始化设备控制面板
                         initDeviceControlPanel();
                     } else {
                         ToastAlert.show('设备控制弹窗尚未就绪');
                     }
-                    // 关闭汉堡菜单
-                    hamburgerMenu.classList.remove('active');
-                    dropdownMenu.classList.remove('show');
+                    closeHamburgerMenu();
                     break;
                 case 'mqtt-config':
-                    // 检查是否已连接，如果已连接则不允许重新登录
                     if (window.mqttClient && window.mqttClient.isConnected && window.mqttClient.isConnected()) {
                         ToastAlert.show('MQTT已成功连接\\n\\n若需更换用户请刷新页面后重新登录\\n');
                         break;
                     }
-                    // 打开MQTT登录弹窗
                     if (window.openMqttConfig && typeof window.openMqttConfig === 'function') {
                         window.openMqttConfig();
                     }
-                    // 关闭汉堡菜单
-                    hamburgerMenu.classList.remove('active');
-                    dropdownMenu.classList.remove('show');
+                    closeHamburgerMenu();
                     break;
                 case 'data-time':
-                    // 打开历史数据时间设置弹窗
                     const dataTimeModal = document.getElementById('dataTimeModal');
                     if (dataTimeModal) {
                         window.ModalHelper.open(dataTimeModal);
                     } else {
                         ToastAlert.show('历史数据时间设置尚未就绪');
                     }
-                    // 关闭汉堡菜单
-                    hamburgerMenu.classList.remove('active');
-                    dropdownMenu.classList.remove('show');
+                    closeHamburgerMenu();
                     break;
                 case 'chart-setting':
-                    // 打开图表显示设置弹窗
                     const chartSettingsModal = document.getElementById('chartSettingsModal');
                     if (chartSettingsModal) {
                         window.ModalHelper.open(chartSettingsModal);
                     } else {
                         ToastAlert.show('图表显示设置尚未就绪');
                     }
-                    // 关闭汉堡菜单
-                    hamburgerMenu.classList.remove('active');
-                    dropdownMenu.classList.remove('show');
+                    closeHamburgerMenu();
                     break;
                 case 'data-export':
                     exportDataToCSV();
-                    // 关闭汉堡菜单
-                    hamburgerMenu.classList.remove('active');
-                    dropdownMenu.classList.remove('show');
+                    closeHamburgerMenu();
                     break;
                 case 'device-version':
-                    // 打开设备版本弹窗
                     if (deviceVersionModal) {
                         window.ModalHelper.open(deviceVersionModal);
-                        // 更新版本信息
                         updateDeviceVersionDisplay();
                     } else {
                         ToastAlert.show('设备版本弹窗尚未就绪');
                     }
-                    // 关闭汉堡菜单
-                    hamburgerMenu.classList.remove('active');
-                    dropdownMenu.classList.remove('show');
+                    closeHamburgerMenu();
                     break;
                 case 'about':
-                    // 打开关于系统弹窗
                     window.ModalHelper.open(aboutModal);
-                    // 关闭汉堡菜单
-                    hamburgerMenu.classList.remove('active');
-                    dropdownMenu.classList.remove('show');
+                    closeHamburgerMenu();
                     break;
             }
         }
