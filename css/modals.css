@@ -1,42 +1,34 @@
+/* ===== 弹窗公共基础样式 ===== */
+.mqtt-config-modal,
+.chart-settings-modal,
+.about-modal,
+.device-version-modal,
+.user-center-modal,
+.device-control-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    height: 100%;
+    z-index: var(--z-modal);
+    opacity: 0;
+    transform: translateZ(0);
+    transition: opacity var(--transition-normal) var(--ease-smooth);
+    contain: layout style paint;
+}
+
+.mqtt-config-modal.show,
+.chart-settings-modal.show,
+.about-modal.show,
+.device-version-modal.show,
+.user-center-modal.show,
+.device-control-modal.show {
+    opacity: 1;
+}
+
 /* ===== MQTT配置弹窗样式 ===== */
-.mqtt-config-modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 9600;
-    opacity: 0;
-    transform: translateZ(0);
-    transition: opacity var(--transition-normal) var(--ease-smooth);
-    contain: layout style paint;
-}
-
-.mqtt-config-modal.show {
-    opacity: 1;
-}
-
-/* 图表设置弹窗样式（采用与 about-modal 相同的布局和交互） */
-.chart-settings-modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 9600;
-    opacity: 0;
-    transform: translateZ(0);
-    transition: opacity var(--transition-normal) var(--ease-smooth);
-    contain: layout style paint;
-}
-
-.chart-settings-modal.show { 
-    opacity: 1;
-}
 
 .chart-settings-modal .modal-content {
     overflow: hidden;
@@ -415,7 +407,7 @@
 
 .btn-apply:active {
     transform: translateY(-1px) scale(0.98);
-    transition: all 0.1s ease;
+    transition: all var(--transition-micro) ease;
 }
 
 /* 确保图表设置弹窗的标题样式优先级高于通用 .modal-title */
@@ -464,7 +456,7 @@
     border-radius: 16px;
     backdrop-filter: blur(10px);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-    transition: all 0.3s ease;
+    transition: all var(--transition-normal) ease;
 }
 
 .settings-row:hover {
@@ -487,77 +479,8 @@
     min-width: 140px;
 }
 
-/* 自定义下拉选择器样式（增强版） */
-.custom-select {
-    appearance: none;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    border: 2px solid #e2e8f0;
-    border-radius: 14px;
-    padding: 12px 45px 12px 22px;
-    font-size: 15px;
-    color: #1e293b;
-    font-weight: 600;
-    cursor: pointer;
-    min-width: 150px;
-    text-align: center;
-    transition: border-color 0.35s cubic-bezier(0.34, 1.56, 0.64, 1),
-                box-shadow 0.35s cubic-bezier(0.34, 1.56, 0.64, 1),
-                transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1),
-                color 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04),
-                inset 0 1px 0 rgba(255, 255, 255, 0.9);
-    position: relative;
-    /* 多重背景：箭头图标 + 渐变（箭头必须在前确保显示） */
-    background-image: 
-        url("data:image/svg+xml,%3Csvg width='14' height='9' viewBox='0 0 14 9' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L7 7L13 1' stroke='%233b82f6' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"),
-        linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-    background-repeat: no-repeat, no-repeat;
-    background-position: calc(100% - 18px) center, 0 0;
-    background-size: 14px auto, 100% 100%;
-    background-color: #ffffff !important;
-    transform: translateZ(0);
-    will-change: transform, box-shadow;
-}
-
-.custom-select:hover {
-    border-color: #60a5fa;
-    background-image: 
-        url("data:image/svg+xml,%3Csvg width='14' height='9' viewBox='0 0 14 9' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L7 7L13 1' stroke='%233b82f6' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"),
-        linear-gradient(135deg, #ffffff 0%, #eff6ff 100%);
-    background-repeat: no-repeat, no-repeat;
-    background-position: calc(100% - 18px) center, 0 0;
-    background-size: 14px auto, 100% 100%;
-    box-shadow: 0 4px 14px rgba(59, 130, 246, 0.15),
-                0 0 0 3px rgba(59, 130, 246, 0.08),
-                inset 0 1px 0 rgba(255, 255, 255, 1);
-    transform: translateY(-1px) scale(1.01) translateZ(0);
-    color: #1e40af;
-}
-
-.custom-select:focus {
-    outline: none;
-    border-color: #3b82f6;
-    background-image: 
-        url("data:image/svg+xml,%3Csvg width='14' height='9' viewBox='0 0 14 9' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L7 7L13 1' stroke='%233b82f6' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"),
-        linear-gradient(135deg, #ffffff 0%, #dbeafe 100%);
-    background-repeat: no-repeat, no-repeat;
-    background-position: calc(100% - 18px) center, 0 0;
-    background-size: 14px auto, 100% 100%;
-    box-shadow: 0 6px 20px rgba(59, 130, 246, 0.2),
-                0 0 0 4px rgba(59, 130, 246, 0.12),
-                inset 0 1px 0 rgba(255, 255, 255, 1);
-    transform: translateY(-2px) scale(1.02) translateZ(0);
-    color: #1e40af;
-}
-
-.custom-select:active {
-    transform: translateY(0) scale(0.99) translateZ(0);
-    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.15),
-                inset 0 2px 4px rgba(59, 130, 246, 0.1);
-}
-
-/* 增强型选择器统一样式 */
+/* 自定义下拉选择器样式（.custom-select 与 .enhanced-select 合并） */
+.custom-select,
 .enhanced-select {
     appearance: none;
     -webkit-appearance: none;
@@ -570,15 +493,18 @@
     font-weight: 600;
     cursor: pointer;
     min-width: 150px;
-    transition: border-color 0.35s cubic-bezier(0.34, 1.56, 0.64, 1),
-                box-shadow 0.35s cubic-bezier(0.34, 1.56, 0.64, 1),
-                transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1),
-                color 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    text-align: center;
+    transition: border-color var(--transition-slow) var(--ease-bounce),
+                box-shadow var(--transition-slow) var(--ease-bounce),
+                transform var(--transition-slow) var(--ease-bounce),
+                color var(--transition-slow) var(--ease-bounce);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04),
                 inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    position: relative;
+    /* 多重背景：箭头图标 + 渐变（箭头必须在前确保显示） */
     background-image: 
         url("data:image/svg+xml,%3Csvg width='14' height='9' viewBox='0 0 14 9' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L7 7L13 1' stroke='%233b82f6' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"),
-        linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+        var(--gradient-surface);
     background-repeat: no-repeat, no-repeat;
     background-position: calc(100% - 18px) center, 0 0;
     background-size: 14px auto, 100% 100%;
@@ -587,6 +513,7 @@
     will-change: transform, box-shadow;
 }
 
+.custom-select:hover,
 .enhanced-select:hover {
     border-color: #60a5fa;
     background-image: 
@@ -602,9 +529,10 @@
     color: #1e40af;
 }
 
+.custom-select:focus,
 .enhanced-select:focus {
     outline: none;
-    border-color: #3b82f6;
+    border-color: var(--color-primary-light);
     background-image: 
         url("data:image/svg+xml,%3Csvg width='14' height='9' viewBox='0 0 14 9' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L7 7L13 1' stroke='%233b82f6' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"),
         linear-gradient(135deg, #ffffff 0%, #dbeafe 100%);
@@ -618,8 +546,11 @@
     color: #1e40af;
 }
 
+.custom-select:active,
 .enhanced-select:active {
     transform: translateY(0) scale(0.99) translateZ(0);
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.15),
+                inset 0 2px 4px rgba(59, 130, 246, 0.1);
 }
 
 /* 专门修复图表类型选择器箭头显示 */
@@ -694,21 +625,6 @@
 
 
 
-/* 优化option选项样式 */
-.custom-select option {
-    padding: 12px 16px;
-    background: #ffffff;
-    color: #334155;
-    font-weight: 500;
-}
-
-.custom-select option:hover,
-.custom-select option:checked {
-    background: linear-gradient(135deg, #dbeafe 0%, #eff6ff 100%);
-    color: #1e40af;
-    font-weight: 600;
-}
-
 /* 为普通select元素也添加美化 */
 select:not(.custom-select) {
     appearance: none;
@@ -722,7 +638,7 @@ select:not(.custom-select) {
     color: #1e293b;
     font-weight: 500;
     cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    transition: all var(--transition-normal) var(--ease-bounce);
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
     background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L6 6L11 1' stroke='%233b82f6' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
@@ -774,7 +690,7 @@ select:not(.custom-select) option {
     bottom: 0;
     background: #cbd5e1;
     border-radius: 34px;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all var(--transition-slow) var(--ease-smooth);
     box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
@@ -787,7 +703,7 @@ select:not(.custom-select) option {
     bottom: 3px;
     background: white;
     border-radius: 50%;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all var(--transition-slow) var(--ease-smooth);
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
 }
 
@@ -821,7 +737,7 @@ select:not(.custom-select) option {
     font-size: 15px;
     font-weight: 600;
     min-width: 120px;
-    transition: all 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    transition: all var(--transition-medium) var(--ease-spring);
 }
 
 .chart-settings-modal .btn-reset:hover {
@@ -833,7 +749,7 @@ select:not(.custom-select) option {
 
 .chart-settings-modal .btn-reset:active {
     transform: translateY(0) scale(0.98);
-    transition: all 0.1s ease;
+    transition: all var(--transition-micro) ease;
 }
 
 .chart-settings-modal .btn-save {
@@ -846,7 +762,7 @@ select:not(.custom-select) option {
     font-weight: 600;
     min-width: 200px;
     box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
-    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    transition: all var(--transition-slow) var(--ease-spring);
 }
 
 .chart-settings-modal .btn-save:hover {
@@ -857,7 +773,7 @@ select:not(.custom-select) option {
 
 .chart-settings-modal .btn-save:active {
     transform: translateY(-1px) scale(0.98);
-    transition: all 0.1s ease;
+    transition: all var(--transition-micro) ease;
     box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
 }
 
@@ -958,25 +874,6 @@ select:not(.custom-select) option {
 }
 
 /* ===== 关于系统弹窗 ===== */
-.about-modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 9600;
-    opacity: 0;
-    transform: translateZ(0);
-    transition: opacity 0.3s ease;
-    contain: layout style paint;
-    will-change: opacity;
-}
-
-.about-modal.show {
-    opacity: 1;
-}
 
 .about-modal .modal-content {
     overflow: hidden;
@@ -1003,7 +900,7 @@ select:not(.custom-select) option {
     align-items: center;
     justify-content: center;
     border-radius: 50%;
-    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    transition: all var(--transition-slow) var(--ease-spring);
     z-index: 10;
 }
 
@@ -1017,7 +914,7 @@ select:not(.custom-select) option {
 
 .about-modal .modal-close:active {
     transform: rotate(90deg) scale(1.05);
-    transition: all 0.1s ease;
+    transition: all var(--transition-micro) ease;
 }
 
 /* 聚焦态可见性支持（键盘访问） */
@@ -1159,25 +1056,7 @@ select:not(.custom-select) option {
 }
 
 /* ========== 设备版本弹窗样式 - 简洁设计 ========== */
-.device-version-modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 9600;
-    opacity: 0;
-    transform: translateZ(0);
-    transition: opacity 0.3s ease;
-    contain: layout style paint;
-    will-change: opacity;
-}
-
-.device-version-modal.show {
-    opacity: 1;
-}
+/* device-version-modal 基础样式已在公共选择器中定义 */
 
 .device-version-modal .modal-content {
     max-width: 480px;
@@ -1204,7 +1083,7 @@ select:not(.custom-select) option {
     align-items: center;
     justify-content: center;
     border-radius: 50%;
-    transition: all 0.3s ease;
+    transition: all var(--transition-normal) ease;
     z-index: 10;
     background: transparent;
 }
@@ -1266,7 +1145,7 @@ select:not(.custom-select) option {
     background: linear-gradient(135deg, rgba(248, 250, 252, 0.8) 0%, rgba(241, 245, 249, 0.6) 100%);
     border-radius: 12px;
     border: 1.5px solid transparent;
-    transition: all 0.3s ease;
+    transition: all var(--transition-normal) ease;
 }
 
 .version-item:hover {
@@ -1434,7 +1313,7 @@ select:not(.custom-select) option {
     color: #334155;
     font-size: 22px;
     cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    transition: all var(--transition-normal) var(--ease-bounce);
     z-index: 10;
 }
 
@@ -1465,7 +1344,7 @@ select:not(.custom-select) option {
 .chart-settings-modal .modal-body::-webkit-scrollbar-thumb {
     background: linear-gradient(180deg, rgba(8,24,41,0.08), rgba(8,24,41,0.04));
     border-radius: 10px;
-    transition: background 0.3s ease;
+    transition: background var(--transition-normal) ease;
 }
 
 .chart-settings-modal .modal-body::-webkit-scrollbar-thumb:hover {
@@ -1479,7 +1358,7 @@ select:not(.custom-select) option {
     align-items: center;
     padding: 14px 0;
     border-bottom: 1px solid rgba(8,24,41,0.03);
-    transition: background 0.2s ease;
+    transition: background var(--transition-fast) ease;
 }
 
 .chart-settings-modal .form-group:last-child {
@@ -1512,7 +1391,7 @@ select:not(.custom-select) option {
     background: #ffffff;
     font-size: 15px;
     color: #071426;
-    transition: all 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    transition: all var(--transition-medium) var(--ease-spring);
     box-shadow: inset 0 1px 2px rgba(0,0,0,0.02);
 }
 
@@ -1551,7 +1430,7 @@ select:not(.custom-select) option {
     font-weight: 700;
     border: none;
     cursor: pointer;
-    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    transition: all var(--transition-slow) var(--ease-spring);
 }
 
 .chart-settings-modal .btn-test {
@@ -1570,7 +1449,7 @@ select:not(.custom-select) option {
 
 .chart-settings-modal .btn-test:active {
     transform: translateY(0px) scale(0.98);
-    transition: all 0.1s ease;
+    transition: all var(--transition-micro) ease;
     box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
 }
 
@@ -1588,7 +1467,7 @@ select:not(.custom-select) option {
 
 .chart-settings-modal .btn-save:active {
     transform: translateY(0px) scale(0.98);
-    transition: all 0.1s ease;
+    transition: all var(--transition-micro) ease;
     box-shadow: 0 8px 20px rgba(37,99,235,0.15);
 }
 
@@ -1677,11 +1556,6 @@ select:not(.custom-select) option {
     backdrop-filter: blur(5px);
     animation: fadeIn 0.3s ease;
     z-index: 1;
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
 }
 
 /* 确保关闭按钮始终可交互 */
@@ -1836,7 +1710,7 @@ select:not(.custom-select) option {
     font-size: 14px;
     color: #1f2937;
     background: #f9fafb;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all var(--transition-normal) var(--ease-smooth);
     box-sizing: border-box;
 }
 
@@ -1870,7 +1744,7 @@ select:not(.custom-select) option {
     cursor: pointer;
     padding: 6px;
     color: #6b7280;
-    transition: color 0.3s ease;
+    transition: color var(--transition-normal) ease;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1911,7 +1785,7 @@ select:not(.custom-select) option {
     font-size: 16px;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all var(--transition-normal) var(--ease-smooth);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1954,7 +1828,7 @@ select:not(.custom-select) option {
 }
 
 .btn-login .btn-icon {
-    transition: transform 0.3s ease;
+    transition: transform var(--transition-normal) ease;
 }
 
 .btn-login:hover .btn-icon {
@@ -2071,25 +1945,7 @@ select:not(.custom-select) option {
 }
 
 /* ===== 用户中心弹窗样式 ===== */
-.user-center-modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 9600;
-    opacity: 0;
-    transform: translateZ(0);
-    transition: opacity 0.3s ease;
-    contain: layout style paint;
-    will-change: opacity;
-}
-
-.user-center-modal.show {
-    opacity: 1;
-}
+/* user-center-modal 基础样式已在公共选择器中定义 */
 
 /* 用户中心弹窗专用样式 - 采用蓝色渐变背景 */
 .user-center-modal .modal-content {

@@ -6,7 +6,7 @@
 
 // ============ 应用版本号 ============
 // 统一版本号管理
-const APP_VERSION = 'V6.2.1';
+const APP_VERSION = 'V6.3.1';
 
 // 暴露全局版本号
 window.APP_VERSION = APP_VERSION;

@@ -29,10 +29,7 @@
     transform: translate3d(0, 0, 0);
     backface-visibility: hidden;
 }
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
+
 /* ===== AI助手样式 ===== */
 
 /* AI悬浮按钮 */
@@ -54,7 +51,7 @@
     transition: transform var(--transition-normal) var(--ease-spring),
                 box-shadow var(--transition-normal) var(--ease-smooth),
                 opacity var(--transition-fast) var(--ease-smooth);
-    z-index: 10001;
+    z-index: var(--z-ai-btn);
     border: 3px solid rgba(255, 255, 255, 0.3);
     pointer-events: auto;
     /* GPU加速 */
@@ -124,7 +121,7 @@
     box-sizing: border-box;
     background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
     box-shadow: -10px 0 40px rgba(0, 0, 0, 0.15);
-    z-index: 9999;
+    z-index: var(--z-ai-sidebar);
     display: flex;
     flex-direction: column;
     /* 优化侧边栏滑入动画 */
@@ -205,7 +202,7 @@
     fill: none;
     stroke: #00d9ff;
     filter: drop-shadow(0 0 0px #00d9ff);
-    transition: filter 0.2s, color 0.2s, stroke 0.2s;
+    transition: filter var(--transition-fast), color var(--transition-fast), stroke var(--transition-fast);
 }
 
 .ai-settings-btn:hover .ai-settings-icon {
@@ -293,7 +290,7 @@
     font-size: 13px;
     font-weight: 500;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all var(--transition-normal) ease;
     position: relative;
     z-index: 1;
 }
@@ -423,7 +420,7 @@
     min-height: 44px;
     max-height: 120px;
     line-height: 1.5;
-    transition: all 0.3s ease;
+    transition: all var(--transition-normal) ease;
     font-family: inherit;
 }
 
@@ -443,7 +440,7 @@
     cursor: pointer;
     font-size: 14px;
     font-weight: 600;
-    transition: all 0.3s ease;
+    transition: all var(--transition-normal) ease;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -488,7 +485,7 @@
     border: 2px solid #e2e8f0;
     border-radius: 12px;
     font-size: 15px;
-    transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
+    transition: border-color var(--transition-normal) ease, box-shadow var(--transition-normal) ease, transform var(--transition-normal) ease;
     background: #f8fafc;
 }
 
@@ -565,7 +562,7 @@
     cursor: pointer;
     font-size: 14px;
     font-weight: 600;
-    transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+    transition: transform var(--transition-normal) ease, box-shadow var(--transition-normal) ease, background var(--transition-normal) ease;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -604,7 +601,7 @@
     z-index: 100;
     opacity: 0;
     transform: translateZ(0);
-    transition: opacity 0.3s ease;
+    transition: opacity var(--transition-normal) ease;
     contain: layout style paint;
     will-change: opacity;
 }
@@ -643,9 +640,9 @@
     border: 2px solid #e2e8f0;
     border-radius: 12px;
     font-size: 15px;
-    transition: border-color 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275), 
-                box-shadow 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275), 
-                transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    transition: border-color var(--transition-medium) var(--ease-spring), 
+                box-shadow var(--transition-medium) var(--ease-spring), 
+                transform var(--transition-medium) var(--ease-spring);
     background: #f8fafc;
 }
 
@@ -667,9 +664,9 @@
     font-weight: 600;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04),
                 inset 0 1px 0 rgba(255, 255, 255, 0.9);
-    transition: border-color 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275),
-                box-shadow 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275),
-                transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    transition: border-color var(--transition-slow) var(--ease-spring),
+                box-shadow var(--transition-slow) var(--ease-spring),
+                transform var(--transition-slow) var(--ease-spring);
     /* 多重背景：箭头 + 渐变 */
     background-image: 
         url("data:image/svg+xml,%3Csvg width='14' height='9' viewBox='0 0 14 9' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L7 7L13 1' stroke='%236366f1' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"),
@@ -798,7 +795,7 @@
         border-radius: 16px;
         opacity: 0;
         visibility: hidden;
-        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        transition: all var(--transition-slow) var(--ease-spring);
         display: flex;
         flex-direction: column;
         overflow: hidden;

@@ -257,10 +257,6 @@
     animation: spin 1s linear infinite;
 }
 
-@keyframes spin {
-    to { transform: rotate(360deg); }
-}
-
 .chart-loading-text {
     font-size: 14px;
     font-weight: 500;
