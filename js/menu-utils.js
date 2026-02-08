@@ -551,8 +551,9 @@ let otaLatestVersions = {
     esp32_ver: null
 };
 let otaCheckTimer = null;
-let otaUpgrading = false; // 是否正在升级中
+let otaPhase = 'idle'; // OTA阶段：'idle' | 'upgrading' | 'restarting' | 'online'
 let otaPanelInited = false; // 防止重复初始化
+let otaRestartSafetyTimer = null; // 重启阶段安全超时
 
 // 初始化OTA交互
 function initOTAPanel() {
@@ -587,16 +588,30 @@ function initOTAPanel() {
         otaLatestVersions.stm32_ver = data.stm32_ver;
         otaLatestVersions.esp32_ver = data.esp32_ver;
         
-        // 恢复检查按钮
-        const otaCheckBtn = document.getElementById('otaCheckBtn');
-        const otaCheckBtnText = document.getElementById('otaCheckBtnText');
-        if (otaCheckBtn) otaCheckBtn.disabled = false;
-        if (otaCheckBtnText) otaCheckBtnText.textContent = '检查更新';
+        // 恢复检查按钮（仅在非重启阶段恢复）
+        if (otaPhase !== 'restarting') {
+            const otaCheckBtn = document.getElementById('otaCheckBtn');
+            const otaCheckBtnText = document.getElementById('otaCheckBtnText');
+            if (otaCheckBtn) otaCheckBtn.disabled = false;
+            if (otaCheckBtnText) otaCheckBtnText.textContent = '检查更新';
+        }
         
         // 版本为 -1 表示查询失败
         if (data.stm32_ver === -1 || data.esp32_ver === -1) {
             ToastAlert.show('⚠️ 固件版本查询失败，服务器返回异常');
+            // 如果是从online阶段自动检查的，仍需恢复按钮
+            if (otaPhase === 'online') {
+                resetOTAButtonsToSafe();
+            }
             return;
+        }
+        
+        // 如果是更新后自动检查, 也刷新设备当前版本显示
+        if (otaPhase === 'online') {
+            if (window.updateDeviceVersionDisplay) {
+                window.updateDeviceVersionDisplay();
+            }
+            otaPhase = 'idle';
         }
         
         // 在当前弹窗内展示更新信息
@@ -625,8 +640,9 @@ function handleOTACheck() {
     if (otaCheckBtnText) otaCheckBtnText.textContent = '检查中...';
     
     // 重置升级状态，允许重新检查后再次更新
-    otaUpgrading = false;
+    otaPhase = 'idle';
     if (otaCleanupTimer) { clearTimeout(otaCleanupTimer); otaCleanupTimer = null; }
+    if (otaRestartSafetyTimer) { clearTimeout(otaRestartSafetyTimer); otaRestartSafetyTimer = null; }
     
     // 隐藏之前的OTA信息和进度区
     const otaStm32Info = document.getElementById('otaStm32Info');
@@ -754,7 +770,7 @@ function handleOTASend(deviceType) {
         const success = window.sendOTACommand && window.sendOTACommand(deviceType);
         if (success) {
             // 发送成功：禁用该按钮防止重复点击，需重新检查更新才可再次操作
-            otaUpgrading = true;
+            otaPhase = 'upgrading';
             const btnMap = { 'stm32': 'otaStm32Btn', 'esp32': 'otaEsp32Btn', 'img': 'otaImgBtn' };
             const targetBtn = document.getElementById(btnMap[deviceType]);
             if (targetBtn) {
@@ -791,9 +807,10 @@ function handleOTASend(deviceType) {
 // 进度清理定时器
 let otaCleanupTimer = null;
 
-// 完成后自动清理进度条并恢复按钮状态
-function scheduleOTACleanup() {
+// 完成后自动清理进度条（不恢复按钮状态，按钮由版本检查结果决定）
+function scheduleOTACleanup(delayMs) {
     if (otaCleanupTimer) clearTimeout(otaCleanupTimer);
+    const delay = typeof delayMs === 'number' ? delayMs : 1500;
     otaCleanupTimer = setTimeout(() => {
         const progressSection = document.getElementById('otaProgressSection');
         const progressTitle = document.getElementById('otaProgressTitle');
@@ -816,28 +833,74 @@ function scheduleOTACleanup() {
             }, 400);
         }
         
-        // 恢复所有OTA按钮状态
-        otaUpgrading = false;
-        ['otaStm32Btn', 'otaEsp32Btn', 'otaImgBtn'].forEach(id => {
-            const btn = document.getElementById(id);
-            if (btn) {
-                btn.disabled = false;
-                // 恢复默认文本 (下次检查更新后会重新设置)
-                if (id === 'otaImgBtn') {
-                    // 图片按钮在action-row内，不需要恢复文本
-                } else {
-                    btn.textContent = '更新';
-                }
-            }
-        });
-        
-        // 触发重新检查版本(自动发送版本查询刷新显示)
-        if (window.sendOTACheckRequest) {
-            setTimeout(() => window.sendOTACheckRequest(), 500);
-        }
-        
         otaCleanupTimer = null;
-    }, 1500);
+    }, delay);
+}
+
+// 设备重启阶段：禁用所有OTA按钮并显示重启状态
+function setOTARestartingState() {
+    ['otaStm32Btn', 'otaEsp32Btn'].forEach(id => {
+        const btn = document.getElementById(id);
+        if (btn) {
+            btn.disabled = true;
+            btn.textContent = '⏳ 重启中';
+        }
+    });
+    const imgBtn = document.getElementById('otaImgBtn');
+    if (imgBtn) imgBtn.disabled = true;
+    
+    // 禁用检查更新按钮
+    const otaCheckBtn = document.getElementById('otaCheckBtn');
+    if (otaCheckBtn) otaCheckBtn.disabled = true;
+    const otaCheckBtnText = document.getElementById('otaCheckBtnText');
+    if (otaCheckBtnText) otaCheckBtnText.textContent = '设备重启中...';
+}
+
+// 设备重新上线后：自动刷新版本并通过版本检查结果恢复按钮
+function handleDeviceBackOnline() {
+    otaPhase = 'online';
+    if (otaRestartSafetyTimer) { clearTimeout(otaRestartSafetyTimer); otaRestartSafetyTimer = null; }
+    
+    // 自动刷新设备版本显示（从最新MQTT数据中获取）
+    if (window.updateDeviceVersionDisplay) {
+        window.updateDeviceVersionDisplay();
+    }
+    
+    // 恢复检查更新按钮
+    const otaCheckBtn = document.getElementById('otaCheckBtn');
+    const otaCheckBtnText = document.getElementById('otaCheckBtnText');
+    if (otaCheckBtn) otaCheckBtn.disabled = false;
+    if (otaCheckBtnText) otaCheckBtnText.textContent = '检查更新';
+    
+    // 自动重新检查版本（延迟2秒等设备稳定）
+    if (window.sendOTACheckRequest) {
+        setTimeout(() => {
+            const sent = window.sendOTACheckRequest();
+            if (!sent) {
+                // 如果发送失败，至少恢复按钮到安全状态
+                resetOTAButtonsToSafe();
+            }
+        }, 2000);
+    } else {
+        resetOTAButtonsToSafe();
+    }
+    
+    // 清理进度区域
+    scheduleOTACleanup(3000);
+}
+
+// 安全恢复按钮状态（未获得版本检查结果时使用）
+function resetOTAButtonsToSafe() {
+    otaPhase = 'idle';
+    ['otaStm32Btn', 'otaEsp32Btn'].forEach(id => {
+        const btn = document.getElementById(id);
+        if (btn) {
+            btn.disabled = true;
+            btn.textContent = '更新';
+        }
+    });
+    const imgBtn = document.getElementById('otaImgBtn');
+    if (imgBtn) imgBtn.disabled = false;
 }
 
 // 处理OTA升级日志
@@ -856,7 +919,7 @@ function handleOTALog(logMsg) {
     if (isOTALog && progressSection) {
         // 确保进度区域可见（可能由handleOTASend已初始化，或设备自行上报）
         if (progressSection.classList.contains('is-hidden')) {
-            otaUpgrading = true;
+            if (otaPhase === 'idle') otaPhase = 'upgrading';
             progressSection.classList.remove('is-hidden');
             if (logArea) logArea.innerHTML = '';
             if (progressTitle) progressTitle.textContent = '⏳ 升级中...';
@@ -878,24 +941,38 @@ function handleOTALog(logMsg) {
             if (progressPct) progressPct.textContent = pct + '%';
             if (progressFill) progressFill.style.width = pct + '%';
             if (pct >= 100) {
-                if (progressTitle) progressTitle.textContent = '✅ 传输完成';
-                scheduleOTACleanup();
+                if (progressTitle) progressTitle.textContent = '✅ 传输完成，等待设备验证...';
+                // 传输完成不立即清理，等待设备重启信号
             }
         }
         
-        // 检测完成/重启
+        // 检测完成/重启 — 进入重启阶段，禁用所有按钮
         if (/校验通过|即将重启/.test(logMsg)) {
-            if (progressTitle) progressTitle.textContent = '✅ 升级完成，设备重启中...';
+            otaPhase = 'restarting';
+            if (progressTitle) progressTitle.textContent = '⏳ 升级完成，设备重启中...';
             if (progressPct) progressPct.textContent = '100%';
             if (progressFill) progressFill.style.width = '100%';
-            scheduleOTACleanup();
+            // 重启阶段：禁用所有OTA按钮，防止误操作
+            setOTARestartingState();
+            // 安全超时：如果60秒内没有收到上线信号，恢复到安全状态
+            if (otaRestartSafetyTimer) clearTimeout(otaRestartSafetyTimer);
+            otaRestartSafetyTimer = setTimeout(() => {
+                if (otaPhase === 'restarting') {
+                    console.warn('⚠️ OTA重启超时（60s），恢复按钮状态');
+                    if (progressTitle) progressTitle.textContent = '⚠️ 等待设备上线超时';
+                    ToastAlert.show('⚠️ 设备重启超时，请手动检查设备状态');
+                    resetOTAButtonsToSafe();
+                    scheduleOTACleanup(3000);
+                }
+                otaRestartSafetyTimer = null;
+            }, 60000);
         }
         
         // 检测设备重新上线（connected to emqx）
         if (/connected to/i.test(logMsg)) {
             if (progressTitle) progressTitle.textContent = '🟢 设备已重新上线';
             ToastAlert.show('🟢 设备升级完成，已重新上线');
-            scheduleOTACleanup();
+            handleDeviceBackOnline();
         }
         
         // 追加日志（保留最近15条）

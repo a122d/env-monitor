@@ -6,7 +6,7 @@
 
 // ============ 应用版本号 ============
 // 统一版本号管理
-const APP_VERSION = 'V6.5.3';
+const APP_VERSION = 'V6.5.4';
 
 // 暴露全局版本号
 window.APP_VERSION = APP_VERSION;
@@ -712,6 +712,14 @@ function updateDataCards(data) {
         const value = cfg.parse(data[cfg.key]);
         updateSensorCard(cfg.key, value);
         if (cfg.displayId) updateDataValue(cfg.displayId, value);
+    }
+    
+    // 如果设备版本弹窗已打开且数据中包含版本信息，自动刷新版本显示
+    if ((data.stm_ver !== undefined || data.esp_ver !== undefined)) {
+        const deviceVersionModal = document.getElementById('deviceVersionModal');
+        if (deviceVersionModal && deviceVersionModal.open && window.updateDeviceVersionDisplay) {
+            window.updateDeviceVersionDisplay();
+        }
     }
 }
 

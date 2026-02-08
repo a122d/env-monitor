@@ -833,9 +833,6 @@ function handleChartRefresh() {
         const sent = window.sendHistoryDataRequest();
         if (sent) {
             console.log('📤 刷新：已发送历史数据请求');
-            if (typeof ToastAlert !== 'undefined' && ToastAlert.show) {
-                ToastAlert.show('正在刷新数据...');
-            }
         } else {
             // MQTT未连接时，仅刷新图表显示
             const chartDom = document.getElementById('combined-chart');
