@@ -29,8 +29,9 @@
     <link rel="preconnect" href="https://cdn.jsdelivr.net">
     <link rel="stylesheet" href="css/style.css">
 
-    <!-- ECharts 库首先加载 -->
-    <script src="js/echarts.min.js" defer></script>
+    <!-- ECharts 库 - CDN优先加载，失败回退本地 -->
+    <script src="https://cdn.jsdelivr.net/npm/echarts@6.0.0/dist/echarts.min.js" defer
+        onerror="let s=document.createElement('script');s.src='js/echarts.min.js';document.head.appendChild(s);"></script>
     <!-- MQTT 库（本地文件，应用层ClientID过滤实现多网页隔离）-->
     <script src="js/mqttws31.min.js" defer></script>
 </head>
