@@ -499,6 +499,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (deviceVersionModal) {
                         window.ModalHelper.open(deviceVersionModal);
                         updateDeviceVersionDisplay();
+                        // 初始化OTA面板（管理员可用）
+                        initOTAPanel();
                     } else {
                         ToastAlert.show('设备版本弹窗尚未就绪');
                     }
@@ -521,7 +523,6 @@ function updateDeviceVersionDisplay() {
     
     const stm32VersionEl = document.getElementById('stm32Version');
     const esp32VersionEl = document.getElementById('esp32Version');
-    const lastUpdateTimeEl = document.getElementById('lastUpdateTime');
     
     if (stm32VersionEl) {
         stm32VersionEl.textContent = stm32Ver ? stm32Ver : '--';
@@ -531,16 +532,390 @@ function updateDeviceVersionDisplay() {
         esp32VersionEl.textContent = esp32Ver ? esp32Ver : '--';
     }
     
-    if (lastUpdateTimeEl) {
-        if (window.latestData?.stm_ver || window.latestData?.esp_ver) {
-            const now = new Date();
-            const timeStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
-            lastUpdateTimeEl.textContent = timeStr;
+    // 管理员可见OTA检查按钮
+    const otaCheckSection = document.getElementById('otaCheckSection');
+    if (otaCheckSection) {
+        if (window.currentUser && window.currentUser.isAdmin && window.currentUser.isAdmin()) {
+            otaCheckSection.classList.remove('is-hidden');
         } else {
-            lastUpdateTimeEl.textContent = '--';
+            otaCheckSection.classList.add('is-hidden');
         }
     }
 }
+
+// ===== 🔄 OTA固件更新逻辑 =====
+
+// OTA状态缓存
+let otaLatestVersions = {
+    stm32_ver: null,
+    esp32_ver: null
+};
+let otaCheckTimer = null;
+let otaUpgrading = false; // 是否正在升级中
+let otaPanelInited = false; // 防止重复初始化
+
+// 初始化OTA交互
+function initOTAPanel() {
+    if (otaPanelInited) return;
+    
+    const otaCheckBtn = document.getElementById('otaCheckBtn');
+    const otaStm32Btn = document.getElementById('otaStm32Btn');
+    const otaEsp32Btn = document.getElementById('otaEsp32Btn');
+    const otaImgBtn = document.getElementById('otaImgBtn');
+    
+    otaPanelInited = true;
+    
+    // 检查更新按钮
+    if (otaCheckBtn) {
+        otaCheckBtn.addEventListener('click', handleOTACheck);
+    }
+    
+    // OTA更新按钮
+    if (otaStm32Btn) {
+        otaStm32Btn.addEventListener('click', () => handleOTASend('stm32'));
+    }
+    if (otaEsp32Btn) {
+        otaEsp32Btn.addEventListener('click', () => handleOTASend('esp32'));
+    }
+    if (otaImgBtn) {
+        otaImgBtn.addEventListener('click', () => handleOTASend('img'));
+    }
+    
+    // 注册OTA版本响应回调
+    window.onOTAVersionResponse = function(data) {
+        clearTimeout(otaCheckTimer);
+        otaLatestVersions.stm32_ver = data.stm32_ver;
+        otaLatestVersions.esp32_ver = data.esp32_ver;
+        
+        // 恢复检查按钮
+        const otaCheckBtn = document.getElementById('otaCheckBtn');
+        const otaCheckBtnText = document.getElementById('otaCheckBtnText');
+        if (otaCheckBtn) otaCheckBtn.disabled = false;
+        if (otaCheckBtnText) otaCheckBtnText.textContent = '检查更新';
+        
+        // 版本为 -1 表示查询失败
+        if (data.stm32_ver === -1 || data.esp32_ver === -1) {
+            ToastAlert.show('⚠️ 固件版本查询失败，服务器返回异常');
+            return;
+        }
+        
+        // 在当前弹窗内展示更新信息
+        showOTAUpdateInline(data);
+    };
+    
+    // 注册OTA日志回调
+    window.onOTALogMessage = function(logMsg) {
+        handleOTALog(logMsg);
+    };
+}
+
+// 处理检查更新按钮点击
+function handleOTACheck() {
+    // 权限检查
+    if (!window.currentUser || !window.currentUser.isAdmin || !window.currentUser.isAdmin()) {
+        ToastAlert.show('❌ 此功能仅限管理员使用');
+        return;
+    }
+    
+    const otaCheckBtn = document.getElementById('otaCheckBtn');
+    const otaCheckBtnText = document.getElementById('otaCheckBtnText');
+    
+    // 设置加载状态
+    if (otaCheckBtn) otaCheckBtn.disabled = true;
+    if (otaCheckBtnText) otaCheckBtnText.textContent = '检查中...';
+    
+    // 重置升级状态，允许重新检查后再次更新
+    otaUpgrading = false;
+    if (otaCleanupTimer) { clearTimeout(otaCleanupTimer); otaCleanupTimer = null; }
+    
+    // 隐藏之前的OTA信息和进度区
+    const otaStm32Info = document.getElementById('otaStm32Info');
+    const otaEsp32Info = document.getElementById('otaEsp32Info');
+    const otaSection = document.getElementById('otaInlineSection');
+    const progressSection = document.getElementById('otaProgressSection');
+    if (otaStm32Info) otaStm32Info.classList.add('is-hidden');
+    if (otaEsp32Info) otaEsp32Info.classList.add('is-hidden');
+    if (otaSection) otaSection.classList.add('is-hidden');
+    if (progressSection) progressSection.classList.add('is-hidden');
+    
+    // 发送检查请求
+    const sent = window.sendOTACheckRequest && window.sendOTACheckRequest();
+    
+    if (!sent) {
+        if (otaCheckBtn) otaCheckBtn.disabled = false;
+        if (otaCheckBtnText) otaCheckBtnText.textContent = '检查更新';
+        return;
+    }
+    
+    // 设置超时（10秒无响应则提示）
+    otaCheckTimer = setTimeout(() => {
+        if (otaCheckBtn) otaCheckBtn.disabled = false;
+        if (otaCheckBtnText) otaCheckBtnText.textContent = '检查更新';
+        ToastAlert.show('⚠️ 版本查询超时，设备可能离线');
+    }, 10000);
+}
+
+// 在设备版本弹窗内展示OTA更新信息
+function showOTAUpdateInline(latestData) {
+    const otaSection = document.getElementById('otaInlineSection');
+    if (!otaSection) return;
+    
+    // 获取当前设备版本
+    const currentStm32 = window.latestData?.stm_ver || null;
+    const currentEsp32 = window.latestData?.esp_ver || null;
+    const latestStm32 = latestData.stm32_ver;
+    const latestEsp32 = latestData.esp32_ver;
+    
+    // STM32 — 直接在版本项内显示
+    const otaStm32Info = document.getElementById('otaStm32Info');
+    const otaStm32Latest = document.getElementById('otaStm32Latest');
+    const otaStm32Btn = document.getElementById('otaStm32Btn');
+    
+    if (otaStm32Latest) otaStm32Latest.textContent = latestStm32 || '未知';
+    
+    const stm32NeedUpdate = currentStm32 && latestStm32 && (parseInt(latestStm32) > parseInt(currentStm32));
+    if (otaStm32Btn) {
+        otaStm32Btn.disabled = !stm32NeedUpdate;
+        otaStm32Btn.textContent = stm32NeedUpdate ? '🔴 更新' : '🟢 最新';
+    }
+    if (otaStm32Info) otaStm32Info.classList.remove('is-hidden');
+    
+    // ESP32 — 直接在版本项内显示
+    const otaEsp32Info = document.getElementById('otaEsp32Info');
+    const otaEsp32Latest = document.getElementById('otaEsp32Latest');
+    const otaEsp32Btn = document.getElementById('otaEsp32Btn');
+    
+    if (otaEsp32Latest) otaEsp32Latest.textContent = latestEsp32 || '未知';
+    
+    const esp32NeedUpdate = currentEsp32 && latestEsp32 && (parseInt(latestEsp32) > parseInt(currentEsp32));
+    if (otaEsp32Btn) {
+        otaEsp32Btn.disabled = !esp32NeedUpdate;
+        otaEsp32Btn.textContent = esp32NeedUpdate ? '🔴 更新' : '🟢 最新';
+    }
+    if (otaEsp32Info) otaEsp32Info.classList.remove('is-hidden');
+    
+    // 显示下方OTA操作区域（图片下载、提示、进度）
+    otaSection.classList.remove('is-hidden');
+}
+
+// 处理OTA更新发送 (带二次确认)
+function handleOTASend(deviceType) {
+    // 权限检查
+    if (!window.currentUser || !window.currentUser.isAdmin || !window.currentUser.isAdmin()) {
+        ToastAlert.show('❌ 此功能仅限管理员使用');
+        return;
+    }
+    
+    const deviceNames = {
+        'stm32': 'STM32 主控芯片',
+        'esp32': 'ESP32 通信模块',
+        'img': '图片资源'
+    };
+    
+    const deviceName = deviceNames[deviceType] || deviceType;
+    
+    // 创建确认弹窗
+    const confirmDialog = document.createElement('dialog');
+    confirmDialog.className = 'toast-alert-modal';
+    confirmDialog.innerHTML = `
+        <div class="modal-mask"></div>
+        <div class="toast-alert-content">
+            <div class="toast-alert-body">
+                <p style="margin: 0; font-size: 16px; line-height: 1.6;">
+                    确定要对 <strong>${deviceName}</strong> 执行${deviceType === 'img' ? '图片下载' : 'OTA固件更新'}吗？
+                </p>
+                <p style="margin: 8px 0 0; font-size: 13px; color: #94a3b8;">
+                    ${deviceType === 'img' ? '将向设备发送图片下载指令' : '更新过程中请勿断电或断开设备连接'}
+                </p>
+            </div>
+            <div class="toast-alert-footer" style="display: flex; gap: 12px; justify-content: center;">
+                <button type="button" class="btn btn-test" style="min-width: 100px;">取消</button>
+                <button type="button" class="btn btn-save" style="min-width: 100px;">确定${deviceType === 'img' ? '下载' : '更新'}</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(confirmDialog);
+    confirmDialog.showModal();
+    requestAnimationFrame(() => confirmDialog.classList.add('show'));
+    
+    const cancelBtn = confirmDialog.querySelector('.btn-test');
+    const confirmBtn = confirmDialog.querySelector('.btn-save');
+    
+    cancelBtn.addEventListener('click', () => {
+        confirmDialog.close();
+        confirmDialog.remove();
+    });
+    
+    confirmBtn.addEventListener('click', () => {
+        confirmDialog.close();
+        confirmDialog.remove();
+        
+        // 发送OTA指令
+        const success = window.sendOTACommand && window.sendOTACommand(deviceType);
+        if (success) {
+            // 发送成功：禁用该按钮防止重复点击，需重新检查更新才可再次操作
+            otaUpgrading = true;
+            const btnMap = { 'stm32': 'otaStm32Btn', 'esp32': 'otaEsp32Btn', 'img': 'otaImgBtn' };
+            const targetBtn = document.getElementById(btnMap[deviceType]);
+            if (targetBtn) {
+                targetBtn.disabled = true;
+                targetBtn.textContent = deviceType === 'img' ? '⏳ 下载中' : '⏳ 更新中';
+            }
+            // 立即显示进度区域并初始化
+            const progressSection = document.getElementById('otaProgressSection');
+            const progressTitle = document.getElementById('otaProgressTitle');
+            const progressPct = document.getElementById('otaProgressPct');
+            const progressFill = document.getElementById('otaProgressFill');
+            const logArea = document.getElementById('otaLogArea');
+            if (progressSection) {
+                progressSection.classList.remove('is-hidden');
+                if (logArea) logArea.innerHTML = '';
+                if (progressTitle) progressTitle.textContent = `⏳ ${deviceName}${deviceType === 'img' ? '下载' : '升级'}中...`;
+                if (progressPct) progressPct.textContent = '0%';
+                if (progressFill) progressFill.style.width = '0%';
+            }
+        } else {
+            ToastAlert.show(`❌ ${deviceName}${deviceType === 'img' ? '下载' : '更新'}指令发送失败`);
+        }
+    });
+    
+    // 点击遮罩关闭
+    confirmDialog.querySelector('.modal-mask').addEventListener('click', () => {
+        confirmDialog.close();
+        confirmDialog.remove();
+    });
+}
+
+// ===== OTA日志处理与进度显示 =====
+
+// 进度清理定时器
+let otaCleanupTimer = null;
+
+// 完成后自动清理进度条并恢复按钮状态
+function scheduleOTACleanup() {
+    if (otaCleanupTimer) clearTimeout(otaCleanupTimer);
+    otaCleanupTimer = setTimeout(() => {
+        const progressSection = document.getElementById('otaProgressSection');
+        const progressTitle = document.getElementById('otaProgressTitle');
+        const progressPct = document.getElementById('otaProgressPct');
+        const progressFill = document.getElementById('otaProgressFill');
+        const logArea = document.getElementById('otaLogArea');
+        
+        // 渐隐进度区
+        if (progressSection) {
+            progressSection.style.transition = 'opacity 0.4s ease';
+            progressSection.style.opacity = '0';
+            setTimeout(() => {
+                progressSection.classList.add('is-hidden');
+                progressSection.style.opacity = '';
+                progressSection.style.transition = '';
+                if (progressTitle) progressTitle.textContent = '升级中...';
+                if (progressPct) progressPct.textContent = '0%';
+                if (progressFill) progressFill.style.width = '0%';
+                if (logArea) logArea.innerHTML = '';
+            }, 400);
+        }
+        
+        // 恢复所有OTA按钮状态
+        otaUpgrading = false;
+        ['otaStm32Btn', 'otaEsp32Btn', 'otaImgBtn'].forEach(id => {
+            const btn = document.getElementById(id);
+            if (btn) {
+                btn.disabled = false;
+                // 恢复默认文本 (下次检查更新后会重新设置)
+                if (id === 'otaImgBtn') {
+                    // 图片按钮在action-row内，不需要恢复文本
+                } else {
+                    btn.textContent = '更新';
+                }
+            }
+        });
+        
+        // 触发重新检查版本(自动发送版本查询刷新显示)
+        if (window.sendOTACheckRequest) {
+            setTimeout(() => window.sendOTACheckRequest(), 500);
+        }
+        
+        otaCleanupTimer = null;
+    }, 1500);
+}
+
+// 处理OTA升级日志
+function handleOTALog(logMsg) {
+    if (!logMsg) return;
+    
+    const progressSection = document.getElementById('otaProgressSection');
+    const progressTitle = document.getElementById('otaProgressTitle');
+    const progressPct = document.getElementById('otaProgressPct');
+    const progressFill = document.getElementById('otaProgressFill');
+    const logArea = document.getElementById('otaLogArea');
+    
+    // 检测升级相关关键词，自动显示进度区
+    const isOTALog = /升级|OTA|块\d+|下载成功|写入.*成功|传输成功|当前进度|传输进度|校验通过|即将重启|connected to|ACK应答/i.test(logMsg);
+    
+    if (isOTALog && progressSection) {
+        // 确保进度区域可见（可能由handleOTASend已初始化，或设备自行上报）
+        if (progressSection.classList.contains('is-hidden')) {
+            otaUpgrading = true;
+            progressSection.classList.remove('is-hidden');
+            if (logArea) logArea.innerHTML = '';
+            if (progressTitle) progressTitle.textContent = '⏳ 升级中...';
+            if (progressPct) progressPct.textContent = '0%';
+            if (progressFill) progressFill.style.width = '0%';
+            // 如果设备版本弹窗未打开，弹出提示
+            const deviceVersionModal = document.getElementById('deviceVersionModal');
+            if (!deviceVersionModal || !deviceVersionModal.open) {
+                ToastAlert.show('📡 设备正在升级中...');
+            }
+        }
+        
+        // 解析进度百分比（匹配多种格式）
+        // 格式1: "当前进度: 44%"  / "当前进度：44%"
+        // 格式2: "图片：传输进度：89%" / "传输进度：89%"
+        const progressMatch = logMsg.match(/(?:当前进度|传输进度)[：:]\s*(\d+)%/);
+        if (progressMatch) {
+            const pct = parseInt(progressMatch[1]);
+            if (progressPct) progressPct.textContent = pct + '%';
+            if (progressFill) progressFill.style.width = pct + '%';
+            if (pct >= 100) {
+                if (progressTitle) progressTitle.textContent = '✅ 传输完成';
+                scheduleOTACleanup();
+            }
+        }
+        
+        // 检测完成/重启
+        if (/校验通过|即将重启/.test(logMsg)) {
+            if (progressTitle) progressTitle.textContent = '✅ 升级完成，设备重启中...';
+            if (progressPct) progressPct.textContent = '100%';
+            if (progressFill) progressFill.style.width = '100%';
+            scheduleOTACleanup();
+        }
+        
+        // 检测设备重新上线（connected to emqx）
+        if (/connected to/i.test(logMsg)) {
+            if (progressTitle) progressTitle.textContent = '🟢 设备已重新上线';
+            ToastAlert.show('🟢 设备升级完成，已重新上线');
+            scheduleOTACleanup();
+        }
+        
+        // 追加日志（保留最近15条）
+        if (logArea) {
+            const logLine = document.createElement('div');
+            logLine.className = 'ota-log-line';
+            logLine.textContent = logMsg;
+            logArea.appendChild(logLine);
+            // 保留最近15条
+            while (logArea.children.length > 15) {
+                logArea.removeChild(logArea.firstChild);
+            }
+            // 滚动到底部
+            logArea.scrollTop = logArea.scrollHeight;
+        }
+    }
+}
+
+// 暴露OTA初始化
+window.initOTAPanel = initOTAPanel;
 
 // 暴露给全局作用域
 window.updateDeviceVersionDisplay = updateDeviceVersionDisplay;

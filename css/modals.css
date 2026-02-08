@@ -1159,28 +1159,75 @@ select:not(.custom-select) option {
     letter-spacing: 0.5px;
 }
 
+/* 版本项右侧区域 */
+.item-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.item-ota-info {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    animation: otaFadeIn 0.3s ease;
+}
+
+.item-ota-info .ota-arrow {
+    color: #94a3b8;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.item-ota-info .ota-latest-ver {
+    font-family: 'Consolas', 'Monaco', monospace;
+    font-size: 15px;
+    font-weight: 700;
+    color: #2563eb;
+    letter-spacing: 0.5px;
+}
+
+.btn-ota-inline {
+    padding: 4px 12px;
+    border: none;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    color: #fff;
+    box-shadow: 0 1px 4px rgba(37, 99, 235, 0.2);
+    white-space: nowrap;
+    flex-shrink: 0;
+    line-height: 1.5;
+}
+
+.btn-ota-inline:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 3px 8px rgba(37, 99, 235, 0.3);
+}
+
+.btn-ota-inline:disabled {
+    background: #e2e8f0;
+    color: #94a3b8;
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
+}
+
+@keyframes otaFadeIn {
+    from { opacity: 0; transform: translateX(8px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
 .stm32-item .item-version {
     color: #2563eb;
 }
 
 .esp32-item .item-version {
     color: #7c3aed;
-}
-
-.version-footer {
-    text-align: center;
-    padding-top: 16px;
-    border-top: 1px solid #f0f2f5;
-}
-
-.footer-time {
-    font-size: 13px;
-    color: #94a3b8;
-}
-
-.footer-time span {
-    color: #64748b;
-    font-weight: 500;
 }
 
 /* 移动端适配 */
@@ -1208,6 +1255,365 @@ select:not(.custom-select) option {
     
     .item-version {
         font-size: 16px;
+    }
+    
+    .item-right {
+        gap: 6px;
+    }
+    
+    .item-ota-info .ota-latest-ver {
+        font-size: 13px;
+    }
+    
+    .btn-ota-inline {
+        padding: 3px 10px;
+        font-size: 11px;
+    }
+    
+    .ota-action-row {
+        gap: 8px;
+        margin-top: 14px;
+        padding-top: 12px;
+    }
+    
+    .btn-ota-action-main {
+        padding: 8px 8px;
+        font-size: 12px;
+        gap: 4px;
+    }
+}
+
+/* ========== OTA 操作按钮行 ========== */
+.ota-action-row {
+    display: flex;
+    gap: 10px;
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px solid #f0f2f5;
+}
+
+.btn-ota-action-main {
+    flex: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 9px 12px;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    white-space: nowrap;
+}
+
+.btn-ota-check-main {
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25);
+}
+
+.btn-ota-check-main:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
+}
+
+.btn-ota-img-main {
+    background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+    box-shadow: 0 2px 8px rgba(124, 58, 237, 0.25);
+}
+
+.btn-ota-img-main:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(124, 58, 237, 0.35);
+}
+
+.btn-ota-action-main:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.btn-ota-action-main svg {
+    flex-shrink: 0;
+}
+
+/* OTA 更新弹窗 */
+.ota-update-modal .modal-content {
+    max-width: 480px;
+}
+
+.ota-version-compare {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-bottom: 16px;
+}
+
+.ota-device-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px;
+    background: linear-gradient(135deg, rgba(248, 250, 252, 0.9) 0%, rgba(241, 245, 249, 0.7) 100%);
+    border-radius: 12px;
+    border: 1.5px solid rgba(226, 232, 240, 0.6);
+    transition: all 0.2s ease;
+}
+
+.ota-device-row:hover {
+    border-color: rgba(37, 99, 235, 0.2);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.ota-device-info {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.ota-device-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: #1f2937;
+}
+
+.ota-ver-compare {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'Consolas', 'Monaco', monospace;
+    font-size: 13px;
+}
+
+.ota-current-ver {
+    color: #64748b;
+    font-weight: 500;
+}
+
+.ota-arrow {
+    color: #94a3b8;
+    font-size: 14px;
+}
+
+.ota-latest-ver {
+    color: #2563eb;
+    font-weight: 700;
+}
+
+.ota-device-status {
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+    padding: 4px 10px;
+    border-radius: 6px;
+}
+
+.ota-status-outdated {
+    color: #dc2626;
+    background: rgba(220, 38, 38, 0.08);
+}
+
+.ota-status-latest {
+    color: #16a34a;
+    background: rgba(22, 163, 74, 0.08);
+}
+
+.ota-status-unknown {
+    color: #d97706;
+    background: rgba(217, 119, 6, 0.08);
+}
+
+.ota-tip {
+    padding: 10px 14px;
+    background: rgba(245, 158, 11, 0.08);
+    border: 1px solid rgba(245, 158, 11, 0.15);
+    border-radius: 8px;
+    margin-top: 4px;
+}
+
+.ota-tip p {
+    margin: 0;
+    font-size: 13px;
+    color: #92400e;
+    line-height: 1.5;
+}
+
+.ota-footer {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+}
+
+.btn-ota-action {
+    padding: 10px 18px;
+    border: none;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    color: #fff;
+    box-shadow: 0 2px 6px rgba(37, 99, 235, 0.2);
+}
+
+.btn-ota-action:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+}
+
+.btn-ota-action:disabled {
+    background: #e2e8f0;
+    color: #94a3b8;
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
+}
+
+.btn-ota-img {
+    background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+    box-shadow: 0 2px 6px rgba(124, 58, 237, 0.2);
+}
+
+.btn-ota-img:hover:not(:disabled) {
+    box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
+}
+
+/* OTA 内联区域（设备版本弹窗内） */
+.ota-inline-section {
+    margin-top: 8px;
+}
+
+.btn-ota-action-sm {
+    padding: 6px 16px;
+    border: none;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    color: #fff;
+    box-shadow: 0 1px 4px rgba(37, 99, 235, 0.2);
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.btn-ota-action-sm:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 3px 10px rgba(37, 99, 235, 0.3);
+}
+
+.btn-ota-action-sm:disabled {
+    background: #e2e8f0;
+    color: #94a3b8;
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
+}
+
+.btn-ota-action-sm.btn-ota-img {
+    background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+    box-shadow: 0 1px 4px rgba(124, 58, 237, 0.2);
+    padding: 8px 20px;
+    font-size: 13px;
+}
+
+.btn-ota-action-sm.btn-ota-img:hover:not(:disabled) {
+    box-shadow: 0 3px 10px rgba(124, 58, 237, 0.3);
+}
+
+/* OTA 升级进度区域 */
+.ota-progress-section {
+    margin-top: 16px;
+    padding: 14px 16px;
+    background: linear-gradient(135deg, rgba(37, 99, 235, 0.04) 0%, rgba(124, 58, 237, 0.04) 100%);
+    border: 1.5px solid rgba(37, 99, 235, 0.12);
+    border-radius: 12px;
+}
+
+.ota-progress-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.ota-progress-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #1f2937;
+}
+
+.ota-progress-pct {
+    font-size: 15px;
+    font-weight: 700;
+    color: #2563eb;
+    font-family: 'Consolas', 'Monaco', monospace;
+}
+
+.ota-progress-bar {
+    width: 100%;
+    height: 8px;
+    background: #e5e7eb;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 12px;
+}
+
+.ota-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #2563eb 0%, #7c3aed 100%);
+    border-radius: 4px;
+    transition: width 0.4s ease;
+}
+
+.ota-log-area {
+    max-height: 120px;
+    overflow-y: auto;
+    background: #1e293b;
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+    font-size: 11px;
+    line-height: 1.6;
+}
+
+.ota-log-line {
+    color: #94a3b8;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.ota-log-area::-webkit-scrollbar {
+    width: 4px;
+}
+
+.ota-log-area::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.ota-log-area::-webkit-scrollbar-thumb {
+    background: #475569;
+    border-radius: 2px;
+}
+
+@media (max-width: 767px) {
+    .ota-update-modal .modal-content {
+        width: 92%;
+        max-width: 420px;
+    }
+    
+    .ota-footer {
+        flex-direction: column;
+    }
+    
+    .btn-ota-action {
+        width: 100%;
     }
 }
 

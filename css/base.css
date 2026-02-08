@@ -101,7 +101,10 @@ dialog::backdrop {
 
 /* 防止滚动穿透 - 当弹窗/侧边栏打开时禁止body滚动 */
 body.modal-open {
+    position: fixed !important;
     overflow: hidden !important;
+    width: 100% !important;
+    left: 0;
 }
 
 /* 确保 AI 按钮始终可见，不被 modal-open 隐藏 */

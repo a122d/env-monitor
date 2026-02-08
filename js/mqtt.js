@@ -6,7 +6,7 @@
 
 // ============ 应用版本号 ============
 // 统一版本号管理
-const APP_VERSION = 'V6.4.1';
+const APP_VERSION = 'V6.5.1';
 
 // 暴露全局版本号
 window.APP_VERSION = APP_VERSION;
@@ -59,7 +59,12 @@ window.MQTT_DEFAULT_CONFIG = {
     
     // 📊 历史数据主题配置
     historySetTopic: 'environment/set',      // 📤 发送历史数据请求的主题
-    historyDataTopic: 'environment/history'  // 📥 接收历史数据的主题
+    historyDataTopic: 'environment/history', // 📥 接收历史数据的主题
+    
+    // 🔄 OTA 固件更新主题配置
+    otaUpdateTopic: 'EnvsonUpdata',          // 📤📥 发送/接收OTA版本查询
+    otaCommandTopic: 'EnvsonOTA',            // 📤 发送OTA更新指令
+    otaEsp32LogTopic: 'Envson/esp32_log'     // 📥 ESP32 OTA升级日志
 };
 
 // 解析MQTT URL（提取host/port/path/SSL）
@@ -984,6 +989,47 @@ window.MQTTApp.init = function(newConfig) {
                 }
             }
             
+            // 🔄 处理OTA版本查询响应
+            if (topic === mqttConfig.otaUpdateTopic) {
+                try {
+                    const otaData = JSON.parse(payload);
+                    
+                    // 区分GetOTA字段：1为自身发送的请求回显，直接忽略
+                    if (otaData.GetOTA === 1) {
+                        return; // 跳过自身消息
+                    }
+                    
+                    // GetOTA === 0 为设备返回的最新版本信息
+                    if (otaData.GetOTA === 0 && otaData.stm32_ver !== undefined && otaData.esp32_ver !== undefined) {
+                        // 版本为 -1 表示查询失败
+                        const queryFailed = (otaData.stm32_ver === -1 || otaData.esp32_ver === -1);
+                        if (queryFailed) {
+                            console.warn('⚠️ OTA版本查询失败（设备返回 -1）');
+                        } else {
+                            console.log('✅ OTA版本响应：STM32=' + otaData.stm32_ver + ', ESP32=' + otaData.esp32_ver);
+                        }
+                        if (window.onOTAVersionResponse) {
+                            window.onOTAVersionResponse(otaData);
+                        }
+                    }
+                } catch (e) {
+                    console.error('❌ OTA消息解析失败：', e);
+                }
+            }
+            
+            // 📋 处理ESP32 OTA升级日志
+            if (topic === mqttConfig.otaEsp32LogTopic) {
+                try {
+                    const logMsg = payload;
+                    console.log('📋 ESP32日志：', logMsg);
+                    if (window.onOTALogMessage) {
+                        window.onOTALogMessage(logMsg);
+                    }
+                } catch (e) {
+                    console.error('❌ ESP32日志处理失败：', e);
+                }
+            }
+            
         };
 
         // 连接配置（仅保留Paho支持的属性）
@@ -1034,10 +1080,40 @@ window.MQTTApp.init = function(newConfig) {
                     });
                     console.log('✅ 管理员：已订阅设备控制主题 environment/con');
                     
+                    // 订阅OTA版本查询主题
+                    if (mqttConfig.otaUpdateTopic) {
+                        client.subscribe(mqttConfig.otaUpdateTopic, {
+                            onSuccess: () => {
+                                console.log('✅ 管理员：已订阅OTA主题', mqttConfig.otaUpdateTopic);
+                            },
+                            onFailure: (res) => {
+                                console.warn('⚠️ 订阅OTA主题失败：', res.errorMessage);
+                            }
+                        });
+                    }
+                    
+                    // 订阅ESP32 OTA升级日志主题
+                    if (mqttConfig.otaEsp32LogTopic) {
+                        client.subscribe(mqttConfig.otaEsp32LogTopic, {
+                            onSuccess: () => {
+                                console.log('✅ 管理员：已订阅ESP32日志主题', mqttConfig.otaEsp32LogTopic);
+                            },
+                            onFailure: (res) => {
+                                console.warn('⚠️ 订阅ESP32日志主题失败：', res.errorMessage);
+                            }
+                        });
+                    }
+                    
                     // 显示设备控制菜单项
                     const menuDeviceControl = document.getElementById('menuDeviceControl');
                     if (menuDeviceControl) {
                         menuDeviceControl.classList.remove('is-hidden');
+                    }
+                    
+                    // 显示OTA检查更新按钮
+                    const otaCheckSection = document.getElementById('otaCheckSection');
+                    if (otaCheckSection) {
+                        otaCheckSection.classList.remove('is-hidden');
                     }
                 }
                 
@@ -1437,6 +1513,87 @@ window.processHistoryData = function(historyData) {
 document.addEventListener('DOMContentLoaded', () => {
     mqttConfig.clientId = generateUniqueClientId();
 });
+
+// 🔄 发送OTA版本检查请求
+window.sendOTACheckRequest = function() {
+    // 权限检查：仅管理员可操作
+    if (!window.currentUser || !window.currentUser.isAdmin || !window.currentUser.isAdmin()) {
+        console.warn('⚠️ 您无权进行OTA检查');
+        return false;
+    }
+    
+    if (!mqttClient || !mqttClient.isConnected()) {
+        console.error('❌ MQTT未连接');
+        ToastAlert.show('MQTT未连接，无法检查更新');
+        return false;
+    }
+    
+    const requestPayload = { GetOTA: 1 };
+    
+    try {
+        const message = new Paho.MQTT.Message(JSON.stringify(requestPayload));
+        message.destinationName = mqttConfig.otaUpdateTopic;
+        message.qos = 0;
+        
+        mqttClient.send(message);
+        console.log('📤 发送OTA版本检查请求：', requestPayload);
+        return true;
+    } catch (err) {
+        console.error('❌ 发送OTA检查请求失败：', err);
+        return false;
+    }
+};
+
+// 🔄 发送OTA更新指令
+// deviceType: 'stm32' | 'esp32' | 'img' — 仅允许单一设备置1
+window.sendOTACommand = function(deviceType) {
+    // 权限检查：仅管理员可操作
+    if (!window.currentUser || !window.currentUser.isAdmin || !window.currentUser.isAdmin()) {
+        console.warn('⚠️ 您无权进行OTA更新');
+        return false;
+    }
+    
+    if (!mqttClient || !mqttClient.isConnected()) {
+        console.error('❌ MQTT未连接');
+        ToastAlert.show('MQTT未连接，无法发送更新指令');
+        return false;
+    }
+    
+    // 构建OTA指令，仅允许单一设备置1
+    const commandPayload = {
+        Stm32_OTA: 0,
+        Esp32_OTA: 0,
+        Img_OTA: 0
+    };
+    
+    switch (deviceType) {
+        case 'stm32':
+            commandPayload.Stm32_OTA = 1;
+            break;
+        case 'esp32':
+            commandPayload.Esp32_OTA = 1;
+            break;
+        case 'img':
+            commandPayload.Img_OTA = 1;
+            break;
+        default:
+            console.error('❌ 未知的OTA设备类型：', deviceType);
+            return false;
+    }
+    
+    try {
+        const message = new Paho.MQTT.Message(JSON.stringify(commandPayload));
+        message.destinationName = mqttConfig.otaCommandTopic;
+        message.qos = 1;
+        
+        mqttClient.send(message);
+        console.log('📤 发送OTA更新指令：', commandPayload);
+        return true;
+    } catch (err) {
+        console.error('❌ 发送OTA更新指令失败：', err);
+        return false;
+    }
+};
 
 // 页面卸载时断开连接
 window.addEventListener('beforeunload', () => {
