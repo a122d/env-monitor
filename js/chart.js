@@ -122,8 +122,6 @@ window.initCharts = function() {
         return;
     }
 
-    console.log('✅ ECharts 库已加载');
-    
     // 隐藏加载指示器
     if (loadingIndicator) {
         loadingIndicator.classList.add('hidden');
@@ -633,8 +631,6 @@ window.refreshChartFromData = function() {
         start: 0,
         end: 100
     });
-    
-    console.log(`✅ 图表已刷新，显示 ${xData.length} 条数据`);
 };
 
 // 重置所有图表的缩放
@@ -831,9 +827,7 @@ function handleChartRefresh() {
     // 📤 发送历史数据请求获取最新数据
     if (window.sendHistoryDataRequest) {
         const sent = window.sendHistoryDataRequest();
-        if (sent) {
-            console.log('📤 刷新：已发送历史数据请求');
-        } else {
+        if (!sent) {
             // MQTT未连接时，仅刷新图表显示
             const chartDom = document.getElementById('combined-chart');
             if (chartDom && typeof echarts !== 'undefined') {

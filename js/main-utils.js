@@ -73,34 +73,10 @@ function debounce(func, wait, immediate = false) {
     };
 }
 
-// requestAnimationFrame 节流 - 用于动画相关操作
-function rafThrottle(callback) {
-    let requestId = null;
-    let lastArgs = null;
-    
-    const later = () => {
-        requestId = null;
-        callback.apply(null, lastArgs);
-    };
-    
-    return function(...args) {
-        lastArgs = args;
-        if (requestId === null) {
-            requestId = requestAnimationFrame(later);
-        }
-    };
-}
-
 // 批量DOM更新调度器 - 优化重绘性能
 const DOMScheduler = {
-    _reads: [],
     _writes: [],
     _scheduled: false,
-    
-    read(fn) {
-        this._reads.push(fn);
-        this._schedule();
-    },
     
     write(fn) {
         this._writes.push(fn);
@@ -116,13 +92,10 @@ const DOMScheduler = {
     
     _flush() {
         // 先执行所有读取操作
-        const reads = this._reads;
         const writes = this._writes;
-        this._reads = [];
         this._writes = [];
         this._scheduled = false;
         
-        reads.forEach(fn => fn());
         writes.forEach(fn => fn());
     }
 };
@@ -132,8 +105,6 @@ const DeviceDetector = {
     isMobile: () => window.innerWidth <= 767,
     isAndroid: () => /Android/i.test(navigator.userAgent),
     isIOS: () => /iPhone|iPad|iPod/i.test(navigator.userAgent),
-    // 检测是否支持触摸
-    hasTouch: () => 'ontouchstart' in window || navigator.maxTouchPoints > 0,
     // 检测是否开启了减少动效
     prefersReducedMotion: () => window.matchMedia('(prefers-reduced-motion: reduce)').matches
 };
@@ -246,8 +217,6 @@ function proceedWithInit() {
 
         if (typeof initCharts === 'function') {
             initCharts();
-        } else {
-            console.warn('⚠️ initCharts 函数未定义');
         }
         
         setStatusDotPosition();
@@ -277,25 +246,13 @@ function proceedWithInit() {
     }, { timeout: 200 });
 }
 
-// 统一图表尺寸调整函数 - 优化版
+// 统一图表尺寸调整函数
 function resizeAllCharts() {
-    // 使用 requestAnimationFrame 确保在下一帧渲染前调整
     requestAnimationFrame(() => {
-        const charts = [
-            window.tempChart,
-            window.humidityChart,
-            window.windChart,
-            window.lightChart,
-            window.PM2Chart,
-            window.sunrayChart
-        ];
-        
-        // 批量调整图表大小
-        charts.forEach(chart => {
-            if (chart && typeof chart.resize === 'function') {
-                chart.resize();
-            }
-        });
+        // 使用实际存在的 combinedChart
+        if (window.combinedChart && typeof window.combinedChart.resize === 'function') {
+            window.combinedChart.resize();
+        }
     });
 }
 

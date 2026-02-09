@@ -44,7 +44,7 @@
             </div>
         </div>
 
-        <!-- 原有内容：标题/菜单/数据卡片/图表 -->
+        <!-- 标题/菜单/数据卡片/图表 -->
         <header class="title-container" id="titleContainer">
             <nav class="menu-container">
                 <div class="hamburger-menu" id="hamburgerMenu">
@@ -77,264 +77,194 @@
         </header>
 
         <main class="data-grid" role="main">
-            <article class="data-card temp-card temp-normal" id="temperatureCard" aria-label="温度监测">
-                <div class="temp-header">
+            <!-- 温度卡片 -->
+            <article class="data-card temp-card" id="temperatureCard" aria-label="温度监测">
+                <div class="card-header temp-header">
                     <h3>温度</h3>
-                    <span class="temp-icon" id="tempIcon">🌡️</span>
+                    <span class="card-icon temp-icon" id="tempIcon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/></svg></span>
                 </div>
-                
-                <div class="temp-main-display">
-                    <div class="temp-value-wrapper">
-                        <div class="temp-value" id="temperature">--</div>
-                        <span class="temp-unit">℃</span>
-                    </div>
-                    <div class="temp-status">
-                        <span class="temp-level" id="tempLevel">--</span>
-                        <span class="temp-trend" id="tempTrend">→</span>
+                <div class="card-main-display temp-main-display">
+                    <div class="card-value-wrapper temp-value-wrapper">
+                        <div class="card-value temp-value" id="temperature">--</div>
+                        <span class="card-unit temp-unit">℃</span>
                     </div>
                 </div>
-
-                <div class="temp-progress-bar">
-                    <div class="progress-track">
-                        <div class="progress-fill" id="tempProgress" style="width: 0%;"></div>
-                        <div class="progress-marker cold" title="-10℃"></div>
-                        <div class="progress-marker normal" title="13℃"></div>
-                        <div class="progress-marker hot" title="36℃"></div>
-                    </div>
+                <div class="card-progress-bar temp-progress-bar">
                     <div class="progress-labels">
                         <span class="progress-label left">-10</span>
-                        <span class="progress-label center">13</span>
+                        <span class="card-level temp-level" id="tempLevel">--</span>
                         <span class="progress-label right">36</span>
                     </div>
+                    <div class="progress-track">
+                        <div class="progress-fill" id="tempProgress" style="width: 0%;"></div>
+                    </div>
                 </div>
-
             </article>
+
+            <!-- 湿度卡片 -->
             <article class="data-card humidity-card" id="humidityCard" aria-label="湿度监测">
                 <div class="card-header">
                     <h3>湿度</h3>
-                    <span class="card-icon" id="humidityIcon">💧</span>
+                    <span class="card-icon" id="humidityIcon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg></span>
                 </div>
-                
                 <div class="card-main-display">
                     <div class="card-value-wrapper">
                         <div class="card-value" id="humidity">--</div>
                         <span class="card-unit">%</span>
                     </div>
-                    <div class="card-status">
-                        <span class="card-level" id="humidityLevel">--</span>
-                        <span class="card-trend" id="humidityTrend">→</span>
-                    </div>
                 </div>
-
                 <div class="card-progress-bar">
-                    <div class="progress-track">
-                        <div class="progress-fill" id="humidityProgress" style="width: 0%;"></div>
-                        <div class="progress-marker left" title="0%"></div>
-                        <div class="progress-marker middle" title="50%"></div>
-                        <div class="progress-marker right" title="100%"></div>
-                    </div>
                     <div class="progress-labels">
                         <span class="progress-label left">0</span>
-                        <span class="progress-label center">50</span>
+                        <span class="card-level" id="humidityLevel">--</span>
                         <span class="progress-label right">100</span>
                     </div>
+                    <div class="progress-track">
+                        <div class="progress-fill" id="humidityProgress" style="width: 0%;"></div>
+                    </div>
                 </div>
-
             </article>
+
+            <!-- 风速卡片 -->
             <article class="data-card wind-card" id="windSpeedCard" aria-label="风速监测">
                 <div class="card-header">
                     <h3>风速</h3>
-                    <span class="card-icon" id="windSpeedIcon">💨</span>
+                    <span class="card-icon" id="windSpeedIcon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9.59 4.59A2 2 0 1 1 11 8H2m10.59 11.41A2 2 0 1 0 14 16H2m15.73-8.27A2.5 2.5 0 1 1 19.5 12H2"/></svg></span>
                 </div>
-                
                 <div class="card-main-display">
                     <div class="card-value-wrapper">
                         <div class="card-value" id="windSpeed">--</div>
                         <span class="card-unit">m/s</span>
                     </div>
-                    <div class="card-status">
-                        <span class="card-level" id="windSpeedLevel">--</span>
-                        <span class="card-trend" id="windSpeedTrend">→</span>
-                    </div>
                 </div>
-
                 <div class="card-progress-bar">
-                    <div class="progress-track">
-                        <div class="progress-fill" id="windSpeedProgress" style="width: 0%;"></div>
-                        <div class="progress-marker left" title="0m/s"></div>
-                        <div class="progress-marker middle" title="10m/s"></div>
-                        <div class="progress-marker right" title="20m/s"></div>
-                    </div>
                     <div class="progress-labels">
                         <span class="progress-label left">0</span>
-                        <span class="progress-label center">10</span>
+                        <span class="card-level" id="windSpeedLevel">--</span>
                         <span class="progress-label right">20</span>
                     </div>
+                    <div class="progress-track">
+                        <div class="progress-fill" id="windSpeedProgress" style="width: 0%;"></div>
+                    </div>
                 </div>
-
             </article>
 
+            <!-- 光照强度卡片 -->
             <article class="data-card illumination-card" id="illuminationCard" aria-label="光照强度监测">
                 <div class="card-header">
                     <h3>光照强度</h3>
-                    <span class="card-icon" id="illuminationIcon">☀️</span>
+                    <span class="card-icon" id="illuminationIcon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></span>
                 </div>
-                
                 <div class="card-main-display">
                     <div class="card-value-wrapper">
                         <div class="card-value" id="illumination">--</div>
                         <span class="card-unit">lux</span>
                     </div>
-                    <div class="card-status">
-                        <span class="card-level" id="illuminationLevel">--</span>
-                        <span class="card-trend" id="illuminationTrend">→</span>
-                    </div>
                 </div>
-
                 <div class="card-progress-bar">
-                    <div class="progress-track">
-                        <div class="progress-fill" id="illuminationProgress" style="width: 0%;"></div>
-                        <div class="progress-marker left" title="0lux"></div>
-                        <div class="progress-marker middle" title="500lux"></div>
-                        <div class="progress-marker right" title="1000lux"></div>
-                    </div>
                     <div class="progress-labels">
                         <span class="progress-label left">0</span>
-                        <span class="progress-label center">500</span>
+                        <span class="card-level" id="illuminationLevel">--</span>
                         <span class="progress-label right">1000</span>
                     </div>
+                    <div class="progress-track">
+                        <div class="progress-fill" id="illuminationProgress" style="width: 0%;"></div>
+                    </div>
                 </div>
-
             </article>
         
-            <!-- PM2.5 数值卡片 -->
+            <!-- PM2.5 卡片 -->
             <article class="data-card PM2-card" id="PM2card" aria-label="PM2.5监测">
                 <div class="card-header">
                     <h3>PM2.5</h3>
-                    <span class="card-icon" id="PM2Icon">🌳</span>
+                    <span class="card-icon" id="PM2Icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></svg></span>
                 </div>
-
                 <div class="card-main-display">
                     <div class="card-value-wrapper">
                         <div class="card-value" id="PM2">--</div>
                         <span class="card-unit PM2unit">μg/m³</span>
                     </div>
-                    <div class="card-status">
-                        <span class="card-level" id="PM2Level">--</span>
-                        <span class="card-trend" id="PM2Trend">→</span>
-                    </div>
                 </div>
-
                 <div class="card-progress-bar">
-                    <div class="progress-track">
-                        <div class="progress-fill" id="PM2Progress" style="width: 0%;"></div>
-                        <div class="progress-marker left" title="0ug/m³"></div>
-                        <div class="progress-marker middle" title="75ug/m³"></div>
-                        <div class="progress-marker right" title="150ug/m³"></div>
-                    </div>
                     <div class="progress-labels">
                         <span class="progress-label left">0</span>
-                        <span class="progress-label center">75</span>
+                        <span class="card-level" id="PM2Level">--</span>
                         <span class="progress-label right">150</span>
                     </div>
+                    <div class="progress-track">
+                        <div class="progress-fill" id="PM2Progress" style="width: 0%;"></div>
+                    </div>
                 </div>
-
             </article>
 
             <!-- 紫外线强度卡片 -->
             <article class="data-card sunray-card" id="sunrayCard" aria-label="紫外线强度监测">
                 <div class="card-header">
                     <h3>紫外线强度</h3>
-                    <span class="card-icon" id="sunrayIcon">⛱️</span>
+                    <span class="card-icon" id="sunrayIcon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></span>
                 </div>
-
                 <div class="card-main-display">
                     <div class="card-value-wrapper">
                         <div class="card-value" id="sunray">--</div>
                         <span class="card-unit">UVI</span>
                     </div>
-                    <div class="card-status">
-                        <span class="card-level" id="sunrayLevel">--</span>
-                        <span class="card-trend" id="sunrayTrend">→</span>
-                    </div>
                 </div>
-
                 <div class="card-progress-bar">
-                    <div class="progress-track">
-                        <div class="progress-fill" id="sunrayProgress" style="width: 0%;"></div>
-                        <div class="progress-marker left" title="0UVI"></div>
-                        <div class="progress-marker middle" title="5UVI"></div>
-                        <div class="progress-marker right" title="10UVI"></div>
-                    </div>
                     <div class="progress-labels">
                         <span class="progress-label left">0</span>
-                        <span class="progress-label center">5</span>
+                        <span class="card-level" id="sunrayLevel">--</span>
                         <span class="progress-label right">10</span>
                     </div>
+                    <div class="progress-track">
+                        <div class="progress-fill" id="sunrayProgress" style="width: 0%;"></div>
+                    </div>
                 </div>
-
             </article>
 
+            <!-- 大气压强卡片 -->
             <article class="data-card pressure-card" id="pressureCard" aria-label="大气压强监测">
                 <div class="card-header">
                     <h3>大气压强</h3>
-                    <span class="card-icon" id="pressureIcon">⏲️</span>
+                    <span class="card-icon" id="pressureIcon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span>
                 </div>
-                
                 <div class="card-main-display">
                     <div class="card-value-wrapper">
                         <div class="card-value" id="pressure">--</div>
                         <span class="card-unit">KPa</span>
                     </div>
-                    <div class="card-status">
-                        <span class="card-level" id="pressureLevel">--</span>
-                        <span class="card-trend" id="pressureTrend">→</span>
-                    </div>
                 </div>
-
                 <div class="card-progress-bar">
-                    <div class="progress-track">
-                        <div class="progress-fill" id="pressureProgress" style="width: 0%;"></div>
-                        <div class="progress-marker left" title="90KPa"></div>
-                        <div class="progress-marker middle" title="101.325KPa"></div>
-                        <div class="progress-marker right" title="110KPa"></div>
-                    </div>
                     <div class="progress-labels">
                         <span class="progress-label left">90</span>
-                        <span class="progress-label center">101</span>
+                        <span class="card-level" id="pressureLevel">--</span>
                         <span class="progress-label right">110</span>
+                    </div>
+                    <div class="progress-track">
+                        <div class="progress-fill" id="pressureProgress" style="width: 0%;"></div>
                     </div>
                 </div>
             </article>
 
+            <!-- 海拔高度卡片 -->
             <article class="data-card altitude-card" id="altitudeCard" aria-label="海拔高度监测">
                 <div class="card-header">
                     <h3>海拔高度</h3>
-                    <span class="card-icon" id="altitudeIcon">🏔️</span>
+                    <span class="card-icon" id="altitudeIcon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></span>
                 </div>
-                
                 <div class="card-main-display">
                     <div class="card-value-wrapper">
                         <div class="card-value" id="altitude">--</div>
                         <span class="card-unit">m</span>
                     </div>
-                    <div class="card-status">
-                        <span class="card-level" id="altitudeLevel">--</span>
-                        <span class="card-trend" id="altitudeTrend">→</span>
-                    </div>
                 </div>
-
                 <div class="card-progress-bar">
-                    <div class="progress-track">
-                        <div class="progress-fill" id="altitudeProgress" style="width: 0%;"></div>
-                        <div class="progress-marker left" title="0m"></div>
-                        <div class="progress-marker middle" title="1500m"></div>
-                        <div class="progress-marker right" title="3000m"></div>
-                    </div>
                     <div class="progress-labels">
                         <span class="progress-label left">0</span>
-                        <span class="progress-label center">1500</span>
+                        <span class="card-level" id="altitudeLevel">--</span>
                         <span class="progress-label right">3000</span>
+                    </div>
+                    <div class="progress-track">
+                        <div class="progress-fill" id="altitudeProgress" style="width: 0%;"></div>
                     </div>
                 </div>
             </article>

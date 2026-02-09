@@ -6,7 +6,7 @@
 
 // ============ 应用版本号 ============
 // 统一版本号管理
-const APP_VERSION = 'V6.5.4';
+const APP_VERSION = 'V6.6.1';
 
 // 暴露全局版本号
 window.APP_VERSION = APP_VERSION;
@@ -165,7 +165,6 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // 显示用户角色信息
         const roleText = userRole === window.USER_ROLES.ADMIN ? '管理员' : '普通用户';
-        console.log(`👤 用户登录: ${login.username} (${roleText})`);
         
         // 禁用登录按钮，防止重复点击
         applyConfigBtn.disabled = true;
@@ -347,24 +346,7 @@ document.addEventListener('DOMContentLoaded', () => {
  */
 let mqttClient = null;
 let reconnectTimer = null;
-const RECONNECT_INTERVAL = 5000;
 let baseClientId = 'env-monitor-' + Math.random().toString(16);
-
-// ===== 传感器统计数据工厂 =====
-function createSensorStats() {
-    return { current: 0, sum: 0, count: 0, history: [], lastUpdateTime: null };
-}
-
-const sensorStats = {
-    temperature: createSensorStats(),
-    humidity: createSensorStats(),
-    windSpeed: createSensorStats(),
-    illumination: createSensorStats(),
-    pm25: createSensorStats(),
-    sunray: createSensorStats(),
-    pressure: createSensorStats(),
-    altitude: createSensorStats()
-};
 
 // ===== 通用阈值分类函数 =====
 // rules: [{ max, ... }, ...] — 值 < max 则命中该规则，最后一条为兜底
@@ -395,17 +377,8 @@ const SENSOR_CARD_CONFIG = {
             { max: Infinity, label: '酷热' }
         ],
         levelSelector: '.temp-level',
-        trendSelector: '.temp-trend',
         progressById: 'tempProgress',
         progressFn: val => ((val + 10) / 46) * 100,
-        iconConfig: {
-            selector: '.temp-icon',
-            rules: [
-                { max: 7, icon: '❄️' },
-                { max: 28.1, icon: '🌡️' },
-                { max: Infinity, icon: '🔥' }
-            ]
-        },
         useRAF: true
     },
     humidity: {
@@ -537,19 +510,6 @@ const DATA_PARSE_CONFIG = [
 
 // MQTT配置（优先从本地存储加载，否则使用全局默认配置）
 let mqttConfig = (() => {
-    // 确保全局默认配置已定义
-    if (!window.MQTT_DEFAULT_CONFIG) {
-        console.warn('⚠️ 全局MQTT配置未定义，使用内置默认值');
-        window.MQTT_DEFAULT_CONFIG = {
-            host: 'wss://mb67e10b.ala.cn-hangzhou.emqxsl.cn:8084/mqtt',
-            topic: 'environment/data',
-            username: 'WEB',
-            password: '',
-            keepalive: 30,
-            clean: true
-        };
-    }
-    
     const savedConfig = localStorage.getItem('mqttConfig');
     if (savedConfig) {
         try {
@@ -560,7 +520,6 @@ let mqttConfig = (() => {
                 clientId: config.clientId || baseClientId
             });
         } catch (e) {
-            console.error('❌ 加载MQTT配置失败：', e);
             localStorage.removeItem('mqttConfig');
         }
     }
@@ -569,8 +528,6 @@ let mqttConfig = (() => {
         clientId: baseClientId
     };
 })();
-
-
 
 // 生成唯一ClientId（防重复）
 function generateUniqueClientId() {
@@ -638,8 +595,6 @@ function resetAllDataCards() {
     if (tempEl) tempEl.textContent = '--';
     const tempLevelEl = document.getElementById('tempLevel');
     if (tempLevelEl) tempLevelEl.textContent = '--';
-    const tempTrendEl = document.getElementById('tempTrend');
-    if (tempTrendEl) tempTrendEl.textContent = '→';
     const tempProgress = document.getElementById('tempProgress');
     if (tempProgress) tempProgress.style.width = '0%';
     
@@ -648,8 +603,6 @@ function resetAllDataCards() {
     if (humidityEl) humidityEl.textContent = '--';
     const humidityLevelEl = document.getElementById('humidityLevel');
     if (humidityLevelEl) humidityLevelEl.textContent = '--';
-    const humidityTrendEl = document.getElementById('humidityTrend');
-    if (humidityTrendEl) humidityTrendEl.textContent = '→';
     const humidityProgress = document.getElementById('humidityProgress');
     if (humidityProgress) humidityProgress.style.width = '0%';
     
@@ -658,8 +611,6 @@ function resetAllDataCards() {
     if (windSpeedEl) windSpeedEl.textContent = '--';
     const windSpeedLevelEl = document.getElementById('windSpeedLevel');
     if (windSpeedLevelEl) windSpeedLevelEl.textContent = '--';
-    const windSpeedTrendEl = document.getElementById('windSpeedTrend');
-    if (windSpeedTrendEl) windSpeedTrendEl.textContent = '→';
     const windSpeedProgress = document.getElementById('windSpeedProgress');
     if (windSpeedProgress) windSpeedProgress.style.width = '0%';
     
@@ -668,8 +619,6 @@ function resetAllDataCards() {
     if (illuminationEl) illuminationEl.textContent = '--';
     const illuminationLevelEl = document.getElementById('illuminationLevel');
     if (illuminationLevelEl) illuminationLevelEl.textContent = '--';
-    const illuminationTrendEl = document.getElementById('illuminationTrend');
-    if (illuminationTrendEl) illuminationTrendEl.textContent = '→';
     const illuminationProgress = document.getElementById('illuminationProgress');
     if (illuminationProgress) illuminationProgress.style.width = '0%';
     
@@ -678,8 +627,6 @@ function resetAllDataCards() {
     if (pm2El) pm2El.textContent = '--';
     const pm2LevelEl = document.getElementById('PM2Level');
     if (pm2LevelEl) pm2LevelEl.textContent = '--';
-    const pm2TrendEl = document.getElementById('PM2Trend');
-    if (pm2TrendEl) pm2TrendEl.textContent = '→';
     const pm2Progress = document.getElementById('PM2Progress');
     if (pm2Progress) pm2Progress.style.width = '0%';
     
@@ -688,8 +635,6 @@ function resetAllDataCards() {
     if (sunrayEl) sunrayEl.textContent = '--';
     const sunrayLevelEl = document.getElementById('sunrayLevel');
     if (sunrayLevelEl) sunrayLevelEl.textContent = '--';
-    const sunrayTrendEl = document.getElementById('sunrayTrend');
-    if (sunrayTrendEl) sunrayTrendEl.textContent = '→';
     const sunrayProgress = document.getElementById('sunrayProgress');
     if (sunrayProgress) sunrayProgress.style.width = '0%';
     
@@ -732,15 +677,6 @@ function updateSensorCard(sensorKey, value) {
     const card = document.getElementById(config.cardId);
     if (!card) return;
 
-    // 更新统计数据
-    const stats = sensorStats[sensorKey];
-    stats.lastUpdateTime = Date.now();
-    stats.history.push(num);
-    if (stats.history.length > 10) stats.history.shift();
-    stats.current = num;
-    stats.sum += num;
-    stats.count++;
-
     // DOM 更新逻辑（可选 RAF 包裹）
     const applyUpdate = () => {
         // 状态类名（仅在变化时更新）
@@ -749,15 +685,6 @@ function updateSensorCard(sensorKey, value) {
             card.classList.remove(...config.stateRules.map(r => r.cls));
             card.classList.add(stateRule.cls);
             lastCardStates[sensorKey] = stateRule.cls;
-        }
-
-        // 图标更新（仅温度等配置了 iconConfig 的卡片）
-        if (config.iconConfig) {
-            const iconEl = card.querySelector(config.iconConfig.selector);
-            if (iconEl) {
-                const iconRule = classifyValue(num, config.iconConfig.rules);
-                iconEl.textContent = iconRule.icon;
-            }
         }
 
         // 等级标签
@@ -783,40 +710,9 @@ function updateSensorCard(sensorKey, value) {
             const pct = Math.max(0, Math.min(100, config.progressFn(num)));
             progressFill.style.width = pct + '%';
         }
-
-        // 趋势
-        const trendSelector = config.trendSelector || '.card-trend';
-        updateCardTrend(card, stats, trendSelector);
     };
 
     config.useRAF ? requestAnimationFrame(applyUpdate) : applyUpdate();
-}
-
-// 通用卡片趋势更新函数
-function updateCardTrend(card, stats, trendSelector) {
-    const history = stats.history;
-    if (history.length < 2) return;
-    
-    const current = history[history.length - 1];
-    const previous = history[Math.max(0, history.length - 5)];
-    const change = current - previous;
-    
-    let trend = '→';
-    if (change > 0.1) trend = '↑';
-    if (change < -0.1) trend = '↓';
-    
-    const trendEl = card.querySelector(trendSelector);
-    if (trendEl) {
-        trendEl.textContent = trend;
-        trendEl.classList.remove('up', 'down', 'stable');
-        if (trend === '↑') {
-            trendEl.classList.add('up');
-        } else if (trend === '↓') {
-            trendEl.classList.add('down');
-        } else {
-            trendEl.classList.add('stable');
-        }
-    }
 }
 
 
@@ -878,7 +774,7 @@ window.MQTTApp.init = function(newConfig) {
     if (mqttClient) {
         try {
             mqttClient.disconnect();
-        } catch (e) { console.warn('清理旧连接失败：', e); }
+        } catch (e) { }
         mqttClient = null;
     }
     if (reconnectTimer) {
@@ -967,8 +863,6 @@ window.MQTTApp.init = function(newConfig) {
                         return;  // 忽略不属于本客户端的消息
                     }
                     
-                    console.log('📊 收到历史数据：', historyData);
-                    
                     // 处理历史数据并更新图表
                     if (window.processHistoryData) {
                         window.processHistoryData(historyData);
@@ -982,7 +876,6 @@ window.MQTTApp.init = function(newConfig) {
             if (topic === 'environment/con') {
                 try {
                     const controlData = JSON.parse(payload);
-                    console.log('📥 收到设备控制状态：', controlData);
 
                     if (controlData.DriveStatus == 0) {
                         if (controlData.Auto !== undefined) window.deviceControlState.Auto = controlData.Auto;
@@ -1011,11 +904,6 @@ window.MQTTApp.init = function(newConfig) {
                     if (otaData.GetOTA === 0 && otaData.stm32_ver !== undefined && otaData.esp32_ver !== undefined) {
                         // 版本为 -1 表示查询失败
                         const queryFailed = (otaData.stm32_ver === -1 || otaData.esp32_ver === -1);
-                        if (queryFailed) {
-                            console.warn('⚠️ OTA版本查询失败（设备返回 -1）');
-                        } else {
-                            console.log('✅ OTA版本响应：STM32=' + otaData.stm32_ver + ', ESP32=' + otaData.esp32_ver);
-                        }
                         if (window.onOTAVersionResponse) {
                             window.onOTAVersionResponse(otaData);
                         }
@@ -1029,7 +917,6 @@ window.MQTTApp.init = function(newConfig) {
             if (topic === mqttConfig.otaEsp32LogTopic) {
                 try {
                     const logMsg = payload;
-                    console.log('📋 ESP32日志：', logMsg);
                     if (window.onOTALogMessage) {
                         window.onOTALogMessage(logMsg);
                     }
@@ -1065,8 +952,6 @@ window.MQTTApp.init = function(newConfig) {
                 if (mqttConfig.historyDataTopic) {
                     client.subscribe(mqttConfig.historyDataTopic, {
                         onSuccess: () => {
-                            console.log('✅ 已订阅历史数据主题：', mqttConfig.historyDataTopic);
-                            
                             // 连接成功后发送默认历史数据请求（根据本地存储的设置）
                             setTimeout(() => {
                                 window.sendHistoryDataRequest();
@@ -1086,14 +971,10 @@ window.MQTTApp.init = function(newConfig) {
                             console.warn('⚠️ 订阅设备控制主题失败：', res.errorMessage);
                         }
                     });
-                    console.log('✅ 管理员：已订阅设备控制主题 environment/con');
                     
                     // 订阅OTA版本查询主题
                     if (mqttConfig.otaUpdateTopic) {
                         client.subscribe(mqttConfig.otaUpdateTopic, {
-                            onSuccess: () => {
-                                console.log('✅ 管理员：已订阅OTA主题', mqttConfig.otaUpdateTopic);
-                            },
                             onFailure: (res) => {
                                 console.warn('⚠️ 订阅OTA主题失败：', res.errorMessage);
                             }
@@ -1103,9 +984,6 @@ window.MQTTApp.init = function(newConfig) {
                     // 订阅ESP32 OTA升级日志主题
                     if (mqttConfig.otaEsp32LogTopic) {
                         client.subscribe(mqttConfig.otaEsp32LogTopic, {
-                            onSuccess: () => {
-                                console.log('✅ 管理员：已订阅ESP32日志主题', mqttConfig.otaEsp32LogTopic);
-                            },
                             onFailure: (res) => {
                                 console.warn('⚠️ 订阅ESP32日志主题失败：', res.errorMessage);
                             }
@@ -1267,13 +1145,11 @@ window.deviceControlState = {
 window.sendDeviceControlMessage = function(autoValue, lightValue) {
     // 权限检查：仅管理员可操作
     if (!window.currentUser || !window.currentUser.isAdmin || !window.currentUser.isAdmin()) {
-        console.warn('⚠️ 您无权操作设备控制');
         return false;
     }
     
     // 验证MQTT连接状态
     if (!mqttClient || !mqttClient.isConnected()) {
-        console.error('❌ MQTT未连接');
         return false;
     }
     
@@ -1291,7 +1167,6 @@ window.sendDeviceControlMessage = function(autoValue, lightValue) {
         message.retained = false;
         
         mqttClient.send(message);
-        console.log(`✅ 发送设备控制命令:`, messagePayload);
         
         window.deviceControlState.Auto = autoValue;
         window.deviceControlState.Light = lightValue;
@@ -1307,13 +1182,11 @@ window.sendDeviceControlMessage = function(autoValue, lightValue) {
 window.sendDeviceControl = function(controlType, value) {
     // 权限检查：仅管理员可操作
     if (!window.currentUser || !window.currentUser.isAdmin || !window.currentUser.isAdmin()) {
-        console.warn('⚠️ 您无权操作设备控制');
         return false;
     }
     
     // 验证MQTT连接状态
     if (!mqttClient || !mqttClient.isConnected()) {
-        console.error('❌ MQTT未连接');
         return false;
     }
     
@@ -1358,7 +1231,6 @@ function getHistoryNumber(timeRange) {
 // 发送历史数据请求
 window.sendHistoryDataRequest = function(timeRange) {
     if (!mqttClient || !mqttClient.isConnected()) {
-        console.warn('⚠️ MQTT未连接，无法发送历史数据请求');
         return false;
     }
     
@@ -1384,7 +1256,6 @@ window.sendHistoryDataRequest = function(timeRange) {
         message.qos = 1;
         
         mqttClient.send(message);
-        console.log(`📤 发送历史数据请求：${timeRange} (number: ${number})`, requestPayload);
         return true;
     } catch (err) {
         console.error('❌ 发送历史数据请求失败：', err);
@@ -1400,7 +1271,6 @@ window.processHistoryData = function(historyData) {
     }
     
     const dataArray = historyData.data;
-    console.log(`📊 处理 ${dataArray.length} 条历史数据`);
     
     // 📊 保存当前的实时数据（保存最后一条，如果存在的话）
     let savedRealtimeData = null;
@@ -1419,7 +1289,6 @@ window.processHistoryData = function(historyData) {
                 PM2: window.chartData.PM2[lastIdx],
                 sunray: window.chartData.sunray[lastIdx]
             };
-            console.log('📊 保留实时数据：', savedRealtimeData.time);
         }
     }
     
@@ -1505,16 +1374,12 @@ window.processHistoryData = function(historyData) {
         window.chartData.illumination.push(savedRealtimeData.illumination);
         window.chartData.PM2.push(savedRealtimeData.PM2);
         window.chartData.sunray.push(savedRealtimeData.sunray);
-        console.log('✅ 已恢复实时数据');
     }
     
     // 更新图表显示
     if (window.refreshChartFromData) {
         window.refreshChartFromData();
     }
-    
-    console.log('✅ 历史数据已加载到图表');
-    // 已移除弹窗提示，仅保留控制台日志
 };
 
 // 页面加载初始化
@@ -1526,12 +1391,10 @@ document.addEventListener('DOMContentLoaded', () => {
 window.sendOTACheckRequest = function() {
     // 权限检查：仅管理员可操作
     if (!window.currentUser || !window.currentUser.isAdmin || !window.currentUser.isAdmin()) {
-        console.warn('⚠️ 您无权进行OTA检查');
         return false;
     }
     
     if (!mqttClient || !mqttClient.isConnected()) {
-        console.error('❌ MQTT未连接');
         ToastAlert.show('MQTT未连接，无法检查更新');
         return false;
     }
@@ -1544,7 +1407,6 @@ window.sendOTACheckRequest = function() {
         message.qos = 0;
         
         mqttClient.send(message);
-        console.log('📤 发送OTA版本检查请求：', requestPayload);
         return true;
     } catch (err) {
         console.error('❌ 发送OTA检查请求失败：', err);
@@ -1557,12 +1419,10 @@ window.sendOTACheckRequest = function() {
 window.sendOTACommand = function(deviceType) {
     // 权限检查：仅管理员可操作
     if (!window.currentUser || !window.currentUser.isAdmin || !window.currentUser.isAdmin()) {
-        console.warn('⚠️ 您无权进行OTA更新');
         return false;
     }
     
     if (!mqttClient || !mqttClient.isConnected()) {
-        console.error('❌ MQTT未连接');
         ToastAlert.show('MQTT未连接，无法发送更新指令');
         return false;
     }
@@ -1595,7 +1455,6 @@ window.sendOTACommand = function(deviceType) {
         message.qos = 1;
         
         mqttClient.send(message);
-        console.log('📤 发送OTA更新指令：', commandPayload);
         return true;
     } catch (err) {
         console.error('❌ 发送OTA更新指令失败：', err);

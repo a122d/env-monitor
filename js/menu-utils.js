@@ -155,8 +155,6 @@ function updateAllButtonStates() {
     updateButtonActiveState('auto', deviceControlState.auto);
     // 更新灯光控制按钮状态
     updateButtonActiveState('light', deviceControlState.light);
-    // 更新状态文本
-    updateControlStatusText();
 }
 
 // 更新按钮显示状态
@@ -187,11 +185,6 @@ function updateDeviceControlStatus() {
     
     // 更新按钮active状态（根据 auto/light 值）
     updateAllButtonStates();
-}
-
-// 更新状态文本显示（保留但简化）
-function updateControlStatusText() {
-    // 新版UI不需要状态文本，直接通过按钮active状态显示
 }
 
 // 导出全局
@@ -971,7 +964,6 @@ function handleOTALog(logMsg) {
         // 检测设备重新上线（connected to emqx）
         if (/connected to/i.test(logMsg)) {
             if (progressTitle) progressTitle.textContent = '🟢 设备已重新上线';
-            ToastAlert.show('🟢 设备升级完成，已重新上线');
             handleDeviceBackOnline();
         }
         

@@ -13,11 +13,11 @@
     }
     .data-grid {
         grid-template-columns: repeat(4, 1fr);
-        gap: 25px;
+        gap: 20px;
     }
     .data-card {
         min-width: 220px;
-        padding: 30px 25px;
+        padding: 20px 24px;
     }
     :root {
         --dot-margin: 18px;
@@ -37,7 +37,7 @@
 @media (min-width: 768px) and (max-width: 1023px) {
     .data-grid {
         grid-template-columns: repeat(2, 1fr);
-        gap: 18px;
+        gap: 16px;
     }
     .charts-container {
         grid-template-columns: repeat(2, 1fr);
@@ -97,35 +97,6 @@
     
     .combined-status .status-text {
         font-size: 12px;
-    }
-    
-    .mqtt-status {
-        padding: 5px 10px;
-        gap: 5px;
-    }
-    
-    .mqtt-status .status-dot {
-        width: 6px;
-        height: 6px;
-    }
-    
-    .mqtt-status .status-label {
-        font-size: 12px;
-    }
-    
-    .user-info {
-        padding: 5px 10px;
-        gap: 5px;
-    }
-    
-    .user-info .user-icon {
-        width: 14px;
-        height: 14px;
-    }
-    
-    .user-info .user-name {
-        font-size: 12px;
-        max-width: 60px;
     }
     
     .status-dot {
@@ -211,10 +182,10 @@
     }
     .data-grid {
         grid-template-columns: 1fr 1fr;
-        gap: 8px;
+        gap: 10px;
     }
     .data-card {
-        padding: 14px 10px;
+        padding: 16px 14px;
         border-radius: 10px;
     }
     .chart-container {
